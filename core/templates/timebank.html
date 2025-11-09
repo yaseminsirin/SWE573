@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Bank</title>
+    <style>
+        * {margin:0; padding:0; box-sizing:border-box;}
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .app-container {max-width: 1200px; margin: 0 auto;}
+        .main-content {display:none;}
+        .main-content.active {display:block;}
+        header {
+            background:white; border-radius:20px; padding:20px 30px; margin-bottom:30px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.1);
+            display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;
+        }
+        .logo {
+            font-size:28px; font-weight:bold;
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+            display:flex; align-items:center; gap:10px;
+        }
+        .header-right {display:flex; gap:15px; align-items:center;}
+        .icon-btn {
+            background:rgba(102,126,234,0.1); border:none; width:50px; height:50px;
+            border-radius:50%; cursor:pointer; font-size:20px; transition:0.3s;
+            display:flex; align-items:center; justify-content:center; position:relative;
+        }
+        .icon-btn:hover {background:rgba(102,126,234,0.2); transform:scale(1.1);}
+        .profile-btn {
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            border:3px solid white; color:white; font-weight:bold; font-size:16px;
+            box-shadow:0 3px 10px rgba(102,126,234,0.3);
+        }
+        .badge {
+            position:absolute; top:5px; right:5px; background:#ff4757; color:white;
+            width:20px; height:20px; border-radius:50%; font-size:11px; font-weight:bold;
+            display:flex; align-items:center; justify-content:center;
+        }
+        .time-balance {
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            color:white; padding:12px 25px; border-radius:50px; font-size:20px;
+            font-weight:bold; display:flex; align-items:center; gap:8px;
+            box-shadow:0 5px 15px rgba(102,126,234,0.4);
+        }
+        .auth-modal {
+            display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,0.7); z-index:5000; align-items:center; justify-content:center; padding:20px;
+        }
+        .auth-modal.show {display:flex;}
+        .auth-box {
+            background:white; border-radius:25px; max-width:450px; width:100%;
+            box-shadow:0 20px 60px rgba(0,0,0,0.3); overflow:hidden;
+        }
+        .auth-header {
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            color:white; padding:40px 30px; text-align:center;
+        }
+        .auth-title {font-size:28px; font-weight:bold;}
+        .auth-body {padding:40px 30px;}
+        .auth-tabs {display:flex; gap:10px; margin-bottom:30px; background:#f0f0f0; border-radius:12px; padding:5px;}
+        .auth-tab {
+            flex:1; padding:12px; border:none; background:transparent;
+            border-radius:8px; font-weight:600; cursor:pointer; transition:0.3s; color:#666;
+        }
+        .auth-tab.active {background:white; color:#667eea; box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+        .auth-form {display:none;}
+        .auth-form.active {display:block;}
+        .input-group {margin-bottom:20px;}
+        .input-label {display:block; font-weight:600; color:#333; margin-bottom:8px; font-size:14px;}
+        .input-field {
+            width:100%; padding:14px 18px; border:2px solid #e0e0e0; border-radius:12px;
+            font-size:14px; transition:0.3s;
+        }
+        .input-field:focus {outline:none; border-color:#667eea; box-shadow:0 0 0 3px rgba(102,126,234,0.1);}
+        .auth-submit {
+            width:100%; padding:16px; border:none; border-radius:12px; font-size:16px;
+            font-weight:600; cursor:pointer; transition:0.3s;
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white;
+        }
+        .auth-submit:hover {transform:translateY(-2px); box-shadow:0 5px 15px rgba(102,126,234,0.4);}
+        .side-panel {
+            position:fixed; top:0; right:-100%; width:450px; height:100vh; background:white;
+            box-shadow:-5px 0 30px rgba(0,0,0,0.3); z-index:4000; transition:right 0.4s; display:flex; flex-direction:column;
+        }
+        .side-panel.open {right:0;}
+        .panel-header {
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            color:white; padding:25px; position:relative;
+        }
+        .panel-close {
+            position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.2);
+            border:none; color:white; width:35px; height:35px; border-radius:50%;
+            cursor:pointer; font-size:20px; transition:0.3s;
+        }
+        .logout-btn {
+            width:100%; padding:15px; border:2px solid #ff4757; background:white; color:#ff4757;
+            border-radius:12px; font-weight:600; cursor:pointer; transition:0.3s;
+        }
+        .logout-btn:hover {background:#ff4757; color:white;}
+        .toast {
+            position:fixed; bottom:30px; right:30px; background:white; border-left:6px solid #667eea;
+            padding:15px 25px; border-radius:12px; box-shadow:0 5px 20px rgba(0,0,0,0.2);
+            font-weight:500; animation:fadeInOut 3s ease forwards; z-index:6000;
+        }
+        @keyframes fadeInOut {
+            0%{opacity:0; transform:translateY(20px);}
+            10%,90%{opacity:1; transform:translateY(0);}
+            100%{opacity:0; transform:translateY(20px);}
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="main-content" id="mainContent">
+        <header>
+            <div class="logo">⏰ Time Bank</div>
+            <div class="header-right">
+                <button class="icon-btn profile-btn" id="profileBtn">JD</button>
+                <button class="icon-btn" id="notificationBtn">🔔<span class="badge">3</span></button>
+                <button class="icon-btn" id="messagesBtn">💬<span class="badge">2</span></button>
+                <div class="time-balance"><span class="clock-icon">🕐</span><span>3 hours</span></div>
+            </div>
+        </header>
+    </div>
+</div>
+
+<!-- Auth Modal -->
+<div class="auth-modal show" id="authModal">
+    <div class="auth-box">
+        <div class="auth-header">
+            <div class="auth-logo">⏰</div>
+            <div class="auth-title">Time Bank</div>
+            <div class="auth-subtitle">Trade time, not money</div>
+        </div>
+        <div class="auth-body">
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="loginTab">Login</button>
+                <button class="auth-tab" id="signupTab">Sign Up</button>
+            </div>
+
+            <form class="auth-form active" id="loginForm">
+                <div class="input-group">
+                    <label class="input-label">Username</label>
+                    <input name="username" type="text" class="input-field" required>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Password</label>
+                    <input name="password" type="password" class="input-field" required>
+                </div>
+                <button type="submit" class="auth-submit">Login</button>
+            </form>
+
+            <form class="auth-form" id="signupForm">
+                <div class="input-group">
+                    <label class="input-label">Username</label>
+                    <input name="username" type="text" class="input-field" required>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Email</label>
+                    <input name="email" type="email" class="input-field" required>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Password</label>
+                    <input name="password" type="password" class="input-field" required>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Confirm Password</label>
+                    <input name="confirmPassword" type="password" class="input-field" required>
+                </div>
+                <button type="submit" class="auth-submit">Sign Up</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Profile Panel -->
+<div class="side-panel" id="profilePanel">
+    <div class="panel-header">
+        <button class="panel-close" id="profileClose">×</button>
+        <h2>Profile</h2>
+        <p class="profile-name" style="margin-top:10px;font-weight:600;"></p>
+        <p class="profile-email" style="font-size:14px;opacity:0.8;"></p>
+    </div>
+    <div class="panel-footer" style="margin-top:auto;padding:20px;">
+        <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const API_BASE = "http://127.0.0.1:8000/api/accounts/";
+    const authModal = document.getElementById('authModal');
+    const mainContent = document.getElementById('mainContent');
+    const loginTab = document.getElementById('loginTab');
+    const signupTab = document.getElementById('signupTab');
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    const profileBtn = document.getElementById('profileBtn');
+    const profileClose = document.getElementById('profileClose');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const profilePanel = document.getElementById('profilePanel');
+
+    // Tab switching
+    loginTab.onclick = () => {
+        loginTab.classList.add('active');
+        signupTab.classList.remove('active');
+        loginForm.classList.add('active');
+        signupForm.classList.remove('active');
+    };
+    signupTab.onclick = () => {
+        signupTab.classList.add('active');
+        loginTab.classList.remove('active');
+        signupForm.classList.add('active');
+        loginForm.classList.remove('active');
+    };
+
+    // LOGIN
+    loginForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        const username = loginForm.username.value;
+        const password = loginForm.password.value;
+        try {
+            const res = await fetch(API_BASE + "login/", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({username, password})
+            });
+            const data = await res.json();
+            if (!res.ok) return showToast("❌ " + (data.error || "Login failed"));
+            localStorage.setItem("access", data.access);
+            localStorage.setItem("refresh", data.refresh);
+            showToast(`✅ Welcome back, ${username}!`);
+            authModal.classList.remove('show');
+            mainContent.classList.add('active');
+            loadUserProfile();
+        } catch (err) { showToast("⚠️ Network error: " + err.message); }
+    });
+
+    // SIGN UP
+    signupForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        const username = signupForm.username.value;
+        const email = signupForm.email.value;
+        const password = signupForm.password.value;
+        const confirm = signupForm.confirmPassword.value;
+        if (password !== confirm) return showToast("❌ Passwords do not match!");
+        try {
+            const res = await fetch(API_BASE + "register/", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({username, email, password})
+            });
+            const data = await res.json();
+            if (!res.ok) return showToast("❌ " + (data.error || "Registration failed"));
+            showToast("🎉 Account created! Please login.");
+            loginTab.click();
+        } catch (err) { showToast("⚠️ Network error: " + err.message); }
+    });
+
+    // PROFILE PANEL
+    profileBtn.onclick = () => profilePanel.classList.add('open');
+    profileClose.onclick = () => profilePanel.classList.remove('open');
+
+    // LOGOUT
+    logoutBtn.onclick = () => {
+        localStorage.clear();
+        mainContent.classList.remove('active');
+        profilePanel.classList.remove('open');
+        setTimeout(() => { authModal.classList.add('show'); showToast("👋 Logged out!"); }, 300);
+    };
+
+    // Toast helper
+    function showToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Kullanıcı bilgilerini dinamik olarak getir
+    async function loadUserProfile() {
+        const token = localStorage.getItem("access");
+        if (!token) return;
+        try {
+            const res = await fetch(API_BASE + "me/", {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                }
+            });
+            if (!res.ok) return;
+            const user = await res.json();
+            const initials = user.username.slice(0, 2).toUpperCase();
+            document.getElementById("profileBtn").textContent = initials;
+            document.querySelector(".profile-name").textContent = user.username;
+            document.querySelector(".profile-email").textContent = user.email;
+        } catch (err) {
+            console.error("Profil yükleme hatası:", err);
+        }
+    }
+
+    // Sayfa yenilendiğinde token varsa
+    const access = localStorage.getItem("access");
+    if (access) {
+        mainContent.classList.add('active');
+        authModal.classList.remove('show');
+        loadUserProfile();
+    }
+});
+</script>
+</body>
+</html>
