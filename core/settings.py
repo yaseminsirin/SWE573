@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-q-xl_9&p7ye53v$)2x*lle-l2p%5e7#6t(6-i)94b%&^-#gs_+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['hive-zi00.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
