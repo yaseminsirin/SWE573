@@ -7,22 +7,35 @@ from .serializers import (
 )
 
 
-# 🔹 Everyone can view offers (for frontend testing)
-# Later you can change AllowAny → IsAuthenticated
+# 🔹 Service Offers: Require authentication, filter by user, and set user on create
 class ServiceOfferViewSet(viewsets.ModelViewSet):
-    queryset = ServiceOffer.objects.all()
     serializer_class = ServiceOfferSerializer
-    permission_classes = [permissions.AllowAny]  # TEMP: open for testing
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # Filter offers by the logged-in user
+        return ServiceOffer.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        # Automatically set the user to the logged-in user
+        serializer.save(user=self.request.user)
 
 
-# 🔹 Requests are still authenticated — only logged-in users
+# 🔹 Service Requests: Require authentication, filter by user, and set user on create
 class ServiceRequestViewSet(viewsets.ModelViewSet):
-    queryset = ServiceRequest.objects.all()
     serializer_class = ServiceRequestSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        # Filter requests by the logged-in user
+        return ServiceRequest.objects.filter(user=self.request.user)
 
-# 🔹 Time transactions are also restricted to logged-in users
+    def perform_create(self, serializer):
+        # Automatically set the user to the logged-in user
+        serializer.save(user=self.request.user)
+
+
+# 🔹 Time Transactions: Require authentication, but allow all objects
 class TimeTransactionViewSet(viewsets.ModelViewSet):
     queryset = TimeTransaction.objects.all()
     serializer_class = TimeTransactionSerializer
