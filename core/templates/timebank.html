@@ -1,320 +1,699 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Time Bank</title>
-    <style>
-        * {margin:0; padding:0; box-sizing:border-box;}
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .app-container {max-width: 1200px; margin: 0 auto;}
-        .main-content {display:none;}
-        .main-content.active {display:block;}
-        header {
-            background:white; border-radius:20px; padding:20px 30px; margin-bottom:30px;
-            box-shadow:0 10px 30px rgba(0,0,0,0.1);
-            display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;
-        }
-        .logo {
-            font-size:28px; font-weight:bold;
-            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-            display:flex; align-items:center; gap:10px;
-        }
-        .header-right {display:flex; gap:15px; align-items:center;}
-        .icon-btn {
-            background:rgba(102,126,234,0.1); border:none; width:50px; height:50px;
-            border-radius:50%; cursor:pointer; font-size:20px; transition:0.3s;
-            display:flex; align-items:center; justify-content:center; position:relative;
-        }
-        .icon-btn:hover {background:rgba(102,126,234,0.2); transform:scale(1.1);}
-        .profile-btn {
-            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-            border:3px solid white; color:white; font-weight:bold; font-size:16px;
-            box-shadow:0 3px 10px rgba(102,126,234,0.3);
-        }
-        .badge {
-            position:absolute; top:5px; right:5px; background:#ff4757; color:white;
-            width:20px; height:20px; border-radius:50%; font-size:11px; font-weight:bold;
-            display:flex; align-items:center; justify-content:center;
-        }
-        .time-balance {
-            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-            color:white; padding:12px 25px; border-radius:50px; font-size:20px;
-            font-weight:bold; display:flex; align-items:center; gap:8px;
-            box-shadow:0 5px 15px rgba(102,126,234,0.4);
-        }
-        .auth-modal {
-            display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-            background:rgba(0,0,0,0.7); z-index:5000; align-items:center; justify-content:center; padding:20px;
-        }
-        .auth-modal.show {display:flex;}
-        .auth-box {
-            background:white; border-radius:25px; max-width:450px; width:100%;
-            box-shadow:0 20px 60px rgba(0,0,0,0.3); overflow:hidden;
-        }
-        .auth-header {
-            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-            color:white; padding:40px 30px; text-align:center;
-        }
-        .auth-title {font-size:28px; font-weight:bold;}
-        .auth-body {padding:40px 30px;}
-        .auth-tabs {display:flex; gap:10px; margin-bottom:30px; background:#f0f0f0; border-radius:12px; padding:5px;}
-        .auth-tab {
-            flex:1; padding:12px; border:none; background:transparent;
-            border-radius:8px; font-weight:600; cursor:pointer; transition:0.3s; color:#666;
-        }
-        .auth-tab.active {background:white; color:#667eea; box-shadow:0 2px 8px rgba(0,0,0,0.1);}
-        .auth-form {display:none;}
-        .auth-form.active {display:block;}
-        .input-group {margin-bottom:20px;}
-        .input-label {display:block; font-weight:600; color:#333; margin-bottom:8px; font-size:14px;}
-        .input-field {
-            width:100%; padding:14px 18px; border:2px solid #e0e0e0; border-radius:12px;
-            font-size:14px; transition:0.3s;
-        }
-        .input-field:focus {outline:none; border-color:#667eea; box-shadow:0 0 0 3px rgba(102,126,234,0.1);}
-        .auth-submit {
-            width:100%; padding:16px; border:none; border-radius:12px; font-size:16px;
-            font-weight:600; cursor:pointer; transition:0.3s;
-            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white;
-        }
-        .auth-submit:hover {transform:translateY(-2px); box-shadow:0 5px 15px rgba(102,126,234,0.4);}
-        .side-panel {
-            position:fixed; top:0; right:-100%; width:450px; height:100vh; background:white;
-            box-shadow:-5px 0 30px rgba(0,0,0,0.3); z-index:4000; transition:right 0.4s; display:flex; flex-direction:column;
-        }
-        .side-panel.open {right:0;}
-        .panel-header {
-            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-            color:white; padding:25px; position:relative;
-        }
-        .panel-close {
-            position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.2);
-            border:none; color:white; width:35px; height:35px; border-radius:50%;
-            cursor:pointer; font-size:20px; transition:0.3s;
-        }
-        .logout-btn {
-            width:100%; padding:15px; border:2px solid #ff4757; background:white; color:#ff4757;
-            border-radius:12px; font-weight:600; cursor:pointer; transition:0.3s;
-        }
-        .logout-btn:hover {background:#ff4757; color:white;}
-        .toast {
-            position:fixed; bottom:30px; right:30px; background:white; border-left:6px solid #667eea;
-            padding:15px 25px; border-radius:12px; box-shadow:0 5px 20px rgba(0,0,0,0.2);
-            font-weight:500; animation:fadeInOut 3s ease forwards; z-index:6000;
-        }
-        @keyframes fadeInOut {
-            0%{opacity:0; transform:translateY(20px);}
-            10%,90%{opacity:1; transform:translateY(0);}
-            100%{opacity:0; transform:translateY(20px);}
-        }
-    </style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hive</title>
+  <style>
+    :root{
+      --vb:#667eea; --pb:#764ba2; --text:#2f2f2f; --muted:#6b7280;
+      --card:#ffffff; --bg1:#6b73ff; --bg2:#000dff; --radius:20px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+      background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      min-height:100vh; padding:20px; color:var(--text);
+    }
+    .hidden{display:none !important}
+    .app{max-width:1200px;margin:0 auto}
+
+    /* Header */
+    header{
+      background:#fff;border-radius:30px;padding:18px 24px;margin-bottom:22px;
+      display:flex;align-items:center;justify-content:space-between;gap:14px;
+      box-shadow:0 10px 30px rgba(0,0,0,.08);
+    }
+    .logo{
+      display:flex;align-items:center;gap:10px;font-size:26px;font-weight:800;
+      background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    }
+    .actions{display:flex;align-items:center;gap:14px}
+    .pill{
+      background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      color:#fff;padding:12px 20px;border-radius:999px;font-weight:800;
+      display:flex;align-items:center;gap:8px;box-shadow:0 12px 30px rgba(102,126,234,.25);
+    }
+    .icon-btn{
+      width:48px;height:48px;border-radius:50%;border:0;cursor:pointer;
+      display:grid;place-items:center;background:#f3f4f6;position:relative;
+      box-shadow:0 6px 16px rgba(0,0,0,.06);transition:transform .15s ease;
+      font-weight:800;color:#fff;
+    }
+    .icon-btn:hover{transform:translateY(-2px)}
+    .profile-btn{
+      background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      border:3px solid #fff;
+    }
+    .badge{
+      position:absolute;top:-2px;right:-2px;width:20px;height:20px;border-radius:50%;
+      background:#ff4757;color:#fff;font-weight:700;font-size:11px;
+      display:grid;place-items:center;border:2px solid #fff;
+    }
+
+    /* Hero */
+    .hero{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0}
+    .cta{
+      background:#fff;border-radius:18px;padding:18px 20px;font-weight:700;
+      display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;
+      box-shadow:0 12px 28px rgba(0,0,0,.09);border:2px solid rgba(102,126,234,.15);
+      transition:transform .15s ease,box-shadow .15s ease;
+    }
+    .cta:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(0,0,0,.12)}
+    .cta.secondary{background:transparent;color:#fff;border-color:#ddd;outline:2px solid rgba(255,255,255,.5)}
+
+    /* Tabs */
+    .tabs{
+      background:#fff;border-radius:99px;padding:8px;display:flex;gap:6px;width:max-content;
+      box-shadow:0 10px 24px rgba(0,0,0,.08);margin:8px 0 16px;
+    }
+    .tab{border:0;background:transparent;padding:10px 16px;border-radius:99px;font-weight:700;color:#6b7280;cursor:pointer}
+    .tab.active{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff}
+
+    /* Section & Search */
+    .section{
+      background:linear-gradient(135deg,#6b73ff 0%,#000dff 100%);
+      border-radius:var(--radius);padding:30px;color:#fff;box-shadow:0 12px 30px rgba(0,0,0,.18);
+    }
+    .section h2{display:flex;align-items:center;gap:10px;font-size:26px;margin-bottom:14px}
+    .search-row{display:flex;gap:10px;align-items:center;margin:6px 0 18px}
+    .search-row input{
+      flex:1;padding:12px 14px;border-radius:12px;border:2px solid rgba(255,255,255,.35);
+      background:rgba(255,255,255,.15);color:#fff;font-weight:600;
+    }
+    .search-row input::placeholder{color:rgba(255,255,255,.8)}
+    .search-row input:focus{outline:none;border-color:#fff;background:rgba(255,255,255,.25)}
+
+    /* Grid & Cards */
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+    .card{
+      background:#fff;border-radius:18px;padding:18px;color:#2f2f2f;
+      box-shadow:0 10px 24px rgba(0,0,0,.12);transition:transform .15s ease,box-shadow .15s ease;
+    }
+    .card:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(0,0,0,.18)}
+    .card h3{font-size:20px;margin-bottom:6px}
+    .badge-mini{
+      background:#e9d5ff;color:#6d28d9;padding:4px 8px;border-radius:999px;font-weight:800;
+      font-size:12px;display:inline-block;margin-bottom:8px;
+    }
+    .meta{display:flex;align-items:center;justify-content:space-between;margin-top:12px;color:#4b5563;font-weight:700}
+    .who{display:flex;align-items:center;gap:10px;margin-top:10px}
+    .avatar{
+      width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+      font-weight:800;color:#fff;background:linear-gradient(135deg,#667eea,#764ba2)
+    }
+    .contact-btn{
+      margin-top:12px;background:#f3f4f6;border:0;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer;
+    }
+
+    /* Profile Panel */
+    .panel{
+      position:fixed;top:0;right:-100%;width:420px;height:100vh;background:#fff;z-index:40;
+      box-shadow:-10px 0 30px rgba(0,0,0,.25);transition:right .35s ease;display:flex;flex-direction:column;
+      border-top-left-radius:18px;border-bottom-left-radius:18px;
+    }
+    .panel.open{right:0}
+    .panel-header{
+      padding:24px;color:#fff;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      border-top-left-radius:18px;position:relative;
+    }
+    .panel-close{
+      position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;
+      background:rgba(255,255,255,.25);color:#fff;border:0;font-size:18px;cursor:pointer;
+    }
+    .panel-body{padding:20px;display:flex;flex-direction:column;gap:14px}
+    .row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee}
+    .logout{
+      margin-top:auto;background:#fff;color:#ff4757;border:2px solid #ff4757;padding:14px;border-radius:12px;
+      font-weight:800;cursor:pointer;transition:.15s ease;width:100%;
+    }
+    .logout:hover{background:#ff4757;color:#fff}
+
+    /* Sheets (Offer/Request) */
+    .sheet{
+      position:fixed;top:0;right:-100%;width:520px;height:100vh;background:#fff;z-index:50;
+      box-shadow:-10px 0 30px rgba(0,0,0,.25);transition:right .35s ease;display:flex;flex-direction:column;
+      border-top-left-radius:18px;border-bottom-left-radius:18px;
+    }
+    .sheet.open{right:0}
+    .sheet-header{padding:22px 22px 10px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
+    .sheet-title{font-size:22px;font-weight:800}
+    .sheet-sub{opacity:.9}
+    .sheet-body{padding:18px;overflow:auto}
+    .field{margin-bottom:14px}
+    .label{font-weight:700;font-size:14px;color:#374151;margin-bottom:6px;display:block}
+    .input,.select,.textarea{width:100%;padding:12px;border-radius:12px;border:2px solid #e5e7eb;font-size:14px;background:#fff}
+    .textarea{min-height:110px;resize:vertical}
+    .seg{display:flex;gap:8px}
+    .seg .seg-btn{flex:1;padding:12px;border-radius:12px;border:2px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:700}
+    .seg .seg-btn.active{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.15)}
+    .sheet-actions{display:flex;gap:10px;padding:12px 18px 18px}
+    .btn{flex:1;padding:14px;border-radius:12px;border:0;font-weight:800;cursor:pointer}
+    .btn.gray{background:#f3f4f6}
+    .btn.primary{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
+
+    /* Auth Modal */
+    .auth{
+      position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:60;padding:16px;
+    }
+    .auth.show{display:flex}
+    .auth-box{background:#fff;border-radius:20px;max-width:460px;width:100%;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+    .auth-head{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:28px;text-align:center}
+    .auth-title{font-size:24px;font-weight:900}
+    .auth-body{padding:22px}
+    .tabs-auth{display:flex;gap:8px;background:#f3f4f6;border-radius:12px;padding:6px;margin-bottom:16px}
+    .tab-auth{flex:1;border:0;background:transparent;padding:10px;border-radius:8px;font-weight:800;color:#6b7280;cursor:pointer}
+    .tab-auth.active{background:#fff;color:#667eea;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+    .form{display:none}
+    .form.active{display:block}
+    .toast{
+      position:fixed;bottom:24px;right:24px;background:#fff;border-left:6px solid #667eea;
+      padding:12px 16px;border-radius:12px;box-shadow:0 10px 24px rgba(0,0,0,.18);font-weight:700;z-index:100;
+      animation:toast 3s ease forwards;
+    }
+    @keyframes toast{0%{opacity:0;transform:translateY(10px)}10%,90%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(10px)}}
+
+    /* Responsive */
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .hero{grid-template-columns:1fr}
+      .panel,.sheet{width:90vw}
+      header{flex-wrap:wrap}
+    }
+  </style>
 </head>
 <body>
-<div class="app-container">
-    <div class="main-content" id="mainContent">
-        <header>
-            <div class="logo">⏰ Time Bank</div>
-            <div class="header-right">
-                <button class="icon-btn profile-btn" id="profileBtn">JD</button>
-                <button class="icon-btn" id="notificationBtn">🔔<span class="badge">3</span></button>
-                <button class="icon-btn" id="messagesBtn">💬<span class="badge">2</span></button>
-                <div class="time-balance"><span class="clock-icon">🕐</span><span>3 hours</span></div>
-            </div>
-        </header>
-    </div>
-</div>
-
-<!-- Auth Modal -->
-<div class="auth-modal show" id="authModal">
+  <!-- AUTH MODAL -->
+  <div class="auth" id="authModal">
     <div class="auth-box">
-        <div class="auth-header">
-            <div class="auth-logo">⏰</div>
-            <div class="auth-title">Time Bank</div>
-            <div class="auth-subtitle">Trade time, not money</div>
+      <div class="auth-head">
+        <div class="auth-title">Hive</div>
+        <div>Trade time, not money</div>
+      </div>
+      <div class="auth-body">
+        <div class="tabs-auth">
+          <button class="tab-auth active" id="tabLogin">Login</button>
+          <button class="tab-auth" id="tabSignup">Sign Up</button>
         </div>
-        <div class="auth-body">
-            <div class="auth-tabs">
-                <button class="auth-tab active" id="loginTab">Login</button>
-                <button class="auth-tab" id="signupTab">Sign Up</button>
-            </div>
 
-            <form class="auth-form active" id="loginForm">
-                <div class="input-group">
-                    <label class="input-label">Username</label>
-                    <input name="username" type="text" class="input-field" required>
-                </div>
-                <div class="input-group">
-                    <label class="input-label">Password</label>
-                    <input name="password" type="password" class="input-field" required>
-                </div>
-                <button type="submit" class="auth-submit">Login</button>
-            </form>
+        <!-- Login -->
+        <form class="form active" id="loginForm">
+          <div class="field">
+            <label class="label">Username</label>
+            <input class="input" name="username" required/>
+          </div>
+          <div class="field">
+            <label class="label">Password</label>
+            <input class="input" name="password" type="password" required/>
+          </div>
+          <button class="btn primary" type="submit">Login</button>
+        </form>
 
-            <form class="auth-form" id="signupForm">
-                <div class="input-group">
-                    <label class="input-label">Username</label>
-                    <input name="username" type="text" class="input-field" required>
-                </div>
-                <div class="input-group">
-                    <label class="input-label">Email</label>
-                    <input name="email" type="email" class="input-field" required>
-                </div>
-                <div class="input-group">
-                    <label class="input-label">Password</label>
-                    <input name="password" type="password" class="input-field" required>
-                </div>
-                <div class="input-group">
-                    <label class="input-label">Confirm Password</label>
-                    <input name="confirmPassword" type="password" class="input-field" required>
-                </div>
-                <button type="submit" class="auth-submit">Sign Up</button>
-            </form>
-        </div>
+        <!-- Signup -->
+        <form class="form" id="signupForm">
+          <div class="field">
+            <label class="label">Username</label>
+            <input class="input" name="username" required/>
+          </div>
+          <div class="field">
+            <label class="label">Email</label>
+            <input class="input" name="email" type="email" required/>
+          </div>
+          <div class="field">
+            <label class="label">Password</label>
+            <input class="input" name="password" type="password" required/>
+          </div>
+          <div class="field">
+            <label class="label">Confirm Password</label>
+            <input class="input" name="confirm" type="password" required/>
+          </div>
+          <button class="btn primary" type="submit">Create Account</button>
+        </form>
+      </div>
     </div>
-</div>
+  </div>
 
-<!-- Profile Panel -->
-<div class="side-panel" id="profilePanel">
+  <!-- APP -->
+  <div class="app hidden" id="app">
+    <header>
+      <div class="logo">⏰ Hive</div>
+      <div class="actions">
+        <button class="icon-btn profile-btn" id="profileBtn">JD</button>
+        <button class="icon-btn" title="Notifications">🔔<span class="badge">3</span></button>
+        <button class="icon-btn" title="Messages">💬<span class="badge">2</span></button>
+        <div class="pill">⏱️ <span id="timeBalance">3 hours</span></div>
+      </div>
+    </header>
+
+    <div class="hero">
+      <div class="cta" id="openOfferSheet">➕ Offer Service</div>
+      <div class="cta secondary" id="openRequestSheet">🔎 Request Service</div>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-tab="offers">Service Offers</button>
+      <button class="tab" data-tab="requests">Service Requests</button>
+      <button class="tab" data-tab="mine">My Listings</button>
+    </div>
+
+    <div class="section">
+      <h2>✨ Active Listings</h2>
+      <div class="search-row">
+        <input id="searchInput" type="text" placeholder="Search by title, category, or description..."/>
+      </div>
+      <div class="grid" id="cardsGrid"></div>
+    </div>
+  </div>
+
+  <!-- Profile Panel -->
+  <aside class="panel" id="profilePanel">
     <div class="panel-header">
-        <button class="panel-close" id="profileClose">×</button>
-        <h2>Profile</h2>
-        <p class="profile-name" style="margin-top:10px;font-weight:600;"></p>
-        <p class="profile-email" style="font-size:14px;opacity:0.8;"></p>
+      <button class="panel-close" id="profileClose">×</button>
+      <div class="avatar" id="profileInitials" style="width:56px;height:56px;border:3px solid rgba(255,255,255,.6)">JD</div>
+      <h2 id="profileName" style="margin-top:8px">John Doe</h2>
+      <div id="profileEmail" style="opacity:.9">john.doe@email.com</div>
     </div>
-    <div class="panel-footer" style="margin-top:auto;padding:20px;">
-        <button class="logout-btn" id="logoutBtn">Logout</button>
+    <div class="panel-body">
+      <div class="row"><span>Services Completed</span><strong id="svcCompleted">8</strong></div>
+      <div class="row"><span>Member Since</span><strong>Jan 2024</strong></div>
     </div>
-</div>
+    <div style="padding:18px">
+      <button class="logout" id="logoutBtn">Logout</button>
+    </div>
+  </aside>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE = "http://127.0.0.1:8000/api/accounts/";
-    const authModal = document.getElementById('authModal');
-    const mainContent = document.getElementById('mainContent');
-    const loginTab = document.getElementById('loginTab');
-    const signupTab = document.getElementById('signupTab');
-    const loginForm = document.getElementById('loginForm');
-    const signupForm = document.getElementById('signupForm');
-    const profileBtn = document.getElementById('profileBtn');
-    const profileClose = document.getElementById('profileClose');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const profilePanel = document.getElementById('profilePanel');
+  <!-- Offer Sheet -->
+  <aside class="sheet" id="offerSheet">
+    <div class="sheet-header">
+      <div class="sheet-title">Offer a Service</div>
+      <div class="sheet-sub">Share your skills with the community</div>
+    </div>
+    <button class="panel-close" id="offerClose">×</button>
+    <div class="sheet-body">
+      <div class="field"><label class="label">Your Name *</label><input class="input" id="offerUser" placeholder="e.g., Alice K." required/></div>
+      <div class="field"><label class="label">Service Title *</label><input class="input" id="offerTitle" placeholder="e.g., Yoga Classes" required/></div>
+      <div class="field">
+        <label class="label">Category *</label>
+        <select class="select" id="offerCategory" required>
+          <option value="">Select a category</option>
+          <option>Sports</option><option>Food</option><option>Music</option>
+          <option>Gardening</option><option>Education</option><option>Art</option>
+          <option>IT & Tech Support</option>
+        </select>
+      </div>
+      <div class="field"><label class="label">Description *</label><textarea class="textarea" id="offerDesc" placeholder="Describe your service." required></textarea></div>
+      <div class="field">
+        <label class="label">Time Required *</label>
+        <select class="select" id="offerDuration" required>
+          <option value="">Select duration</option><option value="1">1 hour</option><option value="2">2 hours</option><option value="3">3 hours</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="label">Location Type *</label>
+        <div class="seg" id="offerLocationSeg">
+          <button type="button" data-val="Online" class="seg-btn active">🖥️ Online</button>
+          <button type="button" data-val="In-Person" class="seg-btn">📍 In-Person</button>
+          <button type="button" data-val="Both" class="seg-btn">🌐 Both</button>
+        </div>
+      </div>
+      <div class="field"><label class="label">Location *</label><input class="input" id="offerLocation" placeholder="e.g., Brooklyn, NY or Online"/></div>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn gray" id="offerCancel">Cancel</button>
+      <button class="btn primary" id="offerSave">Post Service</button>
+    </div>
+  </aside>
 
-    // Tab switching
-    loginTab.onclick = () => {
-        loginTab.classList.add('active');
-        signupTab.classList.remove('active');
-        loginForm.classList.add('active');
-        signupForm.classList.remove('active');
-    };
-    signupTab.onclick = () => {
-        signupTab.classList.add('active');
-        loginTab.classList.remove('active');
-        signupForm.classList.add('active');
-        loginForm.classList.remove('active');
-    };
+  <!-- Request Sheet -->
+  <aside class="sheet" id="requestSheet">
+    <div class="sheet-header">
+      <div class="sheet-title">Request a Service</div>
+      <div class="sheet-sub">Ask the community for help</div>
+    </div>
+    <button class="panel-close" id="requestClose">×</button>
+    <div class="sheet-body">
+      <div class="field"><label class="label">Your Name *</label><input class="input" id="reqUser" placeholder="e.g., Mike Y." required/></div>
+      <div class="field"><label class="label">Request Title *</label><input class="input" id="reqTitle" placeholder="e.g., Need help moving boxes" required/></div>
+      <div class="field">
+        <label class="label">Category *</label>
+        <select class="select" id="reqCategory" required>
+          <option value="">Select a category</option>
+          <option>Sports</option><option>Food</option><option>Music</option>
+          <option>Gardening</option><option>Education</option><option>Art</option>
+          <option>IT & Tech Support</option>
+        </select>
+      </div>
+      <div class="field"><label class="label">Description *</label><textarea class="textarea" id="reqDesc" placeholder="Describe what you need." required></textarea></div>
+      <div class="field">
+        <label class="label">Time Needed *</label>
+        <select class="select" id="reqDuration" required>
+          <option value="">Select duration</option><option value="1">1 hour</option><option value="2">2 hours</option><option value="3">3 hours</option>
+        </select>
+      </div>
+      <div class="field"><label class="label">Location *</label><input class="input" id="reqLocation" placeholder="e.g., Manhattan / Online"/></div>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn gray" id="reqCancel">Cancel</button>
+      <button class="btn primary" id="reqSave">Post Request</button>
+    </div>
+  </aside>
 
-    // LOGIN
-    loginForm.addEventListener('submit', async e => {
-        e.preventDefault();
-        const username = loginForm.username.value;
-        const password = loginForm.password.value;
-        try {
-            const res = await fetch(API_BASE + "login/", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({username, password})
-            });
-            const data = await res.json();
-            if (!res.ok) return showToast("❌ " + (data.error || "Login failed"));
-            localStorage.setItem("access", data.access);
-            localStorage.setItem("refresh", data.refresh);
-            showToast(`✅ Welcome back, ${username}!`);
-            authModal.classList.remove('show');
-            mainContent.classList.add('active');
-            loadUserProfile();
-        } catch (err) { showToast("⚠️ Network error: " + err.message); }
-    });
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // ===== Helpers =====
+    const $ = s => document.querySelector(s);
+    const $$ = s => Array.from(document.querySelectorAll(s));
+    const toast = msg => { const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3000); };
+    const initials = name => (name||'JD').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
 
-    // SIGN UP
-    signupForm.addEventListener('submit', async e => {
-        e.preventDefault();
-        const username = signupForm.username.value;
-        const email = signupForm.email.value;
-        const password = signupForm.password.value;
-        const confirm = signupForm.confirmPassword.value;
-        if (password !== confirm) return showToast("❌ Passwords do not match!");
-        try {
-            const res = await fetch(API_BASE + "register/", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({username, email, password})
-            });
-            const data = await res.json();
-            if (!res.ok) return showToast("❌ " + (data.error || "Registration failed"));
-            showToast("🎉 Account created! Please login.");
-            loginTab.click();
-        } catch (err) { showToast("⚠️ Network error: " + err.message); }
-    });
+    // ===== LocalStorage layer =====
+    const LS = {
+      getUsers(){ return JSON.parse(localStorage.getItem('users')||'[]'); },
+      setUsers(v){ localStorage.setItem('users', JSON.stringify(v)); },
+      getAuth(){ return JSON.parse(localStorage.getItem('authUser')||'null'); },
+      setAuth(u){ localStorage.setItem('authUser', JSON.stringify(u)); },
+      clearAuth(){ localStorage.removeItem('authUser'); },
 
-    // PROFILE PANEL
-    profileBtn.onclick = () => profilePanel.classList.add('open');
-    profileClose.onclick = () => profilePanel.classList.remove('open');
+      getOffers(){ return JSON.parse(localStorage.getItem('offers')||'[]'); },
+      setOffers(v){ localStorage.setItem('offers', JSON.stringify(v)); },
+      getRequests(){ return JSON.parse(localStorage.getItem('requests')||'[]'); },
+      setRequests(v){ localStorage.setItem('requests', JSON.stringify(v)); },
 
-    // LOGOUT
-    logoutBtn.onclick = () => {
-        localStorage.clear();
-        mainContent.classList.remove('active');
-        profilePanel.classList.remove('open');
-        setTimeout(() => { authModal.classList.add('show'); showToast("👋 Logged out!"); }, 300);
-    };
-
-    // Toast helper
-    function showToast(message) {
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-    }
-
-    // Kullanıcı bilgilerini dinamik olarak getir
-    async function loadUserProfile() {
-        const token = localStorage.getItem("access");
-        if (!token) return;
-        try {
-            const res = await fetch(API_BASE + "me/", {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + token
-                }
-            });
-            if (!res.ok) return;
-            const user = await res.json();
-            const initials = user.username.slice(0, 2).toUpperCase();
-            document.getElementById("profileBtn").textContent = initials;
-            document.querySelector(".profile-name").textContent = user.username;
-            document.querySelector(".profile-email").textContent = user.email;
-        } catch (err) {
-            console.error("Profil yükleme hatası:", err);
+      seed(){
+        if(!localStorage.getItem('tb_seed_fixed')){
+          this.setUsers([{username:'johndoe',email:'john@example.com',password:'1234'}]);
+          this.setOffers([
+            {user:'Alice K.', title:"Homemade Cooking", category:"Food", description:"Healthy homemade meals. Vegan/vegetarian available!", duration:1, locationType:"In-Person", location:"Brooklyn, NY"},
+            {user:'Mike Y.', title:"Running & Fitness Training", category:"Sports", description:"Beginner-friendly fitness coaching.", duration:1, locationType:"In-Person", location:"Central Park area"},
+            {user:'Amy L.', title:"Guitar Lessons", category:"Music", description:"Basics of chords and rhythm.", duration:2, locationType:"Online", location:"Online"},
+            {user:'John D.', title:"Garden Care Help", category:"Gardening", description:"Help organizing your garden & basic landscaping.", duration:2, locationType:"In-Person", location:"Queens, NY"}
+          ]);
+          this.setRequests([
+            {user:'Sarah P.', title:"Photography Basics", category:"Art", description:"Looking for a 1h intro to smartphone photography.", duration:1, location:"Manhattan"}
+          ]);
+          localStorage.setItem('tb_seed_fixed','1');
         }
+      }
+    };
+    LS.seed();
+
+    // ===== Elements =====
+    const app = $('#app');
+    const authModal = $('#authModal');
+    const profileBtn = $('#profileBtn');
+    const profilePanel = $('#profilePanel');
+
+    // ===== Auth UI =====
+    function showApp(){
+      app.classList.remove('hidden');
+      authModal.classList.remove('show');
+      refreshProfileHeader();
+      render();
+    }
+    function showAuth(){
+      app.classList.add('hidden');
+      authModal.classList.add('show');
+    }
+    function refreshProfileHeader(){
+      const user = LS.getAuth();
+      const ini = initials(user?.username || 'JD');
+      $('#profileBtn').textContent = ini;
+      $('#profileInitials').textContent = ini;
+      $('#profileName').textContent = user?.username ? user.username : 'John Doe';
+      $('#profileEmail').textContent = user?.email || 'john.doe@email.com';
     }
 
-    // Sayfa yenilendiğinde token varsa
-    const access = localStorage.getItem("access");
-    if (access) {
-        mainContent.classList.add('active');
-        authModal.classList.remove('show');
-        loadUserProfile();
-    }
-});
-</script>
+    // Auth tabs
+    $('#tabLogin').onclick = ()=>{
+      $('#tabLogin').classList.add('active');
+      $('#tabSignup').classList.remove('active');
+      $('#loginForm').classList.add('active');
+      $('#signupForm').classList.remove('active');
+    };
+    $('#tabSignup').onclick = ()=>{
+      $('#tabSignup').classList.add('active');
+      $('#tabLogin').classList.remove('active');
+      $('#signupForm').classList.add('active');
+      $('#loginForm').classList.remove('active');
+    };
+
+    // Login
+    $('#loginForm').addEventListener('submit', e=>{
+      e.preventDefault();
+      const u = e.target.username.value.trim();
+      const p = e.target.password.value.trim();
+      const users = LS.getUsers();
+      const found = users.find(x=>x.username===u && x.password===p);
+      if(!found){ toast("❌ Invalid credentials."); return; }
+      LS.setAuth({username:found.username, email:found.email});
+      toast(`✅ Welcome back, ${found.username}!`);
+      showApp();
+      e.target.reset();
+    });
+
+    // Signup
+    $('#signupForm').addEventListener('submit', e=>{
+      e.preventDefault();
+      const u = e.target.username.value.trim();
+      const em= e.target.email.value.trim();
+      const p = e.target.password.value.trim();
+      const c = e.target.confirm.value.trim();
+      if(p!==c){ toast("❌ Passwords do not match."); return; }
+      const users = LS.getUsers();
+      if(users.some(x=>x.username===u)){ toast("❌ Username already exists."); return; }
+      users.push({username:u,email:em,password:p}); LS.setUsers(users);
+      toast("🎉 Account created! Please login.");
+      $('#tabLogin').click();
+      e.target.reset();
+    });
+    // ===== Listings / Search / Tabs =====
+    const grid = $('#cardsGrid');
+    const searchInput = $('#searchInput');
+    let activeTab = 'offers';
+    // Initial screen
+    if(LS.getAuth()) showApp(); else showAuth();
+
+    
+
+    function cardHTML(it, type) {
+        const hours = (it.duration || 1) + " hour" + (Number(it.duration) > 1 ? "s" : "");
+        const userName = (it.user || '').split('(')[1]?.replace(')', '') || (it.user || 'Member');
+        const ini = (userName || '')[0] ? initials(userName) : 'MB';
+      
+        // Giriş yapan kullanıcıya aitse silme butonunu göster
+        const authUser = LS.getAuth()?.username?.toLowerCase();
+        const isOwner = authUser && (it.user || '').toLowerCase().includes(authUser);
+      
+        const deleteBtn = isOwner
+          ? `<button class="contact-btn" 
+               style="background:#fee2e2;color:#b91c1c"
+               onclick="deleteItem(${it.id}, '${type}')">🗑️ Delete</button>`
+          : "";
+      
+        return `
+          <div class="card">
+            <span class="badge-mini">${it.category || 'General'}</span>
+            <h3>${it.title}</h3>
+            <p style="color:#4b5563;margin-top:6px">${it.description || ''}</p>
+      
+            <div class="who">
+              <div class="avatar">${ini}</div>
+              <div><strong>${userName}</strong></div>
+            </div>
+      
+            <div class="meta">
+              <div>⏱️ ${hours}</div>
+              <div>📍 ${it.location || it.locationType || '—'}</div>
+            </div>
+      
+            <button class="contact-btn" onclick="alert('📩 Message sent to ${userName}!')">
+              Contact
+            </button>
+            ${deleteBtn}
+          </div>
+        `;
+      }
+      
+
+    async function render() {
+        const q = (searchInput.value || '').toLowerCase();
+        let list = [];
+      
+        console.log("Render triggered for tab:", activeTab);
+      
+        try {
+          if (activeTab === 'offers') {
+            const res = await fetch('/api/offers/');
+            list = await res.json();
+          } 
+          else if (activeTab === 'requests') {
+            const res = await fetch('/api/requests/');
+            list = await res.json();
+          } 
+          else if (activeTab === 'mine') {
+            const me = LS.getAuth()?.username?.toLowerCase();
+      
+            const [offersRes, requestsRes] = await Promise.all([
+              fetch('/api/offers/'),
+              fetch('/api/requests/')
+            ]);
+      
+            const offers = await offersRes.json();
+            const requests = await requestsRes.json();
+      
+            // Kullanıcının hem offers hem requests'lerini birleştir
+            list = [...offers, ...requests].filter(
+              x => (x.user || '').toLowerCase() === me
+            );
+      
+            if (list.length === 0) {
+              list = [{
+                title: "No listings yet",
+                category: "Info",
+                description: "You haven't posted any offers or requests yet.",
+                duration: 1,
+                location: "—",
+                user: "You"
+              }];
+            }
+          } 
+        } catch (err) {
+          console.error("Error fetching data:", err);
+          toast("⚠️ Unable to connect to server!");
+          return;
+        }
+      
+        // Arama filtreleme
+        const filtered = list.filter(o =>
+          (o.title || '').toLowerCase().includes(q) ||
+          (o.category || '').toLowerCase().includes(q) ||
+          (o.description || '').toLowerCase().includes(q)
+        );
+      
+        // Kartları ekrana bas
+        grid.innerHTML =
+          filtered.map(it => cardHTML(it, activeTab)).join('') ||
+          `<div class="card"><strong>No results found.</strong></div>`;
+      }
+      async function deleteItem(id, type) {
+        if (!confirm("Are you sure you want to delete this item?")) return;
+      
+        const endpoint = type === 'offers'
+          ? `/api/offers/${id}/`
+          : `/api/requests/${id}/`;
+      
+        try {
+          const res = await fetch(endpoint, { method: 'DELETE' });
+          if (res.ok) {
+            toast("✅ Deleted successfully!");
+            render();
+          } else {
+            toast("⚠️ Failed to delete item.");
+          }
+        } catch (err) {
+          console.error(err);
+          toast("❌ Server error while deleting.");
+        }
+      }
+          
+      
+
+    searchInput.addEventListener('input', render);
+    $$('#tabs .tab').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        $$('#tabs .tab').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        activeTab = btn.dataset.tab;
+        render();
+      });
+    });
+
+    // ===== Offer Sheet =====
+    const offerSheet = $('#offerSheet');
+    const offerSegBtns = $$('#offerLocationSeg .seg-btn');
+    let offerLocationType = 'Online';
+    offerSegBtns.forEach(b=>{
+      b.addEventListener('click', ()=>{
+        offerSegBtns.forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        offerLocationType=b.dataset.val;
+      });
+    });
+    $('#openOfferSheet').onclick = ()=> offerSheet.classList.add('open');
+    $('#offerClose').onclick = ()=> offerSheet.classList.remove('open');
+    $('#offerCancel').onclick = ()=> offerSheet.classList.remove('open');
+
+    $('#offerSave').onclick = ()=>{
+      const authUser = LS.getAuth()?.username || 'Member';
+      const inputName = $('#offerUser').value.trim();
+      const user = inputName ? `${authUser} (${inputName})` : authUser;
+      const title= $('#offerTitle').value.trim();
+      const category=$('#offerCategory').value.trim();
+      const desc   = $('#offerDesc').value.trim();
+      const duration = $('#offerDuration').value;
+      const location = $('#offerLocation').value.trim() || offerLocationType;
+
+      if(!user || !title || !category || !desc || !duration){
+        toast("Please fill in all required fields."); return;
+      }
+      const arr = LS.getOffers();
+      arr.unshift({user,title,category,description:desc,duration:Number(duration),locationType:offerLocationType,location});
+      LS.setOffers(arr);
+      toast("✅ Offer posted successfully!");
+      ['offerUser','offerTitle','offerCategory','offerDesc','offerDuration','offerLocation'].forEach(id=>$('#'+id).value='');
+      offerSegBtns.forEach(x=>x.classList.remove('active')); offerSegBtns[0].classList.add('active'); offerLocationType='Online';
+      offerSheet.classList.remove('open');
+      activeTab='offers'; $$('#tabs .tab').forEach(b=>b.classList.toggle('active', b.dataset.tab==='offers'));
+      render();
+    };
+
+    // ===== Request Sheet =====
+    const requestSheet = $('#requestSheet');
+    $('#openRequestSheet').onclick = ()=> requestSheet.classList.add('open');
+    $('#requestClose').onclick = ()=> requestSheet.classList.remove('open');
+    $('#reqCancel').onclick = ()=> requestSheet.classList.remove('open');
+
+    $('#reqSave').onclick = ()=>{
+      const user = $('#reqUser').value.trim() || (LS.getAuth()?.username || 'Member');
+      const title= $('#reqTitle').value.trim();
+      const category=$('#reqCategory').value.trim();
+      const desc   = $('#reqDesc').value.trim();
+      const duration = $('#reqDuration').value;
+      const location = $('#reqLocation').value.trim();
+
+      if(!user || !title || !category || !desc || !duration){
+        toast("Please fill in all required fields."); return;
+      }
+      const arr = LS.getRequests();
+      arr.unshift({user,title,category,description:desc,duration:Number(duration),location});
+      LS.setRequests(arr);
+      toast("✅ Request posted successfully!");
+      ['reqUser','reqTitle','reqCategory','reqDesc','reqDuration','reqLocation'].forEach(id=>$('#'+id).value='');
+      requestSheet.classList.remove('open');
+      activeTab='requests'; $$('#tabs .tab').forEach(b=>b.classList.toggle('active', b.dataset.tab==='requests'));
+      render();
+    };
+
+    // ===== Profile Panel & Logout =====
+    $('#profileBtn').onclick = ()=> profilePanel.classList.add('open');
+    $('#profileClose').onclick = ()=> profilePanel.classList.remove('open');
+    $('#logoutBtn').onclick = ()=>{
+      LS.clearAuth();
+      toast("👋 Logged out!");
+      profilePanel.classList.remove('open');
+      showAuth();
+      $('#profileBtn').textContent='JD';
+      $('#profileInitials').textContent='JD';
+      $('#profileName').textContent='John Doe';
+      $('#profileEmail').textContent='john.doe@email.com';
+    };
+    // DEBUG erişimi için global değişkenler
+    window.LS = LS;
+    window.render = render;
+    window.deleteItem = deleteItem;
+    window.activeTab = activeTab;
+  });
+  </script>
 </body>
 </html>

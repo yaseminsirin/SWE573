@@ -31,22 +31,27 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # Django apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts',
-   # 'market',
-   #  'matches',
-   # 'chat',
-   # 'reputation',
-   # 'leaderboard',
-   'rest_framework',
-   'rest_framework_simplejwt',
 
+    # Third-party apps
+    'rest_framework',
+    'rest_framework_simplejwt',
+
+    # Local apps
+    'accounts',
+    'market',
+    # 'matches',
+    # 'chat',
+    # 'reputation',
+    # 'leaderboard',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -78,19 +83,28 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
 
 import os
+from pathlib import Path
+from dotenv import load_dotenv
 
+# Proje kök dizinini otomatik bul
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+dotenv_path = BASE_DIR / ".env"
+load_dotenv(str(dotenv_path))
+
+# Database configuration
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+        'NAME': os.getenv('POSTGRES_DB', 'postgres'),
+        'USER': os.getenv('POSTGRES_USER', 'postgres'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
 
