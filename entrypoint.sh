@@ -1,92 +1,23 @@
 #!/bin/bash
-set -e  # Hata oluşursa işlemi durdur
 
-echo "Waiting for database to be ready..."
+# Hata olursa dur
+set -e
 
-# Veritabanı bağlantısını kontrol etmek için Python script'i
-check_db_connection() {
-  python3 << EOF
-import sys
-import os
-import psycopg2
-from urllib.parse import urlparse
+echo "Running entrypoint script..."
 
-db_url = os.environ.get("DATABASE_URL")
+# Veritabanı URL var mı kontrol et (Sadece varlığını kontrol et, bağlanmayı değil)
+if [ -z "$DATABASE_URL" ]; then
+    echo "ERROR: DATABASE_URL environment variable is missing!"
+    exit 1
+fi
 
-if not db_url:
-    # Docker Compose için ayrı değişkenlerden oluştur
-    dbname = os.environ.get("POSTGRES_DB", "hive_db")
-    user = os.environ.get("POSTGRES_USER", "postgres")
-    password = os.environ.get("POSTGRES_PASSWORD", "postgres")
-    host = os.environ.get("DB_HOST", "db")
-    port = int(os.environ.get("DB_PORT", "5432"))
-    
-    print(f"Attempting to connect to host: {host} on port {port}...")
-    
-    try:
-        conn = psycopg2.connect(
-            dbname=dbname,
-            user=user,
-            password=password,
-            host=host,
-            port=port,
-            connect_timeout=3
-        )
-        conn.close()
-        print("Database connection successful!")
-        sys.exit(0)
-    except Exception as e:
-        print(f"Connection failed details: {e}")
-        sys.exit(1)
-else:
-    # DATABASE_URL'den parse et
-    try:
-        url = urlparse(db_url)
-        dbname = url.path[1:] if url.path.startswith('/') else url.path
-        user = url.username
-        password = url.password
-        host = url.hostname
-        port = url.port or 5432
-        
-        print(f"Attempting to connect to host: {host} on port {port}...")
-        
-        conn = psycopg2.connect(
-            dbname=dbname,
-            user=user,
-            password=password,
-            host=host,
-            port=port,
-            connect_timeout=3
-        )
-        conn.close()
-        print("Database connection successful!")
-        sys.exit(0)
-    except Exception as e:
-        print(f"Connection failed details: {e}")
-        sys.exit(1)
-EOF
-}
+echo "DATABASE_URL found. Starting migrations..."
 
-# Veritabanı hazır olana kadar bekle
-until check_db_connection; do
-  echo "Database is unavailable - sleeping"
-  sleep 1
-done
-
-echo "Database is ready!"
-
-echo "Running migrations..."
-python manage.py migrate --noinput
+# Direkt migrate yap. Eğer veritabanı yoksa Django burada hata verir ve biz de loglarda görürüz.
+python manage.py migrate
 
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
-echo "Starting Gunicorn server..."
-exec gunicorn core.wsgi:application \
-    --bind 0.0.0.0:${PORT:-8000} \
-    --workers ${GUNICORN_WORKERS:-4} \
-    --timeout ${GUNICORN_TIMEOUT:-120} \
-    --access-logfile - \
-    --error-logfile - \
-    --log-level ${LOG_LEVEL:-info}
-
+echo "Starting Gunicorn..."
+gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
