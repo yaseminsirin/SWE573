@@ -154,3 +154,13 @@ SESSION_SAVE_EVERY_REQUEST = True
 
 # Tarayıcıyı kapatsa bile oturum açık kalsın
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# === SSL/HTTPS Settings (Production) ===
+# Render'dan gelen HTTPS bilgisini doğru oku
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Production'da HTTPS zorunlu (DEBUG=False iken aktif)
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True

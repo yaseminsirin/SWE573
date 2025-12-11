@@ -19,6 +19,12 @@ urlpatterns = [
     path('api/', include('accounts.urls')),
 ]
 
-# Media files serving (sadece DEBUG=True iken)
+# Media files serving
+# Development'ta static() kullan, production'da serve() kullan
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
+    # Production'da media dosyalarını serve et
+    urlpatterns += [
+        re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    ]
