@@ -11,38 +11,59 @@ import os
 import psycopg2
 from urllib.parse import urlparse
 
-# DATABASE_URL varsa onu kullan, yoksa ayrı değişkenlerden oluştur
-database_url = os.environ.get("DATABASE_URL")
+db_url = os.environ.get("DATABASE_URL")
 
-if database_url:
-    # DATABASE_URL'den parse et
-    url = urlparse(database_url)
-    dbname = url.path[1:] if url.path.startswith('/') else url.path
-    user = url.username
-    password = url.password
-    host = url.hostname
-    port = url.port or 5432
-else:
+if not db_url:
     # Docker Compose için ayrı değişkenlerden oluştur
     dbname = os.environ.get("POSTGRES_DB", "hive_db")
     user = os.environ.get("POSTGRES_USER", "postgres")
     password = os.environ.get("POSTGRES_PASSWORD", "postgres")
     host = os.environ.get("DB_HOST", "db")
     port = int(os.environ.get("DB_PORT", "5432"))
-
-try:
-    conn = psycopg2.connect(
-        dbname=dbname,
-        user=user,
-        password=password,
-        host=host,
-        port=port,
-        connect_timeout=5
-    )
-    conn.close()
-    sys.exit(0)
-except Exception as e:
-    sys.exit(1)
+    
+    print(f"Attempting to connect to host: {host} on port {port}...")
+    
+    try:
+        conn = psycopg2.connect(
+            dbname=dbname,
+            user=user,
+            password=password,
+            host=host,
+            port=port,
+            connect_timeout=3
+        )
+        conn.close()
+        print("Database connection successful!")
+        sys.exit(0)
+    except Exception as e:
+        print(f"Connection failed details: {e}")
+        sys.exit(1)
+else:
+    # DATABASE_URL'den parse et
+    try:
+        url = urlparse(db_url)
+        dbname = url.path[1:] if url.path.startswith('/') else url.path
+        user = url.username
+        password = url.password
+        host = url.hostname
+        port = url.port or 5432
+        
+        print(f"Attempting to connect to host: {host} on port {port}...")
+        
+        conn = psycopg2.connect(
+            dbname=dbname,
+            user=user,
+            password=password,
+            host=host,
+            port=port,
+            connect_timeout=3
+        )
+        conn.close()
+        print("Database connection successful!")
+        sys.exit(0)
+    except Exception as e:
+        print(f"Connection failed details: {e}")
+        sys.exit(1)
 EOF
 }
 
