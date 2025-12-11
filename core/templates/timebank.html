@@ -3,635 +3,1693 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Time Bank</title>
+  <title>HIVE | Time Bank</title>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
+    /* SweetAlert2 z-index override - sidebar'dan yüksek olmalı */
+    .swal2-container {
+      z-index: 10000 !important;
+    }
+    .swal2-container.swal2-backdrop-show {
+      z-index: 10000 !important;
+    }
     :root{
-      --vb:#667eea; --pb:#764ba2; --text:#2f2f2f; --muted:#6b7280;
-      --card:#ffffff; --bg1:#6b73ff; --bg2:#000dff; --radius:20px;
+      --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --bg: #f3f4f6; --text: #1f2937;
     }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
-      background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-      min-height:100vh; padding:20px; color:var(--text);
-    }
+    *{box-sizing:border-box;margin:0;padding:0;outline:none;font-family:'Segoe UI',sans-serif}
+    body{background:var(--primary);min-height:100vh;padding:20px;color:var(--text)}
     .hidden{display:none !important}
-    .app{max-width:1200px;margin:0 auto}
+    .app{max-width:1100px;margin:0 auto;padding-bottom:100px;position:relative}
 
-    /* Header */
-    header{
-      background:#fff;border-radius:30px;padding:18px 24px;margin-bottom:22px;
-      display:flex;align-items:center;justify-content:space-between;gap:14px;
-      box-shadow:0 10px 30px rgba(0,0,0,.08);
-    }
-    .logo{
-      display:flex;align-items:center;gap:10px;font-size:26px;font-weight:800;
-      background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-    }
-    .actions{display:flex;align-items:center;gap:14px}
-    .pill{
-      background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-      color:#fff;padding:12px 20px;border-radius:999px;font-weight:800;
-      display:flex;align-items:center;gap:8px;box-shadow:0 12px 30px rgba(102,126,234,.25);
-    }
-    .icon-btn{
-      width:48px;height:48px;border-radius:50%;border:0;cursor:pointer;
-      display:grid;place-items:center;background:#f3f4f6;position:relative;
-      box-shadow:0 6px 16px rgba(0,0,0,.06);transition:transform .15s ease;
-      font-weight:800;color:#fff;
-    }
-    .icon-btn:hover{transform:translateY(-2px)}
-    .profile-btn{
-      background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-      border:3px solid #fff;
-    }
-    .badge{
-      position:absolute;top:-2px;right:-2px;width:20px;height:20px;border-radius:50%;
-      background:#ff4757;color:#fff;font-weight:700;font-size:11px;
-      display:grid;place-items:center;border:2px solid #fff;
-    }
+    header{background:#fff;border-radius:24px;padding:16px 24px;margin-bottom:24px;display:flex;justify-content:space-between;box-shadow:0 10px 40px rgba(0,0,0,0.15);position:relative;z-index:50}
+    .logo{font-size:26px;font-weight:900;background:var(--primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:flex;align-items:center;gap:8px}
+    .actions{display:flex;align-items:center;gap:12px;position:relative}
+    
+    .pill{background:#f3f4f6;padding:8px 16px;border-radius:99px;font-weight:700;color:#555;font-size:14px}
+    .icon-btn{width:44px;height:44px;border-radius:50%;border:0;cursor:pointer;background:#f3f4f6;font-size:18px;display:grid;place-items:center;position:relative;transition:0.2s}
+    .icon-btn:hover{background:#e5e7eb;transform:translateY(-2px)}
+    .profile-btn{background:var(--primary);color:#fff;font-weight:700;font-size:14px;border:2px solid #fff}
+    .notif-badge{position:absolute;top:-2px;right:-2px;background:#ef4444;color:#fff;width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:800;display:grid;place-items:center;opacity:0;transform:scale(0);transition:0.2s}
+    .notif-badge.show{opacity:1;transform:scale(1)}
 
-    /* Hero */
-    .hero{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0}
-    .cta{
-      background:#fff;border-radius:18px;padding:18px 20px;font-weight:700;
-      display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;
-      box-shadow:0 12px 28px rgba(0,0,0,.09);border:2px solid rgba(102,126,234,.15);
-      transition:transform .15s ease,box-shadow .15s ease;
-    }
-    .cta:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(0,0,0,.12)}
-    .cta.secondary{background:transparent;color:#fff;border-color:#ddd;outline:2px solid rgba(255,255,255,.5)}
+    .profile-menu{position:absolute;top:70px;right:0;width:220px;background:#fff;border-radius:16px;padding:16px;box-shadow:0 15px 50px rgba(0,0,0,0.2);z-index:100;display:none;flex-direction:column;gap:10px}
+    .profile-menu.show{display:flex}
+    .pm-btn{background:#fee2e2;color:#dc2626;border:0;padding:10px;border-radius:10px;font-weight:700;cursor:pointer;width:100%}
+    .pm-btn:hover{background:#fecaca}
+    .notifications-dropdown{position:absolute;top:70px;right:0;width:420px;max-height:600px;background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.15);z-index:5000;display:none;flex-direction:column;overflow:hidden}
+    .notifications-dropdown.show{display:flex}
+    .notif-header{padding:20px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;background:#fff;position:sticky;top:0;z-index:10}
+    .notif-header h3{margin:0;font-size:18px;font-weight:800;color:#1f2937}
+    .notif-close-btn{width:32px;height:32px;border-radius:50%;border:0;background:#f3f4f6;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#666;transition:all .2s;font-size:16px}
+    .notif-close-btn:hover{background:#e5e7eb;color:#333}
+    .notif-body{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:12px}
+    .notif-card{background:#fff;border:1px solid #f0f0f0;border-radius:16px;padding:16px;display:flex;gap:14px;transition:all .2s;cursor:pointer;position:relative}
+    .notif-card:hover{box-shadow:0 4px 12px rgba(0,0,0,0.08);transform:translateY(-2px);border-color:#e5e7eb}
+    .notif-card.unread{background:#f8fafc;border-color:#e0f2fe}
+    .notif-icon-box{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+    .notif-icon-box.accepted{background:#d1fae5;color:#059669}
+    .notif-icon-box.message{background:#dbeafe;color:#2563eb}
+    .notif-icon-box.time-credit{background:#fed7aa;color:#ea580c}
+    .notif-icon-box.warning{background:#fef3c7;color:#d97706}
+    .notif-icon-box.pending{background:#e0e7ff;color:#6366f1}
+    .notif-content{flex:1;min-width:0}
+    .notif-header-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:12px}
+    .notif-title{font-weight:700;font-size:15px;color:#1f2937;margin:0;flex:1}
+    .notif-date{font-size:11px;color:#9ca3af;font-weight:500;white-space:nowrap}
+    .notif-message{font-size:14px;color:#4b5563;line-height:1.5;margin:0;margin-top:4px}
+    .notif-empty{padding:40px 20px;text-align:center;color:#9ca3af;font-size:14px}
+    .notifications-dropdown{position:absolute;top:70px;right:0;width:420px;max-height:600px;background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.15);z-index:5000;display:none;flex-direction:column;overflow:hidden}
+    .notifications-dropdown.show{display:flex}
+    .notif-header{padding:20px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;background:#fff;position:sticky;top:0;z-index:10}
+    .notif-header h3{margin:0;font-size:18px;font-weight:800;color:#1f2937}
+    .notif-close-btn{width:32px;height:32px;border-radius:50%;border:0;background:#f3f4f6;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#666;transition:all .2s;font-size:16px}
+    .notif-close-btn:hover{background:#e5e7eb;color:#333}
+    .notif-body{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:12px}
+    .notif-card{background:#fff;border:1px solid #f0f0f0;border-radius:16px;padding:16px;display:flex;gap:14px;transition:all .2s;cursor:pointer;position:relative}
+    .notif-card:hover{box-shadow:0 4px 12px rgba(0,0,0,0.08);transform:translateY(-2px);border-color:#e5e7eb}
+    .notif-card.unread{background:#f8fafc;border-color:#e0f2fe}
+    .notif-icon-box{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+    .notif-icon-box.accepted{background:#d1fae5;color:#059669}
+    .notif-icon-box.message{background:#dbeafe;color:#2563eb}
+    .notif-icon-box.time-credit{background:#fed7aa;color:#ea580c}
+    .notif-icon-box.warning{background:#fef3c7;color:#d97706}
+    .notif-icon-box.pending{background:#e0e7ff;color:#6366f1}
+    .notif-content{flex:1;min-width:0}
+    .notif-header-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:12px}
+    .notif-title{font-weight:700;font-size:15px;color:#1f2937;margin:0;flex:1}
+    .notif-date{font-size:11px;color:#9ca3af;font-weight:500;white-space:nowrap}
+    .notif-message{font-size:14px;color:#4b5563;line-height:1.5;margin:0;margin-top:4px}
+    .notif-empty{padding:40px 20px;text-align:center;color:#9ca3af;font-size:14px}
 
-    /* Tabs */
-    .tabs{
-      background:#fff;border-radius:99px;padding:8px;display:flex;gap:6px;width:max-content;
-      box-shadow:0 10px 24px rgba(0,0,0,.08);margin:8px 0 16px;
-    }
-    .tab{border:0;background:transparent;padding:10px 16px;border-radius:99px;font-weight:700;color:#6b7280;cursor:pointer}
-    .tab.active{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff}
+    .hero{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+    .cta{background:#fff;padding:24px;border-radius:20px;display:flex;align-items:center;justify-content:center;gap:12px;font-weight:800;font-size:18px;color:#333;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,0.06);transition:transform .2s;text-decoration:none}
+    .cta:hover{transform:translateY(-3px)}
+    .cta.primary{background:var(--primary);color:#fff}
 
-    /* Section & Search */
-    .section{
-      background:linear-gradient(135deg,#6b73ff 0%,#000dff 100%);
-      border-radius:var(--radius);padding:30px;color:#fff;box-shadow:0 12px 30px rgba(0,0,0,.18);
-    }
-    .section h2{display:flex;align-items:center;gap:10px;font-size:26px;margin-bottom:14px}
-    .search-row{display:flex;gap:10px;align-items:center;margin:6px 0 18px}
-    .search-row input{
-      flex:1;padding:12px 14px;border-radius:12px;border:2px solid rgba(255,255,255,.35);
-      background:rgba(255,255,255,.15);color:#fff;font-weight:600;
-    }
-    .search-row input::placeholder{color:rgba(255,255,255,.8)}
-    .search-row input:focus{outline:none;border-color:#fff;background:rgba(255,255,255,.25)}
+    /* TABS FIX: Centered & width:auto */
+    .tabs-container{display:flex;justify-content:center;margin-bottom:24px}
+    .tabs{background:#fff;padding:6px;border-radius:99px;display:inline-flex;gap:6px;box-shadow:0 8px 24px rgba(0,0,0,0.08);width:auto}
+    .tab{padding:10px 24px;border-radius:99px;border:0;background:transparent;font-weight:700;color:#6b7280;cursor:pointer;transition:0.2s;font-size:14px;white-space:nowrap}
+    .tab.active{background:var(--primary);color:#fff}
+    .search-container{background:#fff;border-radius:16px;padding:16px;margin-bottom:24px;box-shadow:0 4px 12px rgba(0,0,0,0.05)}
+    .search-box{width:100%;padding:14px 20px;border-radius:12px;border:2px solid #e5e7eb;font-size:15px;outline:none;transition:border-color .2s}
+    .search-box:focus{border-color:#667eea}
+    .search-box::placeholder{color:#9ca3af}
+    
+    .sub-tabs{display:flex;gap:10px;margin-bottom:16px;padding:0 4px}
+    .sub-tab{padding:8px 16px;border-radius:12px;border:0;background:rgba(255,255,255,0.2);color:#fff;font-weight:700;cursor:pointer;font-size:13px}
+    .sub-tab.active{background:#fff;color:#667eea;box-shadow:0 4px 10px rgba(0,0,0,0.1)}
 
-    /* Grid & Cards */
-    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
-    .card{
-      background:#fff;border-radius:18px;padding:18px;color:#2f2f2f;
-      box-shadow:0 10px 24px rgba(0,0,0,.12);transition:transform .15s ease,box-shadow .15s ease;
-    }
-    .card:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(0,0,0,.18)}
-    .card h3{font-size:20px;margin-bottom:6px}
-    .badge-mini{
-      background:#e9d5ff;color:#6d28d9;padding:4px 8px;border-radius:999px;font-weight:800;
-      font-size:12px;display:inline-block;margin-bottom:8px;
-    }
-    .meta{display:flex;align-items:center;justify-content:space-between;margin-top:12px;color:#4b5563;font-weight:700}
-    .who{display:flex;align-items:center;gap:10px;margin-top:10px}
-    .avatar{
-      width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
-      font-weight:800;color:#fff;background:linear-gradient(135deg,#667eea,#764ba2)
-    }
-    .contact-btn{
-      margin-top:12px;background:#f3f4f6;border:0;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer;
-    }
+    .grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:20px}
+    .card{background:#fff;border-radius:20px;padding:22px;box-shadow:0 4px 12px rgba(0,0,0,0.05);position:relative;display:flex;flex-direction:column;transition:transform .2s;z-index:1}
+    .card:hover{transform:translateY(-4px); box-shadow:0 12px 30px rgba(0,0,0,0.1)}
+    .card-cat{position:absolute;top:20px;right:20px;font-size:11px;font-weight:800;background:#ede9fe;color:#7c3aed;padding:5px 10px;border-radius:99px}
+    .card h3{font-size:20px;margin-bottom:8px;padding-right:60px;font-weight:800}
+    .card p{color:#666;font-size:14px;line-height:1.5;margin-bottom:16px;flex:1}
+    .card-meta{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;color:#888;border-top:1px solid #f0f0f0;padding-top:14px;margin-top:auto}
+    
+    .action-btn{width:100%;margin-top:16px;padding:12px;border:0;border-radius:12px;background:#f3f4f6;font-weight:800;cursor:pointer;color:#333;transition:background .2s;position:relative;z-index:10}
+    .action-btn:hover{background:#e5e7eb}
+    .action-btn.disabled{opacity:0.6;cursor:not-allowed;background:#eee}
 
-    /* Profile Panel */
-    .panel{
-      position:fixed;top:0;right:-100%;width:420px;height:100vh;background:#fff;z-index:40;
-      box-shadow:-10px 0 30px rgba(0,0,0,.25);transition:right .35s ease;display:flex;flex-direction:column;
-      border-top-left-radius:18px;border-bottom-left-radius:18px;
-    }
-    .panel.open{right:0}
-    .panel-header{
-      padding:24px;color:#fff;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-      border-top-left-radius:18px;position:relative;
-    }
-    .panel-close{
-      position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;
-      background:rgba(255,255,255,.25);color:#fff;border:0;font-size:18px;cursor:pointer;
-    }
-    .panel-body{padding:20px;display:flex;flex-direction:column;gap:14px}
-    .row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee}
-    .logout{
-      margin-top:auto;background:#fff;color:#ff4757;border:2px solid #ff4757;padding:14px;border-radius:12px;
-      font-weight:800;cursor:pointer;transition:.15s ease;width:100%;
-    }
-    .logout:hover{background:#ff4757;color:#fff}
+    .inbox-list{display:flex;flex-direction:column;gap:12px}
+    .inbox-item{background:#fff;padding:16px;border-radius:18px;display:flex;gap:16px;cursor:pointer;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,0.04);transition:transform .2s}
+    .inbox-item:hover{transform:translateX(5px)}
+    .inbox-icon{width:50px;height:50px;border-radius:14px;background:#eef2ff;display:grid;place-items:center;font-size:24px}
+    .inbox-info{flex:1}
+    .delete-listing-btn{width:36px;height:36px;border-radius:10px;border:0;background:#fee2e2;color:#dc2626;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s;flex-shrink:0}
+    .delete-listing-btn:hover{background:#fecaca;transform:scale(1.1)}
+    .status-badge{font-size:10px;padding:4px 8px;border-radius:6px;font-weight:800;text-transform:uppercase}
+    .st-pending{background:#fff7ed;color:#c2410c}
+    .st-accepted{background:#ecfdf5;color:#047857}
+    .st-date_proposed{background:#eff6ff;color:#1d4ed8}
+    .st-scheduled{background:#f0f9ff;color:#0369a1}
+    .st-completed{background:#eef2ff;color:#4338ca}
 
-    /* Sheets (Offer/Request) */
-    .sheet{
-      position:fixed;top:0;right:-100%;width:520px;height:100vh;background:#fff;z-index:50;
-      box-shadow:-10px 0 30px rgba(0,0,0,.25);transition:right .35s ease;display:flex;flex-direction:column;
-      border-top-left-radius:18px;border-bottom-left-radius:18px;
-    }
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px)}
+    .modal-overlay.open{display:flex}
+    .sheet{position:fixed;top:0;right:-100%;width:100%;max-width:480px;height:100%;background:#fff;z-index:1500;transition:right .3s;box-shadow:-10px 0 60px rgba(0,0,0,0.2);display:flex;flex-direction:column}
     .sheet.open{right:0}
-    .sheet-header{padding:22px 22px 10px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
-    .sheet-title{font-size:22px;font-weight:800}
-    .sheet-sub{opacity:.9}
-    .sheet-body{padding:18px;overflow:auto}
-    .field{margin-bottom:14px}
-    .label{font-weight:700;font-size:14px;color:#374151;margin-bottom:6px;display:block}
-    .input,.select,.textarea{width:100%;padding:12px;border-radius:12px;border:2px solid #e5e7eb;font-size:14px;background:#fff}
-    .textarea{min-height:110px;resize:vertical}
-    .seg{display:flex;gap:8px}
-    .seg .seg-btn{flex:1;padding:12px;border-radius:12px;border:2px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:700}
-    .seg .seg-btn.active{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.15)}
-    .sheet-actions{display:flex;gap:10px;padding:12px 18px 18px}
-    .btn{flex:1;padding:14px;border-radius:12px;border:0;font-weight:800;cursor:pointer}
-    .btn.gray{background:#f3f4f6}
-    .btn.primary{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
+    .sheet-head{padding:20px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:16px}
+    .sheet-body{flex:1;overflow-y:auto;padding:20px;background:#f9fafb}
 
-    /* Auth Modal */
-    .auth{
-      position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:60;padding:16px;
-    }
-    .auth.show{display:flex}
-    .auth-box{background:#fff;border-radius:20px;max-width:460px;width:100%;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35)}
-    .auth-head{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:28px;text-align:center}
-    .auth-title{font-size:24px;font-weight:900}
-    .auth-body{padding:22px}
-    .tabs-auth{display:flex;gap:8px;background:#f3f4f6;border-radius:12px;padding:6px;margin-bottom:16px}
-    .tab-auth{flex:1;border:0;background:transparent;padding:10px;border-radius:8px;font-weight:800;color:#6b7280;cursor:pointer}
-    .tab-auth.active{background:#fff;color:#667eea;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-    .form{display:none}
-    .form.active{display:block}
-    .toast{
-      position:fixed;bottom:24px;right:24px;background:#fff;border-left:6px solid #667eea;
-      padding:12px 16px;border-radius:12px;box-shadow:0 10px 24px rgba(0,0,0,.18);font-weight:700;z-index:100;
-      animation:toast 3s ease forwards;
-    }
-    @keyframes toast{0%{opacity:0;transform:translateY(10px)}10%,90%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(10px)}}
+    /* FORM STYLE (FIXED) */
+    .form-style .field{margin-bottom:16px}
+    .form-style .label{display:block;margin-bottom:8px;font-weight:700;font-size:14px;color:#4b5563}
+    .form-style .input{width:100%;padding:14px;border-radius:12px;border:2px solid #e5e7eb;font-size:15px;background:#fff}
+    .form-style .btn{width:100%;padding:14px;border-radius:12px;border:0;font-weight:800;background:var(--primary);color:#fff;cursor:pointer;font-size:15px;display:block}
+    .map-container{width:100%;height:300px;border-radius:12px;border:2px solid #e5e7eb;margin-bottom:16px;overflow:hidden}
+    .map-search{width:100%;padding:10px;border-radius:8px;border:2px solid #e5e7eb;margin-bottom:12px;font-size:14px}
+    .search-results{position:absolute;top:100%;left:0;right:0;background:#fff;border:2px solid #e5e7eb;border-radius:8px;max-height:200px;overflow-y:auto;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.1);display:none;margin-top:4px}
+    .search-result-item{padding:12px;cursor:pointer;border-bottom:1px solid #f0f0f0;transition:background .2s}
+    .search-result-item:hover{background:#f9fafb}
+    .search-result-item:last-child{border-bottom:0}
+    .search-result-title{font-weight:700;font-size:14px;color:#1f2937;margin-bottom:4px}
+    .search-result-details{font-size:12px;color:#6b7280}
+    .search-container-relative{position:relative}
+    .image-upload-area{width:100%;min-height:200px;border:2px dashed #e5e7eb;border-radius:12px;margin-bottom:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#f9fafb;transition:all .2s;position:relative;overflow:hidden}
+    .image-upload-area:hover{border-color:#667eea;background:#f0f4ff}
+    .image-upload-area.has-image{border-style:solid;border-color:#667eea;padding:0}
+    .image-upload-area.has-image:hover{border-color:#764ba2}
+    .image-upload-placeholder{text-align:center;padding:20px;color:#6b7280;font-size:14px}
+    .image-upload-placeholder strong{display:block;margin-bottom:8px;color:#4b5563;font-size:16px}
+    .image-preview{width:100%;height:100%;object-fit:cover;display:none}
+    .image-preview.show{display:block}
+    .image-remove-btn{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.6);color:#fff;border:0;border-radius:50%;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;z-index:10;transition:background .2s}
+    .image-remove-btn:hover{background:rgba(0,0,0,0.8)}
+    .main-map-container{width:100%;height:500px;border-radius:20px;overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,0.06);margin-bottom:24px;background:#fff}
+    .detail-sidebar{position:fixed;top:0;right:-100%;width:100%;max-width:420px;height:100%;background:#fff;z-index:1600;transition:right .3s;box-shadow:-10px 0 60px rgba(0,0,0,0.2);display:flex;flex-direction:column;overflow-y:auto}
+    .detail-sidebar.open{right:0}
+    .detail-sidebar-header{padding:20px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;background:#fff;position:sticky;top:0;z-index:10}
+    .detail-sidebar-body{padding:20px;flex:1}
+    .detail-badge{display:inline-block;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:800;text-transform:uppercase;margin-bottom:12px;letter-spacing:0.5px}
+    .detail-badge.offer{background:#667eea;color:#fff}
+    .detail-badge.request{background:#10b981;color:#fff}
+    .detail-image{width:100%;height:200px;object-fit:cover;border-radius:12px;margin-bottom:16px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px}
+    .detail-image img{width:100%;height:100%;object-fit:cover;border-radius:12px}
+    .detail-title{font-size:24px;font-weight:800;margin-bottom:8px;color:#1f2937}
+    .detail-meta{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+    .detail-meta-item{display:flex;align-items:center;gap:6px;font-size:14px;color:#666}
+    .detail-description{color:#4b5563;line-height:1.6;margin-bottom:20px;font-size:15px}
+    .detail-address{background:#f9fafb;padding:12px;border-radius:8px;margin-bottom:16px;font-size:14px;color:#666}
+    .detail-actions{display:flex;gap:10px;margin-top:20px}
+    .detail-btn{flex:1;padding:12px;border-radius:10px;border:0;font-weight:700;cursor:pointer;font-size:14px;transition:transform .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+    .detail-btn:hover{transform:translateY(-2px)}
+    .detail-btn.primary{background:var(--primary);color:#fff}
+    .detail-btn.secondary{background:#f3f4f6;color:#333}
+    .detail-btn.danger{background:#fee2e2;color:#dc2626}
+    .detail-btn.danger:hover{background:#fecaca}
 
-    /* Responsive */
-    @media (max-width:900px){
-      .grid{grid-template-columns:1fr}
-      .hero{grid-template-columns:1fr}
-      .panel,.sheet{width:90vw}
-      header{flex-wrap:wrap}
-    }
+    .chat-area{flex:1;display:flex;flex-direction:column;gap:12px;padding:20px;padding-bottom:30px}
+    .chat-bubble{max-width:80%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.5;box-shadow:0 2px 5px rgba(0,0,0,0.03)}
+    .chat-bubble.me{align-self:flex-end;background:var(--primary);color:#fff;border-bottom-right-radius:4px}
+    .chat-bubble.them{align-self:flex-start;background:#fff;color:#333;border:1px solid #eee;border-bottom-left-radius:4px}
+    .chat-footer{padding:16px;background:#fff;border-top:1px solid #eee;display:flex;gap:10px;align-items:center}
+    .chat-input{flex:1;padding:12px 16px;border-radius:99px;border:2px solid #e5e7eb;outline:none}
+    
+    .action-bar-modern{margin:-20px -20px 10px -20px;padding:20px;background:#fff;border-bottom:1px solid #eee;display:flex;flex-direction:column;gap:12px}
+    .ab-header{display:flex;justify-content:space-between;align-items:center}
+    .ab-title{font-weight:800;font-size:16px;color:#1f2937}
+    .ab-content{background:#f0f9ff;border:1px solid #e0f2fe;padding:14px;border-radius:12px;font-size:14px;color:#0c4a6e;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .ab-content.success{background:#ecfdf5;border-color:#d1fae5;color:#065f46}
+    .ab-btn{padding:8px 16px;border-radius:8px;border:0;font-weight:700;cursor:pointer;color:#fff;font-size:13px;white-space:nowrap}
+    .green{background:#10b981} .red{background:#ef4444} .blue{background:#3b82f6}
+
+    .toast{position:fixed;bottom:30px;right:30px;background:#1f2937;color:#fff;padding:12px 24px;border-radius:12px;font-weight:700;z-index:3000;box-shadow:0 10px 30px rgba(0,0,0,0.2);animation:slideUp .3s}
+    @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}.hero{grid-template-columns:1fr}.sheet{width:100%}}
   </style>
 </head>
 <body>
-  <!-- AUTH MODAL -->
-  <div class="auth" id="authModal">
-    <div class="auth-box">
-      <div class="auth-head">
-        <div class="auth-title">Time Bank</div>
-        <div>Trade time, not money</div>
-      </div>
-      <div class="auth-body">
-        <div class="tabs-auth">
-          <button class="tab-auth active" id="tabLogin">Login</button>
-          <button class="tab-auth" id="tabSignup">Sign Up</button>
-        </div>
 
-        <!-- Login -->
-        <form class="form active" id="loginForm">
-          <div class="field">
-            <label class="label">Username</label>
-            <input class="input" name="username" required/>
-          </div>
-          <div class="field">
-            <label class="label">Password</label>
-            <input class="input" name="password" type="password" required/>
-          </div>
-          <button class="btn primary" type="submit">Login</button>
-        </form>
-
-        <!-- Signup -->
-        <form class="form" id="signupForm">
-          <div class="field">
-            <label class="label">Username</label>
-            <input class="input" name="username" required/>
-          </div>
-          <div class="field">
-            <label class="label">Email</label>
-            <input class="input" name="email" type="email" required/>
-          </div>
-          <div class="field">
-            <label class="label">Password</label>
-            <input class="input" name="password" type="password" required/>
-          </div>
-          <div class="field">
-            <label class="label">Confirm Password</label>
-            <input class="input" name="confirm" type="password" required/>
-          </div>
-          <button class="btn primary" type="submit">Create Account</button>
-        </form>
+  <div class="modal-overlay" id="authModal">
+    <div style="background:#fff;width:100%;max-width:400px;border-radius:24px;padding:36px;box-shadow:0 25px 50px rgba(0,0,0,0.25)" class="form-style">
+      <h2 style="text-align:center;margin-bottom:24px;font-size:32px;background:var(--primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900">🚀 HIVE</h2>
+      <div style="display:flex;gap:10px;background:#f3f4f6;padding:5px;border-radius:14px;margin-bottom:24px">
+        <button id="tabLogin" class="tab active" style="text-align:center;flex:1">Login</button>
+        <button id="tabSignup" class="tab" style="text-align:center;flex:1">Sign Up</button>
       </div>
+      <form id="loginForm">
+        <div class="field"><label class="label">Username</label><input class="input" name="username" required></div>
+        <div class="field"><label class="label">Password</label><input class="input" type="password" name="password" required></div>
+        <button type="submit" class="btn">Login</button>
+      </form>
+      <form id="signupForm" class="hidden">
+        <div class="field"><label class="label">Username</label><input class="input" name="username" required></div>
+        <div class="field"><label class="label">Email</label><input class="input" name="email" required></div>
+        <div class="field"><label class="label">Password</label><input class="input" type="password" name="password" required></div>
+        <div class="field"><label class="label">Confirm</label><input class="input" type="password" name="confirm" required></div>
+        <button type="submit" class="btn">Create Account</button>
+      </form>
     </div>
   </div>
 
-  <!-- APP -->
   <div class="app hidden" id="app">
     <header>
-      <div class="logo">⏰ Time Bank</div>
+      <div class="logo">⏰ HIVE</div>
       <div class="actions">
-        <button class="icon-btn profile-btn" id="profileBtn">JD</button>
-        <button class="icon-btn" title="Notifications">🔔<span class="badge">3</span></button>
-        <button class="icon-btn" title="Messages">💬<span class="badge">2</span></button>
-        <div class="pill">⏱️ <span id="timeBalance">3 hours</span></div>
+        <div class="pill balance">⏱️ <span id="balanceDisplay">0h</span></div>
+        <button class="icon-btn" id="notifBtn" title="Notifications" style="position:relative">
+          <i class="fas fa-bell"></i>
+          <span class="notif-badge" id="notifBadge">0</span>
+        </button>
+        <button class="icon-btn" onclick="loadView('inbox')" title="Inbox">💬</button>
+        <button class="icon-btn profile-btn" id="headerProfileBtn">JD</button>
+        <div class="profile-menu" id="profileMenu">
+          <div class="pm-info"><b id="menuUsername" style="font-size:16px">User</b></div>
+          <button class="pm-btn" id="logoutBtn">Logout</button>
+        </div>
+        <div class="notifications-dropdown" id="notificationsDropdown">
+          <div class="notif-header">
+            <h3>Notifications</h3>
+            <button class="notif-close-btn" onclick="closeNotifications()" title="Close">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="notif-body" id="notificationsBody">
+            <div class="notif-empty">Loading notifications...</div>
+          </div>
+        </div>
       </div>
     </header>
 
     <div class="hero">
-      <div class="cta" id="openOfferSheet">➕ Offer Service</div>
-      <div class="cta secondary" id="openRequestSheet">🔎 Request Service</div>
+      <div class="cta primary" id="btnOffer"><span style="font-size:22px">➕</span> Offer Service</div>
+      <div class="cta" id="btnRequest"><span style="font-size:22px">🔎</span> Request Help</div>
     </div>
 
-    <div class="tabs" id="tabs">
-      <button class="tab active" data-tab="offers">Service Offers</button>
-      <button class="tab" data-tab="requests">Service Requests</button>
-      <button class="tab" data-tab="mine">My Listings</button>
+    <div class="main-map-container" id="mainMapContainer">
+      <div id="mainMap" style="width:100%;height:100%"></div>
     </div>
 
-    <div class="section">
-      <h2>✨ Active Listings</h2>
-      <div class="search-row">
-        <input id="searchInput" type="text" placeholder="Search by title, category, or description..."/>
+    <div class="tabs-container">
+      <div class="tabs">
+        <button class="tab active" data-view="all">ALL</button>
+        <button class="tab" data-view="offers">Offers</button>
+        <button class="tab" data-view="requests">Requests</button>
+        <button class="tab" data-view="inbox">Inbox</button>
       </div>
-      <div class="grid" id="cardsGrid"></div>
+    </div>
+
+    <div id="mainContent">
+      <div class="search-container" id="searchContainer" style="display:none">
+        <input type="text" class="search-box" id="searchInput" placeholder="🔍 Search listings by title, description, user, location, category...">
+      </div>
+      <div class="grid" id="gridView"></div>
+      
+      <div class="hidden" id="inboxContainer">
+        <div class="sub-tabs">
+            <button class="sub-tab active" onclick="loadInboxSub('chats')">💬 Chats</button>
+            <button class="sub-tab" onclick="loadInboxSub('listings')">📋 My Listings</button>
+        </div>
+        <div class="inbox-list" id="inboxContent"></div>
+      </div>
     </div>
   </div>
 
-  <!-- Profile Panel -->
-  <aside class="panel" id="profilePanel">
-    <div class="panel-header">
-      <button class="panel-close" id="profileClose">×</button>
-      <div class="avatar" id="profileInitials" style="width:56px;height:56px;border:3px solid rgba(255,255,255,.6)">JD</div>
-      <h2 id="profileName" style="margin-top:8px">John Doe</h2>
-      <div id="profileEmail" style="opacity:.9">john.doe@email.com</div>
-    </div>
-    <div class="panel-body">
-      <div class="row"><span>Services Completed</span><strong id="svcCompleted">8</strong></div>
-      <div class="row"><span>Member Since</span><strong>Jan 2024</strong></div>
-    </div>
-    <div style="padding:18px">
-      <button class="logout" id="logoutBtn">Logout</button>
-    </div>
-  </aside>
-
-  <!-- Offer Sheet -->
-  <aside class="sheet" id="offerSheet">
-    <div class="sheet-header">
-      <div class="sheet-title">Offer a Service</div>
-      <div class="sheet-sub">Share your skills with the community</div>
-    </div>
-    <button class="panel-close" id="offerClose">×</button>
+  <aside class="sheet form-style" id="listingSheet">
+    <div class="sheet-head"><button onclick="closeSheet('listingSheet')" style="border:0;background:none;font-size:24px;cursor:pointer;color:#666">×</button><h3>New Listing</h3></div>
     <div class="sheet-body">
-      <div class="field"><label class="label">Your Name *</label><input class="input" id="offerUser" placeholder="e.g., Alice K." required/></div>
-      <div class="field"><label class="label">Service Title *</label><input class="input" id="offerTitle" placeholder="e.g., Yoga Classes" required/></div>
-      <div class="field">
-        <label class="label">Category *</label>
-        <select class="select" id="offerCategory" required>
-          <option value="">Select a category</option>
-          <option>Sports</option><option>Food</option><option>Music</option>
-          <option>Gardening</option><option>Education</option><option>Art</option>
-          <option>IT & Tech Support</option>
-        </select>
-      </div>
-      <div class="field"><label class="label">Description *</label><textarea class="textarea" id="offerDesc" placeholder="Describe your service." required></textarea></div>
-      <div class="field">
-        <label class="label">Time Required *</label>
-        <select class="select" id="offerDuration" required>
-          <option value="">Select duration</option><option value="1">1 hour</option><option value="2">2 hours</option><option value="3">3 hours</option>
-        </select>
-      </div>
-      <div class="field">
-        <label class="label">Location Type *</label>
-        <div class="seg" id="offerLocationSeg">
-          <button type="button" data-val="Online" class="seg-btn active">🖥️ Online</button>
-          <button type="button" data-val="In-Person" class="seg-btn">📍 In-Person</button>
-          <button type="button" data-val="Both" class="seg-btn">🌐 Both</button>
+      <form id="listingForm">
+        <input type="hidden" id="listingType" value="offer">
+        <input type="hidden" id="inpLat" value="">
+        <input type="hidden" id="inpLng" value="">
+        <div class="field"><label class="label">Title</label><input class="input" id="inpTitle" required placeholder="e.g. Guitar Lessons"></div>
+        <div class="field"><label class="label">Category</label><select class="input" id="inpCat"><option>Education</option><option>Tech</option><option>Home</option><option>Art</option><option>Sports</option></select></div>
+        <div class="field"><label class="label">Duration (Hours)</label><input type="number" class="input" id="inpDur" value="1" min="1" step="1"></div>
+        <div class="field"><label class="label">Description</label><textarea class="input" id="inpDesc" rows="5" required placeholder="Details..."></textarea></div>
+        <div class="field">
+          <label class="label">Image (Optional)</label>
+          <div class="image-upload-area" id="imageUploadArea" tabindex="0">
+            <div class="image-upload-placeholder" id="imagePlaceholder">
+              <strong>📷 Click or Paste Image</strong>
+              <div>Press Ctrl+V to paste from clipboard</div>
+            </div>
+            <img id="imagePreview" class="image-preview" alt="Preview">
+            <button type="button" class="image-remove-btn" id="imageRemoveBtn" onclick="removeImage()" style="display:none">×</button>
+          </div>
+          <input type="file" id="imageFileInput" accept="image/*" style="display:none">
         </div>
-      </div>
-      <div class="field"><label class="label">Location *</label><input class="input" id="offerLocation" placeholder="e.g., Brooklyn, NY or Online"/></div>
-    </div>
-    <div class="sheet-actions">
-      <button class="btn gray" id="offerCancel">Cancel</button>
-      <button class="btn primary" id="offerSave">Post Service</button>
+        <div class="field">
+          <label class="label">Location</label>
+          <div class="search-container-relative">
+            <input type="text" class="map-search" id="locationSearch" placeholder="Search address or click on map..." autocomplete="off">
+            <div id="searchResults" class="search-results"></div>
+          </div>
+          <div id="locationMap" class="map-container"></div>
+          <input type="text" class="input" id="inpAddress" placeholder="Selected address will appear here" readonly style="margin-top:8px">
+        </div>
+        <button type="submit" class="btn">Post Listing</button>
+      </form>
     </div>
   </aside>
 
-  <!-- Request Sheet -->
-  <aside class="sheet" id="requestSheet">
-    <div class="sheet-header">
-      <div class="sheet-title">Request a Service</div>
-      <div class="sheet-sub">Ask the community for help</div>
+  <aside class="sheet" id="chatSheet">
+    <div class="sheet-head"><button onclick="closeSheet('chatSheet')" style="border:0;background:none;font-size:24px;cursor:pointer">←</button><h3>Chat</h3></div>
+    <div class="sheet-body" style="padding:0">
+      <div id="actionBar" class="action-bar-modern" style="display:none"></div>
+      <div class="chat-area" id="msgArea"></div>
+      <form class="chat-footer" id="msgForm">
+        <input class="chat-input" id="msgInput" placeholder="Type a message..." autocomplete="off">
+        <button type="submit" class="send-btn" style="width:46px;height:46px;border-radius:50%;border:0;background:var(--primary);color:#fff;cursor:pointer">➤</button>
+      </form>
     </div>
-    <button class="panel-close" id="requestClose">×</button>
-    <div class="sheet-body">
-      <div class="field"><label class="label">Your Name *</label><input class="input" id="reqUser" placeholder="e.g., Mike Y." required/></div>
-      <div class="field"><label class="label">Request Title *</label><input class="input" id="reqTitle" placeholder="e.g., Need help moving boxes" required/></div>
-      <div class="field">
-        <label class="label">Category *</label>
-        <select class="select" id="reqCategory" required>
-          <option value="">Select a category</option>
-          <option>Sports</option><option>Food</option><option>Music</option>
-          <option>Gardening</option><option>Education</option><option>Art</option>
-          <option>IT & Tech Support</option>
-        </select>
-      </div>
-      <div class="field"><label class="label">Description *</label><textarea class="textarea" id="reqDesc" placeholder="Describe what you need." required></textarea></div>
-      <div class="field">
-        <label class="label">Time Needed *</label>
-        <select class="select" id="reqDuration" required>
-          <option value="">Select duration</option><option value="1">1 hour</option><option value="2">2 hours</option><option value="3">3 hours</option>
-        </select>
-      </div>
-      <div class="field"><label class="label">Location *</label><input class="input" id="reqLocation" placeholder="e.g., Manhattan / Online"/></div>
+  </aside>
+
+  <aside class="detail-sidebar" id="detailSidebar">
+    <div class="detail-sidebar-header">
+      <h3 style="margin:0;font-size:20px;font-weight:800">Listing Details</h3>
+      <button onclick="closeDetailSidebar()" style="border:0;background:none;font-size:24px;cursor:pointer;color:#666;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background .2s" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='transparent'">×</button>
     </div>
-    <div class="sheet-actions">
-      <button class="btn gray" id="reqCancel">Cancel</button>
-      <button class="btn primary" id="reqSave">Post Request</button>
+    <div class="detail-sidebar-body" id="detailSidebarBody">
+      <!-- İçerik dinamik olarak doldurulacak -->
     </div>
   </aside>
 
   <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // ===== Helpers =====
+    const API = '/api';
+    let TOKEN = localStorage.getItem('token');
+    let USER = JSON.parse(localStorage.getItem('user') || '{}');
+    let CURRENT_VIEW = 'offers';
+    let CURRENT_INBOX_SUB = 'chats'; 
+    let ACTIVE_CHAT_ID = null;
+    let POLLER = null;
+    let LAST_RENDER_KEY = "";
+    let USER_BALANCE = 0;
+    
+    // Arama değişkenleri (en üstte tanımla - hoisting sorununu önlemek için)
+    let allListings = [];
+    let currentListingType = 'offers';
+    let listingsData = null;
+
     const $ = s => document.querySelector(s);
-    const $$ = s => Array.from(document.querySelectorAll(s));
-    const toast = msg => { const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3000); };
-    const initials = name => (name||'JD').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
+    const toast = m => { const d=document.createElement('div');d.className='toast';d.innerText=m;document.body.appendChild(d);setTimeout(()=>d.remove(),3000) };
 
-    // ===== LocalStorage layer =====
-    const LS = {
-      getUsers(){ return JSON.parse(localStorage.getItem('users')||'[]'); },
-      setUsers(v){ localStorage.setItem('users', JSON.stringify(v)); },
-      getAuth(){ return JSON.parse(localStorage.getItem('authUser')||'null'); },
-      setAuth(u){ localStorage.setItem('authUser', JSON.stringify(u)); },
-      clearAuth(){ localStorage.removeItem('authUser'); },
+    if(TOKEN) initApp(); else $('#authModal').classList.add('open');
 
-      getOffers(){ return JSON.parse(localStorage.getItem('offers')||'[]'); },
-      setOffers(v){ localStorage.setItem('offers', JSON.stringify(v)); },
-      getRequests(){ return JSON.parse(localStorage.getItem('requests')||'[]'); },
-      setRequests(v){ localStorage.setItem('requests', JSON.stringify(v)); },
-
-      seed(){
-        if(!localStorage.getItem('tb_seed_fixed')){
-          this.setUsers([{username:'johndoe',email:'john@example.com',password:'1234'}]);
-          this.setOffers([
-            {user:'Alice K.', title:"Homemade Cooking", category:"Food", description:"Healthy homemade meals. Vegan/vegetarian available!", duration:1, locationType:"In-Person", location:"Brooklyn, NY"},
-            {user:'Mike Y.', title:"Running & Fitness Training", category:"Sports", description:"Beginner-friendly fitness coaching.", duration:1, locationType:"In-Person", location:"Central Park area"},
-            {user:'Amy L.', title:"Guitar Lessons", category:"Music", description:"Basics of chords and rhythm.", duration:2, locationType:"Online", location:"Online"},
-            {user:'John D.', title:"Garden Care Help", category:"Gardening", description:"Help organizing your garden & basic landscaping.", duration:2, locationType:"In-Person", location:"Queens, NY"}
-          ]);
-          this.setRequests([
-            {user:'Sarah P.', title:"Photography Basics", category:"Art", description:"Looking for a 1h intro to smartphone photography.", duration:1, location:"Manhattan"}
-          ]);
-          localStorage.setItem('tb_seed_fixed','1');
+    $('#loginForm').onsubmit = e => { e.preventDefault(); authReq('/login/', {username:e.target.username.value, password:e.target.password.value}); };
+    $('#signupForm').onsubmit = e => { 
+      e.preventDefault(); 
+      if(e.target.password.value!==e.target.confirm.value){
+        Swal.fire({
+          icon: 'error',
+          title: 'Password Mismatch',
+          text: 'Passwords do not match',
+          confirmButtonColor: '#3085d6',
+          timer: 3000,
+          showConfirmButton: false,
+          position: 'top-end',
+          toast: true
+        });
+        return;
+      }
+      authReq('/register/', {username:e.target.username.value, email:e.target.email.value, password:e.target.password.value}, true); 
+    };
+    
+    async function authReq(url, body, isSign=false){
+      const res = await fetch(API+url, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+      const data = await res.json();
+      if(res.ok){
+        if(isSign){ 
+        Swal.fire({
+          icon: 'success',
+          title: 'Account Created!',
+          text: 'Please login now.',
+          timer: 3000,
+          showConfirmButton: false,
+          position: 'top-end',
+          toast: true
+        });
+          $('#tabLogin').click(); 
         }
+        else { localStorage.setItem('token',data.access); localStorage.setItem('user',JSON.stringify({username:body.username})); TOKEN=data.access; USER={username:body.username}; initApp(); }
+      } else {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: data.error || 'An error occurred',
+          confirmButtonColor: '#3085d6'
+        });
+      }
+    }
+
+    function initApp(){
+      $('#authModal').classList.remove('open'); $('#app').classList.remove('hidden');
+      $('#headerProfileBtn').innerText = USER.username.substring(0,2).toUpperCase();
+      $('#menuUsername').innerText = USER.username;
+      fetchProfile(); loadView('all'); checkNotifications();
+      // Ana haritayı başlat - biraz gecikme ile (DOM hazır olsun)
+      setTimeout(() => initMainMap(), 100);
+      setInterval(() => { if(!ACTIVE_CHAT_ID) { fetchProfile(); checkNotifications(); } }, 5000); 
+    }
+
+    function initMainMap(){
+      if(mainMap) return;
+      
+      const mapEl = $('#mainMap');
+      if(!mapEl) {
+        console.error('Main map container not found');
+        return;
+      }
+      
+      try {
+        mainMap = L.map('mainMap').setView([39.9334, 32.8597], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors'
+        }).addTo(mainMap);
+        loadMapMarkers();
+      } catch(err) {
+        console.error('Error initializing main map:', err);
+      }
+    }
+
+    async function loadMapMarkers(){
+      if(!mainMap) return;
+      
+      // Mevcut marker'ları temizle
+      mainMapMarkers.forEach(m => mainMap.removeLayer(m));
+      mainMapMarkers = [];
+
+      // Tüm aktif ilanları getir
+      const offers = await req('/service-offers/');
+      const requests = await req('/service-requests/');
+
+      // Offer marker'ları (mavi)
+      offers.forEach(item => {
+        if(item.latitude && item.longitude) {
+          const marker = L.marker([parseFloat(item.latitude), parseFloat(item.longitude)], {
+            icon: L.divIcon({
+              className: 'custom-marker offer-marker',
+              html: '<div style="background:#667eea;width:24px;height:24px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>',
+              iconSize: [24, 24],
+              iconAnchor: [12, 12]
+            })
+          }).addTo(mainMap);
+          marker.on('click', () => openDetailSidebar(item, 'offer'));
+          mainMapMarkers.push(marker);
+        }
+      });
+
+      // Request marker'ları (yeşil)
+      requests.forEach(item => {
+        if(item.latitude && item.longitude) {
+          const marker = L.marker([parseFloat(item.latitude), parseFloat(item.longitude)], {
+            icon: L.divIcon({
+              className: 'custom-marker request-marker',
+              html: '<div style="background:#10b981;width:24px;height:24px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>',
+              iconSize: [24, 24],
+              iconAnchor: [12, 12]
+            })
+          }).addTo(mainMap);
+          marker.on('click', () => openDetailSidebar(item, 'request'));
+          mainMapMarkers.push(marker);
+        }
+      });
+    }
+    
+    // Haritayı yenile (marker'ları güncelle)
+    function updateMapMarkers() {
+      if(mainMap) {
+        loadMapMarkers();
+      }
+    }
+    
+    window.updateMapMarkers = updateMapMarkers;
+
+    function openDetailSidebar(item, type) {
+      currentDetailItem = {item, type};
+      const body = $('#detailSidebarBody');
+      const isOwn = item.user_info.username === USER.username;
+      
+      // Badge HTML
+      const badgeClass = type === 'offer' ? 'offer' : 'request';
+      const badgeText = type === 'offer' ? 'OFFER' : 'REQUEST';
+      
+      // Resim HTML - sadece resim varsa göster
+      const imageHtml = item.image_url ? 
+        `<div class="detail-image"><img src="${item.image_url}" alt="${item.title}"></div>` : '';
+      
+      body.innerHTML = `
+        <span class="detail-badge ${badgeClass}">${badgeText}</span>
+        ${imageHtml}
+        <h2 class="detail-title">${item.title}</h2>
+        <div class="detail-meta">
+          <div class="detail-meta-item"><span>👤</span> <span>${item.user_info.username}</span></div>
+          <div class="detail-meta-item"><span>⏱️</span> <span>${item.duration}h</span></div>
+          <div class="detail-meta-item"><span>📂</span> <span>${item.category}</span></div>
+          <div class="detail-meta-item"><span>📅</span> <span>${formatDate(item.created_at)}</span></div>
+        </div>
+        <div class="detail-description">${item.description}</div>
+        ${item.address ? `<div class="detail-address">📍 ${item.address}</div>` : ''}
+        ${!isOwn ? `
+          <div class="detail-actions">
+            <button class="detail-btn primary" onclick="startChatFromDetail(${item.id}, '${type}')">Contact</button>
+            <button class="detail-btn secondary" onclick="closeDetailSidebar()">Close</button>
+          </div>
+        ` : `
+          <div class="detail-actions">
+            <button class="detail-btn danger" onclick="deleteListingFromDetail(${item.id}, '${type}')">
+              <i class="fas fa-trash-alt"></i> Delete
+            </button>
+            <button class="detail-btn secondary" onclick="closeDetailSidebar()">Close</button>
+          </div>
+        `}
+      `;
+      $('#detailSidebar').classList.add('open');
+    }
+
+    function closeDetailSidebar() {
+      $('#detailSidebar').classList.remove('open');
+      currentDetailItem = null;
+    }
+
+    window.closeDetailSidebar = closeDetailSidebar;
+
+    function startChatFromDetail(id, type) {
+      closeDetailSidebar();
+      startChat(id, type);
+    }
+    
+    // Detail sidebar'dan silme
+    async function deleteListingFromDetail(id, type) {
+      const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel',
+      });
+      
+      if(!result.isConfirmed) {
+        return;
+      }
+      
+      try {
+        const endpoint = type === 'offer' ? `/service-offers/${id}/` : `/service-requests/${id}/`;
+        const deleteResult = await req(endpoint, 'DELETE');
+        if(deleteResult.error) {
+          await Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: deleteResult.error,
+            confirmButtonColor: '#3085d6'
+          });
+          return;
+        }
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Deleted!',
+          text: 'Listing deleted successfully!',
+          timer: 2000,
+          showConfirmButton: false,
+          position: 'top-end',
+          toast: true
+        });
+        
+        closeDetailSidebar();
+        // Listeleri yenile
+        if(currentListingType) {
+          fetchListings(currentListingType);
+        }
+        fetchMyListings();
+        // Haritayı da yenile
+        if(window.mainMap) {
+          updateMapMarkers();
+        }
+      } catch(err) {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: err.message || 'Unknown error occurred',
+          confirmButtonColor: '#3085d6'
+        });
+      }
+    }
+    
+    window.deleteListingFromDetail = deleteListingFromDetail;
+
+    $('#headerProfileBtn').onclick = e => { e.stopPropagation(); $('#profileMenu').classList.toggle('show'); };
+    document.onclick = e => { if(!e.target.closest('.actions')) $('#profileMenu').classList.remove('show'); };
+    $('#logoutBtn').onclick = () => { localStorage.clear(); location.reload(); };
+
+    $('#tabLogin').onclick = () => { $('#loginForm').classList.remove('hidden'); $('#signupForm').classList.add('hidden'); $('#tabLogin').classList.add('active'); $('#tabSignup').classList.remove('active'); };
+    $('#tabSignup').onclick = () => { $('#signupForm').classList.remove('hidden'); $('#loginForm').classList.add('hidden'); $('#tabSignup').classList.add('active'); $('#tabLogin').classList.remove('active'); };
+
+    document.querySelectorAll('.tab[data-view]').forEach(b => b.onclick = () => loadView(b.dataset.view));
+
+    function loadView(view){
+      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view===view));
+      if(view === 'inbox') {
+        $('#gridView').classList.add('hidden');
+        $('#inboxContainer').classList.remove('hidden');
+        $('#searchContainer').style.display = 'none';
+        loadInboxSub('chats');
+      } else {
+        $('#gridView').classList.remove('hidden');
+        $('#inboxContainer').classList.add('hidden');
+        $('#searchContainer').style.display = 'block';
+        // Arama kutusunu sıfırla
+        $('#searchInput').value = '';
+        fetchListings(view);
+      }
+    }
+
+    window.loadInboxSub = function(sub){
+        CURRENT_INBOX_SUB = sub;
+        document.querySelectorAll('.sub-tab').forEach(t => t.classList.toggle('active', t.innerText.toLowerCase().includes(sub)));
+        sub==='chats' ? fetchChats() : fetchMyListings();
+    }
+
+    // Tarih formatlama fonksiyonu
+    function formatDate(dateString) {
+      if(!dateString) return '';
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+      
+      if(diffMins < 1) return 'Just now';
+      if(diffMins < 60) return `${diffMins}m ago`;
+      if(diffHours < 24) return `${diffHours}h ago`;
+      if(diffDays < 7) return `${diffDays}d ago`;
+      
+      // Daha eski tarihler için tam format
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined }) + 
+             ' ' + date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    }
+    
+    // Arama fonksiyonu
+    function filterListings(searchTerm) {
+      if(!searchTerm || searchTerm.trim() === '') {
+        // Arama terimi yoksa tüm ilanları göster
+        renderListings(allListings);
+        return;
+      }
+      
+      // allListings boşsa, önce fetch et
+      if(!allListings || allListings.length === 0) {
+        const type = currentListingType || 'all';
+        fetchListings(type);
+        return;
+      }
+      
+      const term = searchTerm.toLowerCase().trim();
+      const filtered = allListings.filter(item => {
+        // Başlıkta ara
+        if(item.title && item.title.toLowerCase().includes(term)) return true;
+        // Açıklamada ara
+        if(item.description && item.description.toLowerCase().includes(term)) return true;
+        // Kullanıcı adında ara
+        if(item.user_info && item.user_info.username && item.user_info.username.toLowerCase().includes(term)) return true;
+        // Konumda ara
+        if(item.address && item.address.toLowerCase().includes(term)) return true;
+        // Kategoride ara
+        if(item.category && item.category.toLowerCase().includes(term)) return true;
+        return false;
+      });
+      
+      renderListings(filtered);
+    }
+    
+    // Listeleri render et
+    function renderListings(listings) {
+      const gridEl = $('#gridView');
+      
+      if(!listings || listings.length === 0) {
+        gridEl.innerHTML = '<div style="padding:20px;color:#fff;text-align:center;grid-column:1/-1">No listings found.</div>';
+        return;
+      }
+      
+      // currentListingType'ı tekil forma çevir (offers -> offer, requests -> request, all -> item._type kullan)
+      let singularType = 'offer';
+      if(currentListingType === 'offers') {
+        singularType = 'offer';
+      } else if(currentListingType === 'requests') {
+        singularType = 'request';
+      }
+      // all durumunda item._type kullanılacak
+      
+      gridEl.innerHTML = listings.map((i, idx)=> {
+        // Eğer all view'ındaysak, item'ın _type'ını kullan
+        const itemType = currentListingType === 'all' ? (i._type || 'offer') : singularType;
+        const buttonType = currentListingType === 'all' ? (i._type === 'request' ? 'requests' : 'offers') : currentListingType;
+        
+        return `
+        <div class="card" data-item-id="${i.id}" data-item-type="${itemType}" data-item-index="${idx}" style="cursor:pointer">
+          <span class="card-cat">${i.category}</span><h3>${i.title}</h3><p>${i.description}</p>
+          <div class="card-meta">
+            <div class="user-tag"><div class="u-avatar">${i.user_info.username[0].toUpperCase()}</div>${i.user_info.username}</div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+              <div>⏱️ ${i.duration}h</div>
+              <div style="font-size:11px;color:#999;font-weight:500">${formatDate(i.created_at)}</div>
+            </div>
+          </div>
+          ${getButtonHtml(i, buttonType)}
+        </div>`;
+      }).join('');
+      
+      // Her karta click event ekle
+      gridEl.querySelectorAll('.card').forEach(card => {
+        card.onclick = function(e) {
+          // Eğer butona tıklandıysa, butonun işlevini çalıştır (sidebar açma)
+          if(e.target.closest('.action-btn')) {
+            return; // Butonun kendi onclick'i çalışsın
+          }
+          const itemId = parseInt(this.dataset.itemId);
+          const itemType = this.dataset.itemType; // Bu artık 'offer' veya 'request' olacak
+          const itemIndex = parseInt(this.dataset.itemIndex);
+          const item = listings[itemIndex];
+          if(item) {
+            openDetailSidebar(item, itemType);
+          }
+        };
+      });
+    }
+
+    async function req(ep, m='GET', b, isFormData=false){
+      try{
+        const headers = {'Authorization':`Bearer ${TOKEN}`};
+        if(!isFormData && m !== 'DELETE') headers['Content-Type'] = 'application/json';
+        
+        const fetchOptions = {
+          method: m,
+          headers: headers
+        };
+        
+        // DELETE için body gönderme
+        if(m !== 'DELETE' && b) {
+          fetchOptions.body = isFormData ? b : JSON.stringify(b);
+        }
+        
+        const r = await fetch(API+ep, fetchOptions);
+        if(r.status===401){ localStorage.clear(); location.reload(); }
+        // DELETE için boş response olabilir
+        if(r.status === 204 || (m === 'DELETE' && r.status === 200)) {
+          return {success: true};
+        }
+        const data = await r.json();
+        return data;
+      }catch(err){ 
+        console.error('Request failed:', err);
+        return {error: err.message || 'Request failed'}; 
+      }
+    }
+
+    async function fetchProfile(){ const d=await req('/profile/'); if(d) { $('#balanceDisplay').innerText=d.balance+'h'; USER_BALANCE = d.balance; } }
+    async function checkNotifications(){ 
+      const d=await req('/notifications/count/'); 
+      $('#notifBadge').innerText=d.count; 
+      $('#notifBadge').classList.toggle('show', d.count>0); 
+    }
+    
+    // Bildirim dropdown fonksiyonları
+    $('#notifBtn').onclick = function(e) {
+      e.stopPropagation();
+      const dropdown = $('#notificationsDropdown');
+      dropdown.classList.toggle('show');
+      if(dropdown.classList.contains('show')) {
+        loadNotifications();
       }
     };
-    LS.seed();
-
-    // ===== Elements =====
-    const app = $('#app');
-    const authModal = $('#authModal');
-    const profileBtn = $('#profileBtn');
-    const profilePanel = $('#profilePanel');
-
-    // ===== Auth UI =====
-    function showApp(){
-      app.classList.remove('hidden');
-      authModal.classList.remove('show');
-      refreshProfileHeader();
-      render();
-    }
-    function showAuth(){
-      app.classList.add('hidden');
-      authModal.classList.add('show');
-    }
-    function refreshProfileHeader(){
-      const user = LS.getAuth();
-      const ini = initials(user?.username || 'JD');
-      $('#profileBtn').textContent = ini;
-      $('#profileInitials').textContent = ini;
-      $('#profileName').textContent = user?.username ? user.username : 'John Doe';
-      $('#profileEmail').textContent = user?.email || 'john.doe@email.com';
-    }
-
-    // Auth tabs
-    $('#tabLogin').onclick = ()=>{
-      $('#tabLogin').classList.add('active');
-      $('#tabSignup').classList.remove('active');
-      $('#loginForm').classList.add('active');
-      $('#signupForm').classList.remove('active');
-    };
-    $('#tabSignup').onclick = ()=>{
-      $('#tabSignup').classList.add('active');
-      $('#tabLogin').classList.remove('active');
-      $('#signupForm').classList.add('active');
-      $('#loginForm').classList.remove('active');
-    };
-
-    // Login
-    $('#loginForm').addEventListener('submit', e=>{
-      e.preventDefault();
-      const u = e.target.username.value.trim();
-      const p = e.target.password.value.trim();
-      const users = LS.getUsers();
-      const found = users.find(x=>x.username===u && x.password===p);
-      if(!found){ toast("❌ Invalid credentials."); return; }
-      LS.setAuth({username:found.username, email:found.email});
-      toast(`✅ Welcome back, ${found.username}!`);
-      showApp();
-      e.target.reset();
-    });
-
-    // Signup
-    $('#signupForm').addEventListener('submit', e=>{
-      e.preventDefault();
-      const u = e.target.username.value.trim();
-      const em= e.target.email.value.trim();
-      const p = e.target.password.value.trim();
-      const c = e.target.confirm.value.trim();
-      if(p!==c){ toast("❌ Passwords do not match."); return; }
-      const users = LS.getUsers();
-      if(users.some(x=>x.username===u)){ toast("❌ Username already exists."); return; }
-      users.push({username:u,email:em,password:p}); LS.setUsers(users);
-      toast("🎉 Account created! Please login.");
-      $('#tabLogin').click();
-      e.target.reset();
-    });
-    // ===== Listings / Search / Tabs =====
-    const grid = $('#cardsGrid');
-    const searchInput = $('#searchInput');
-    let activeTab = 'offers';
-    // Initial screen
-    if(LS.getAuth()) showApp(); else showAuth();
-
     
+    // Dışarı tıklandığında kapat
+    document.addEventListener('click', function(e) {
+      if(!e.target.closest('#notifBtn') && !e.target.closest('#notificationsDropdown')) {
+        $('#notificationsDropdown').classList.remove('show');
+      }
+    });
+    
+    function closeNotifications() {
+      $('#notificationsDropdown').classList.remove('show');
+    }
+    
+    window.closeNotifications = closeNotifications;
+    
+    // Bildirim türüne göre ikon ve renk belirleme
+    function getNotificationIcon(status, type) {
+      if(status === 'accepted') {
+        return { icon: 'fa-check-circle', class: 'accepted' };
+      } else if(status === 'completed') {
+        return { icon: 'fa-clock', class: 'time-credit' };
+      } else if(status === 'pending') {
+        return { icon: 'fa-comment', class: 'message' };
+      } else if(status === 'declined' || status === 'cancelled') {
+        return { icon: 'fa-exclamation-triangle', class: 'warning' };
+      } else {
+        return { icon: 'fa-bell', class: 'message' };
+      }
+    }
+    
+    // Bildirim başlığı oluştur
+    function getNotificationTitle(notification) {
+      const sender = notification.sender_username;
+      const status = notification.status;
+      
+      if(status === 'pending') {
+        return `${sender} sent a request`;
+      } else if(status === 'accepted') {
+        return `Request accepted`;
+      } else if(status === 'completed') {
+        return `Transaction completed`;
+      } else if(status === 'declined') {
+        return `Request declined`;
+      } else if(status === 'date_proposed') {
+        return `Date proposed`;
+      } else if(status === 'scheduled') {
+        return `Event scheduled`;
+      }
+      return `New notification`;
+    }
+    
+    // Bildirim mesajı oluştur
+    function getNotificationMessage(notification) {
+      const status = notification.status;
+      const listingTitle = notification.title || 'Listing';
+      
+      if(status === 'pending') {
+        return `New request for "${listingTitle}"`;
+      } else if(status === 'accepted') {
+        return `Your request for "${listingTitle}" has been accepted`;
+      } else if(status === 'completed') {
+        return `Transaction for "${listingTitle}" completed successfully`;
+      } else if(notification.message) {
+        return notification.message;
+      }
+      return `Update on "${listingTitle}"`;
+    }
+    
+    // Bildirimleri yükle
+    async function loadNotifications() {
+      const data = await req('/notifications/list/');
+      const notifications = data.notifications || [];
+      const body = $('#notificationsBody');
+      
+      if(notifications.length === 0) {
+        body.innerHTML = '<div class="notif-empty"><i class="fas fa-bell-slash" style="font-size:32px;margin-bottom:12px;opacity:0.3"></i><div>No notifications</div></div>';
+        return;
+      }
+      
+      body.innerHTML = notifications.map(notif => {
+        const iconInfo = getNotificationIcon(notif.status, notif.type);
+        const isUnread = notif.status === 'pending';
+        const title = getNotificationTitle(notif);
+        const message = getNotificationMessage(notif);
+        const date = formatDate(notif.created_at);
+        
+        return `
+          <div class="notif-card ${isUnread ? 'unread' : ''}" onclick="handleNotificationClick(${notif.id}, '${notif.status}')">
+            <div class="notif-icon-box ${iconInfo.class}">
+              <i class="fas ${iconInfo.icon}"></i>
+            </div>
+            <div class="notif-content">
+              <div class="notif-header-row">
+                <div class="notif-title">${title}</div>
+                <div class="notif-date">${date}</div>
+              </div>
+              <div class="notif-message">${message}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    // Bildirime tıklandığında
+    function handleNotificationClick(interactionId, status) {
+      closeNotifications();
+      // Eğer pending veya accepted ise chat'e yönlendir
+      if(status === 'pending' || status === 'accepted' || status === 'date_proposed' || status === 'scheduled') {
+        openChat(interactionId);
+      } else {
+        loadView('inbox');
+      }
+    }
+    
+    window.handleNotificationClick = handleNotificationClick;
 
-    function cardHTML(it){
-      const hours = (it.duration||1) + " hour" + (Number(it.duration)>1 ? "s":"");
-      const userName = (it.user || '').split('(')[1]?.replace(')','') || (it.user || 'Member');
-      const ini = (userName||'')[0] ? initials(userName) : 'MB';
-      return `
-        <div class="card">
-          <span class="badge-mini">${it.category||'General'}</span>
-          <h3>${it.title}</h3>
-          <p style="color:#4b5563;margin-top:6px">${it.description||''}</p>
-          <div class="who">
-            <div class="avatar">${ini}</div>
-            <div><strong>${userName}</strong></div>
-          </div>
-          <div class="meta">
-            <div>⏱️ ${hours}</div>
-            <div>📍 ${it.location||it.locationType||'—'}</div>
-          </div>
-          <button class="contact-btn" onclick="(function(){alert('📩 Message sent to ${userName}!')})()">Contact</button>
-        </div>
-      `;
+    async function fetchListings(type){
+      currentListingType = type;
+      
+      let d = [];
+      
+      // Eğer "all" ise hem offer hem request getir
+      if(type === 'all') {
+        try {
+          const [offers, requests] = await Promise.all([
+            req('/service-offers/'),
+            req('/service-requests/')
+          ]);
+          
+          const offersList = Array.isArray(offers) ? offers : [];
+          const requestsList = Array.isArray(requests) ? requests : [];
+          
+          // Her iki listeye de type ekle
+          offersList.forEach(item => item._type = 'offer');
+          requestsList.forEach(item => item._type = 'request');
+          
+          // Birleştir ve created_at'e göre sırala (en yeniden en eskiye)
+          d = [...offersList, ...requestsList].sort((a, b) => {
+            const dateA = new Date(a.created_at || 0);
+            const dateB = new Date(b.created_at || 0);
+            return dateB - dateA; // Büyükten küçüğe (en yeni önce)
+          });
+          
+          console.log('ALL view - Offers:', offersList.length, 'Requests:', requestsList.length, 'Total:', d.length);
+        } catch(err) {
+          console.error('Error fetching all listings:', err);
+          d = [];
+        }
+      } else {
+        d = await req(type==='offers'?'/service-offers/':'/service-requests/');
+        // Backend'den zaten sıralı geliyor ama emin olmak için tekrar sırala
+        if(Array.isArray(d)) {
+          d = d.sort((a, b) => {
+            const dateA = new Date(a.created_at || 0);
+            const dateB = new Date(b.created_at || 0);
+            return dateB - dateA; // Büyükten küçüğe (en yeni önce)
+          });
+        }
+      }
+      
+      // Tüm ilanları sakla (arama için) - eğer d bir array değilse boş array kullan
+      if(Array.isArray(d)) {
+        allListings = d;
+      } else {
+        allListings = [];
+      }
+      listingsData = d;
+      
+      // Arama kutusunu kontrol et
+      const searchInput = $('#searchInput');
+      const searchTerm = searchInput ? searchInput.value.trim() : '';
+      
+      // Her zaman render et - arama terimi varsa filtrele, yoksa tümünü göster
+      if(searchTerm && searchTerm !== '') {
+        filterListings(searchTerm);
+      } else {
+        // Tüm ilanları göster - allListings'i direkt kullan
+        console.log('Rendering listings:', allListings.length, 'Type:', type);
+        renderListings(allListings);
+      }
+      
+      // Harita marker'larını güncelle
+      if(mainMap) loadMapMarkers();
+    }
+    
+    // Arama kutusu event handler
+    $('#searchInput').oninput = function() {
+      filterListings(this.value);
+    };
+    
+    // Enter tuşu ile arama
+    $('#searchInput').onkeypress = function(e) {
+      if(e.key === 'Enter') {
+        e.preventDefault();
+        filterListings(this.value);
+      }
+    };
+
+    function getButtonHtml(item, type){
+        if(item.user_info.username === USER.username) return ''; 
+        if(type === 'offers'){
+            if(USER_BALANCE < item.duration) return `<button class="action-btn disabled" disabled>Insufficient Balance</button>`;
+            return `<button class="action-btn" onclick="startChat(${item.id}, 'offer')">Contact / Request</button>`;
+        } 
+        return `<button class="action-btn" onclick="startChat(${item.id}, 'request')">Offer Help</button>`;
     }
 
-    function render(){
-        const q = (searchInput.value||'').toLowerCase();
-        let list = [];
-        console.log("Render triggered for tab:", activeTab);
+    async function startChat(id, type){
+      const result = await Swal.fire({
+        title: 'Start conversation?',
+        text: 'Send a message to start chatting',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, start!',
+        cancelButtonText: 'Cancel'
+      });
       
-        if(activeTab === 'offers') {
-          list = LS.getOffers();
-        } 
-        else if(activeTab === 'requests') {
-          list = LS.getRequests();
-        } 
-        else if(activeTab === 'mine') {
-          const me = LS.getAuth()?.username?.toLowerCase();
-          const offers = LS.getOffers();
-          const requests = LS.getRequests();
+      if(result.isConfirmed){
+        const r = await req('/interaction/create/', 'POST', {id, type, message:'Hi!'});
+        if(r.success){ 
+          Swal.fire({
+            icon: 'success',
+            title: 'Sent!',
+            timer: 2000,
+            showConfirmButton: false,
+            position: 'top-end',
+            toast: true
+          });
+          loadView('inbox'); 
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: r.error || 'Error',
+            confirmButtonColor: '#3085d6'
+          });
+        }
+      }
+    }
+
+    async function fetchChats(){
+      const d = await req('/interactions/');
+      $('#inboxContent').innerHTML = d.map(i=>`
+        <div class="inbox-item" onclick="openChat(${i.id})">
+          <div class="inbox-icon">${i.sender_username===USER.username?'📤':'📥'}</div>
+          <div class="inbox-info"><div class="inbox-title">${i.title}</div><span class="status-badge st-${i.status.toLowerCase()}">${i.status.replace('_',' ')}</span></div>
+          <div style="font-size:13px;color:#666">With: ${i.sender_username===USER.username?i.receiver_username:i.sender_username}</div>
+        </div>`).join('') || '<div style="padding:20px;text-align:center;color:#eee">No conversations.</div>';
+    }
+
+    // My listings verilerini sakla
+    let myListingsData = [];
+
+    async function fetchMyListings(){
+        const d = await req('/my-listings/');
+        myListingsData = d; // Veriyi sakla
+        $('#inboxContent').innerHTML = d.map(i=>`
+            <div class="inbox-item" style="cursor:pointer;position:relative" onclick="openMyListingDetail(${i.id}, '${i.type}')">
+                <div class="inbox-icon" style="background:#f3f4f6">📝</div>
+                <div class="inbox-info" style="flex:1"><div class="inbox-title">${i.title}</div><div style="font-size:13px;color:#666">${i.type.toUpperCase()} • ${i.duration}h</div></div>
+                <button class="delete-listing-btn" onclick="event.stopPropagation(); deleteListing(${i.id}, '${i.type}')" title="Delete listing">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>`).join('') || '<div style="padding:20px;text-align:center;color:#eee">You have no listings.</div>';
+    }
+    
+    // My Listings'ten detay açma
+    function openMyListingDetail(id, type) {
+      // Önce saklanan veriden bul
+      const item = myListingsData.find(i => i.id === id && i.type === type);
       
-          // Kullanıcının hem offers hem requests'lerini birleştir
-          list = [...offers, ...requests].filter(x => (x.user || '').toLowerCase().includes(me));
+      if(item) {
+        // Veriyi openDetailSidebar formatına çevir
+        const detailItem = {
+          id: item.id,
+          title: item.title,
+          description: item.description || '',
+          category: item.category || '',
+          duration: item.duration,
+          latitude: item.latitude,
+          longitude: item.longitude,
+          address: item.address || '',
+          image_url: item.image_url || null,
+          created_at: item.created_at,
+          user_info: {
+            id: item.user_info?.id || USER.id,
+            username: item.user_info?.username || USER.username
+          }
+        };
+        openDetailSidebar(detailItem, type);
+      } else {
+        // Eğer saklanan veride yoksa API'den çek (fallback)
+        (async () => {
+          try {
+            const endpoint = type === 'offer' ? `/service-offers/${id}/` : `/service-requests/${id}/`;
+            const apiItem = await req(endpoint);
+            if(apiItem && apiItem.id) {
+              openDetailSidebar(apiItem, type);
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Could not load listing details',
+                confirmButtonColor: '#3085d6'
+              });
+            }
+          } catch(err) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: err.message || 'Unknown error occurred',
+              confirmButtonColor: '#3085d6'
+            });
+          }
+        })();
+      }
+    }
+    
+    window.openMyListingDetail = openMyListingDetail;
+    
+    // İlan silme fonksiyonu
+    async function deleteListing(id, type) {
+        const result = await Swal.fire({
+          title: 'Are you sure?',
+          text: "You won't be able to revert this!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Yes, delete it!',
+          cancelButtonText: 'Cancel'
+        });
+        
+        if(!result.isConfirmed) {
+            return;
+        }
+        
+        try {
+            const endpoint = type === 'offer' ? `/service-offers/${id}/` : `/service-requests/${id}/`;
+            const deleteResult = await req(endpoint, 'DELETE');
+            if(deleteResult.error) {
+                await Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: deleteResult.error,
+                  confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+            
+            Swal.fire({
+              icon: 'success',
+              title: 'Deleted!',
+              text: 'Listing deleted successfully!',
+              timer: 2000,
+              showConfirmButton: false,
+              position: 'top-end',
+              toast: true
+            });
+            
+            fetchMyListings(); // Listeyi yenile
+            // Ana sayfadaki listeyi de yenile
+            if(currentListingType) {
+                fetchListings(currentListingType);
+            }
+            // Haritayı da yenile
+            if(window.mainMap) {
+                updateMapMarkers();
+            }
+        } catch(err) {
+            await Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: err.message || 'Unknown error occurred',
+              confirmButtonColor: '#3085d6'
+            });
+        }
+    }
+    
+    window.deleteListing = deleteListing;
+
+    async function openChat(id){ 
+        ACTIVE_CHAT_ID=id; LAST_RENDER_KEY=""; 
+        $('#chatSheet').classList.add('open'); 
+        if(POLLER) clearInterval(POLLER);
+        loadChatMessages();
+        POLLER = setInterval(loadChatMessages, 3000);
+    }
+
+    window.closeSheet = id => { 
+      $('#'+id).classList.remove('open'); 
+      if(id==='chatSheet'){ 
+        ACTIVE_CHAT_ID=null; 
+        clearInterval(POLLER); 
+        checkNotifications(); 
+      } else if(id==='listingSheet') {
+        // Harita ve marker'ı temizle
+        if(locationMap) {
+          locationMap.remove();
+          locationMap = null;
+          locationMarker = null;
+        }
+        // Form alanlarını temizle
+        $('#inpLat').value = '';
+        $('#inpLng').value = '';
+        $('#inpAddress').value = '';
+        $('#locationSearch').value = '';
+        $('#locationMap').innerHTML = '';
+      }
+    };
+
+    async function loadChatMessages(){
+      if(!ACTIVE_CHAT_ID) return;
+      const all = await req('/interactions/');
+      const chat = all.find(x => x.id === ACTIVE_CHAT_ID);
+      const key = chat.status + (chat.appointment_date||'') + chat.is_completed_by_provider + chat.date_proposed_by_username;
+      if(key!==LAST_RENDER_KEY) { updateBar(chat); LAST_RENDER_KEY=key; }
       
-          if(list.length === 0) {
-            list = [{
-              title: "No listings yet",
-              category: "Info",
-              description: "You haven't posted any offers or requests yet.",
-              duration: 1,
-              location: "—",
-              user: "You"
-            }];
+      const msgs = await req(`/interaction/${ACTIVE_CHAT_ID}/messages/`);
+      const area = $('#msgArea');
+      area.innerHTML = msgs.map(m=>`<div class="chat-bubble ${m.sender_username === USER.username ? 'me' : 'them'}">${m.content}</div>`).join('');
+      area.scrollTop = area.scrollHeight;
+    }
+
+    $('#msgForm').onsubmit = async e => {
+      e.preventDefault(); const inp = $('#msgInput'); const val = inp.value.trim(); if(!val) return;
+      await req(`/interaction/${ACTIVE_CHAT_ID}/messages/`, 'POST', {content: val});
+      inp.value = ''; loadChatMessages();
+    };
+
+    function updateBar(d){
+      const imSender = d.sender_username === USER.username; 
+      const bar = $('#actionBar');
+      let html = ''; let title = '';
+
+      if(d.status==='pending'){
+        title = "New Request";
+        if(d.receiver_username === USER.username) html = `<span>Accept?</span> <div><button class="ab-btn green" onclick="act('accept')">Accept</button> <button class="ab-btn red" onclick="act('decline')">Decline</button></div>`;
+        else { title="Request Sent"; html = `Waiting for provider response...`; }
+      }
+      else if(d.status==='accepted'){
+        title = "Request Accepted";
+        html = `<span>Schedule a date:</span> <div><input type="datetime-local" id="dp" style="padding:6px;border:1px solid #ddd;border-radius:6px"> <button class="ab-btn blue" onclick="act('schedule')">Propose</button></div>`;
+      }
+      else if(d.status==='date_proposed'){
+        title = "Date Proposed";
+        const date = new Date(d.appointment_date).toLocaleString();
+        const imProposer = d.date_proposed_by_username === USER.username;
+        if(imProposer) html = `You proposed <b>${date}</b>. Waiting.`;
+        else html = `<span>Proposed: <b>${date}</b></span> <button class="ab-btn green" onclick="act('accept_date')">Confirm Date</button>`;
+      }
+      else if(d.status==='scheduled'){
+        title = "Scheduled";
+        const date = new Date(d.appointment_date).toLocaleString();
+        const isProvider = (d.type === 'offer' && d.receiver_username === USER.username) || (d.type === 'request' && d.sender_username === USER.username);
+        
+        if(isProvider && !d.is_completed_by_provider) html=`<span>Date: <b>${date}</b></span> <button class="ab-btn green" onclick="act('complete')">Mark Complete</button>`;
+        else if(d.is_completed_by_provider && !d.is_confirmed_by_receiver){
+            title = "Job Done!";
+            if(!isProvider) html=`<span>Confirm & Pay?</span> <button class="ab-btn green" onclick="act('confirm')">Pay (${d.duration}h)</button>`;
+            else html=`Waiting for payment...`;
+        } else html=`Event: <b>${date}</b>`;
+      }
+      else if(d.status==='completed'){ title = "Completed"; html = `Transaction successful.`; }
+
+      bar.innerHTML = `<div class="ab-header"><span class="ab-title">${title}</span> <span class="status-badge st-${d.status}">${d.status.replace('_',' ')}</span></div>` + (html ? `<div class="ab-content ${d.status==='completed'?'success':''}">${html}</div>` : '');
+      bar.style.display = 'flex';
+    }
+
+    async function act(a){
+      let p={}; 
+      if(a==='schedule'){ 
+        const v=$('#dp').value; 
+        if(!v){
+          await Swal.fire({
+            icon: 'warning',
+            title: 'Date Required',
+            text: 'Please select a date',
+            confirmButtonColor: '#3085d6'
+          });
+          return;
+        }
+        p={date:v}; 
+      }
+      const r = await req(`/interaction/${ACTIVE_CHAT_ID}/${a}/`, 'POST', p);
+      if(r.status){ 
+        Swal.fire({
+          icon: 'success',
+          title: 'Updated!',
+          timer: 2000,
+          showConfirmButton: false,
+          position: 'top-end',
+          toast: true
+        });
+        LAST_RENDER_KEY=""; 
+        loadChatMessages(); 
+        fetchProfile(); 
+      } else {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: r.error || 'An error occurred',
+          confirmButtonColor: '#3085d6'
+        });
+      }
+    }
+
+    // Harita değişkenleri
+    let locationMap = null;
+    let locationMarker = null;
+    let geocoder = null;
+    let mainMap = null;
+    let mainMapMarkers = [];
+    let currentDetailItem = null;
+    
+    // Resim yükleme değişkenleri
+    let selectedImageFile = null;
+
+    $('#btnOffer').onclick = () => openSheet('offer');
+    $('#btnRequest').onclick = () => openSheet('request');
+    
+    function openSheet(type){ 
+      $('#listingSheet').classList.add('open'); 
+      $('#listingType').value = type;
+      // Resim yükleme alanını sıfırla
+      removeImage();
+      // Haritayı başlat - sidebar açıldıktan sonra biraz bekle
+      setTimeout(() => {
+        initLocationMap();
+        // Harita başlatıldıktan sonra invalidateSize çağır (görünürlük değiştiği için)
+        if(locationMap) {
+          setTimeout(() => locationMap.invalidateSize(), 200);
+        }
+      }, 150);
+    }
+
+    // Resim yükleme fonksiyonları
+    function handleImageFile(file) {
+      if(!file || !file.type.startsWith('image/')) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Invalid File',
+          text: 'Please select an image file',
+          confirmButtonColor: '#3085d6',
+          timer: 3000,
+          showConfirmButton: false,
+          position: 'top-end',
+          toast: true
+        });
+        return;
+      }
+      
+      selectedImageFile = file;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        $('#imagePreview').src = e.target.result;
+        $('#imagePreview').classList.add('show');
+        $('#imagePlaceholder').style.display = 'none';
+        $('#imageRemoveBtn').style.display = 'flex';
+        $('#imageUploadArea').classList.add('has-image');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeImage() {
+      selectedImageFile = null;
+      $('#imagePreview').src = '';
+      $('#imagePreview').classList.remove('show');
+      $('#imagePlaceholder').style.display = 'block';
+      $('#imageRemoveBtn').style.display = 'none';
+      $('#imageUploadArea').classList.remove('has-image');
+      $('#imageFileInput').value = '';
+    }
+
+    window.removeImage = removeImage;
+
+    // Copy/Paste event handler
+    document.addEventListener('paste', function(e) {
+      const activeElement = document.activeElement;
+      if(activeElement && (activeElement.id === 'imageUploadArea' || activeElement.closest('#listingSheet'))) {
+        e.preventDefault();
+        const items = e.clipboardData.items;
+        for(let i = 0; i < items.length; i++) {
+          if(items[i].type.indexOf('image') !== -1) {
+            const file = items[i].getAsFile();
+            handleImageFile(file);
+            break;
           }
         }
-      
-        const filtered = list.filter(o =>
-          (o.title||'').toLowerCase().includes(q) ||
-          (o.category||'').toLowerCase().includes(q) ||
-          (o.description||'').toLowerCase().includes(q)
-        );
-        grid.innerHTML = filtered.map(cardHTML).join('') || `<div class="card"><strong>No results found.</strong></div>`;
       }
-      
-
-    searchInput.addEventListener('input', render);
-    $$('#tabs .tab').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        $$('#tabs .tab').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active');
-        activeTab = btn.dataset.tab;
-        render();
-      });
     });
 
-    // ===== Offer Sheet =====
-    const offerSheet = $('#offerSheet');
-    const offerSegBtns = $$('#offerLocationSeg .seg-btn');
-    let offerLocationType = 'Online';
-    offerSegBtns.forEach(b=>{
-      b.addEventListener('click', ()=>{
-        offerSegBtns.forEach(x=>x.classList.remove('active'));
-        b.classList.add('active');
-        offerLocationType=b.dataset.val;
-      });
-    });
-    $('#openOfferSheet').onclick = ()=> offerSheet.classList.add('open');
-    $('#offerClose').onclick = ()=> offerSheet.classList.remove('open');
-    $('#offerCancel').onclick = ()=> offerSheet.classList.remove('open');
-
-    $('#offerSave').onclick = ()=>{
-      const authUser = LS.getAuth()?.username || 'Member';
-      const inputName = $('#offerUser').value.trim();
-      const user = inputName ? `${authUser} (${inputName})` : authUser;
-      const title= $('#offerTitle').value.trim();
-      const category=$('#offerCategory').value.trim();
-      const desc   = $('#offerDesc').value.trim();
-      const duration = $('#offerDuration').value;
-      const location = $('#offerLocation').value.trim() || offerLocationType;
-
-      if(!user || !title || !category || !desc || !duration){
-        toast("Please fill in all required fields."); return;
+    // Image upload area click handler
+    $('#imageUploadArea').onclick = function(e) {
+      if(e.target !== $('#imageRemoveBtn')) {
+        $('#imageFileInput').click();
       }
-      const arr = LS.getOffers();
-      arr.unshift({user,title,category,description:desc,duration:Number(duration),locationType:offerLocationType,location});
-      LS.setOffers(arr);
-      toast("✅ Offer posted successfully!");
-      ['offerUser','offerTitle','offerCategory','offerDesc','offerDuration','offerLocation'].forEach(id=>$('#'+id).value='');
-      offerSegBtns.forEach(x=>x.classList.remove('active')); offerSegBtns[0].classList.add('active'); offerLocationType='Online';
-      offerSheet.classList.remove('open');
-      activeTab='offers'; $$('#tabs .tab').forEach(b=>b.classList.toggle('active', b.dataset.tab==='offers'));
-      render();
     };
 
-    // ===== Request Sheet =====
-    const requestSheet = $('#requestSheet');
-    $('#openRequestSheet').onclick = ()=> requestSheet.classList.add('open');
-    $('#requestClose').onclick = ()=> requestSheet.classList.remove('open');
-    $('#reqCancel').onclick = ()=> requestSheet.classList.remove('open');
-
-    $('#reqSave').onclick = ()=>{
-      const user = $('#reqUser').value.trim() || (LS.getAuth()?.username || 'Member');
-      const title= $('#reqTitle').value.trim();
-      const category=$('#reqCategory').value.trim();
-      const desc   = $('#reqDesc').value.trim();
-      const duration = $('#reqDuration').value;
-      const location = $('#reqLocation').value.trim();
-
-      if(!user || !title || !category || !desc || !duration){
-        toast("Please fill in all required fields."); return;
+    // File input change handler
+    $('#imageFileInput').onchange = function(e) {
+      if(e.target.files && e.target.files[0]) {
+        handleImageFile(e.target.files[0]);
       }
-      const arr = LS.getRequests();
-      arr.unshift({user,title,category,description:desc,duration:Number(duration),location});
-      LS.setRequests(arr);
-      toast("✅ Request posted successfully!");
-      ['reqUser','reqTitle','reqCategory','reqDesc','reqDuration','reqLocation'].forEach(id=>$('#'+id).value='');
-      requestSheet.classList.remove('open');
-      activeTab='requests'; $$('#tabs .tab').forEach(b=>b.classList.toggle('active', b.dataset.tab==='requests'));
-      render();
     };
 
-    // ===== Profile Panel & Logout =====
-    $('#profileBtn').onclick = ()=> profilePanel.classList.add('open');
-    $('#profileClose').onclick = ()=> profilePanel.classList.remove('open');
-    $('#logoutBtn').onclick = ()=>{
-      LS.clearAuth();
-      toast("👋 Logged out!");
-      profilePanel.classList.remove('open');
-      showAuth();
-      $('#profileBtn').textContent='JD';
-      $('#profileInitials').textContent='JD';
-      $('#profileName').textContent='John Doe';
-      $('#profileEmail').textContent='john.doe@email.com';
+    function initLocationMap(){
+      const mapEl = $('#locationMap');
+      if(!mapEl) {
+        console.error('Location map container not found');
+        return;
+      }
+      
+      // Eğer harita zaten başlatılmışsa, önce temizle
+      if(locationMap) {
+        try {
+          locationMap.remove();
+        } catch(e) {
+          console.warn('Error removing old map:', e);
+        }
+        locationMap = null;
+        locationMarker = null;
+      }
+      
+      // Container'ın innerHTML'ini temizle (eğer önceki harita kalıntıları varsa)
+      if(mapEl.innerHTML.trim()) {
+        mapEl.innerHTML = '';
+      }
+      
+      try {
+        // Haritayı başlat (Türkiye merkezli)
+        locationMap = L.map('locationMap').setView([39.9334, 32.8597], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors'
+        }).addTo(locationMap);
+
+        // Marker oluştur
+        locationMarker = L.marker([39.9334, 32.8597], {draggable: true}).addTo(locationMap);
+        
+        // Marker sürüklendiğinde
+        locationMarker.on('dragend', function(e) {
+          const pos = e.target.getLatLng();
+          updateLocationFields(pos.lat, pos.lng);
+          reverseGeocode(pos.lat, pos.lng);
+        });
+
+        // Haritaya tıklandığında
+        locationMap.on('click', function(e) {
+          locationMarker.setLatLng(e.latlng);
+          updateLocationFields(e.latlng.lat, e.latlng.lng);
+          reverseGeocode(e.latlng.lat, e.latlng.lng);
+        });
+
+        // Adres arama (iyileştirilmiş geocoding - Nominatim kullanarak)
+        let searchTimeout = null;
+        $('#locationSearch').oninput = async function() {
+          const query = this.value.trim();
+          const resultsDiv = $('#searchResults');
+          
+          // Önceki timeout'u iptal et
+          if(searchTimeout) clearTimeout(searchTimeout);
+          
+          if(!query || query.length < 2) {
+            resultsDiv.style.display = 'none';
+            return;
+          }
+          
+          // Debounce - 300ms bekle
+          searchTimeout = setTimeout(async () => {
+            try {
+              // İstanbul bölgesine öncelik ver (tüm dünyadan sonuçlar)
+              const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&viewbox=28.5,41.0,29.2,41.2&bounded=0&addressdetails=1`;
+              const response = await fetch(url, {
+                headers: {
+                  'User-Agent': 'HIVE TimeBank App'
+                }
+              });
+              const data = await response.json();
+              
+              if(data.length > 0) {
+                // Sonuçları göster
+                resultsDiv.innerHTML = data.map((item, idx) => `
+                  <div class="search-result-item" onclick="selectSearchResult(${parseFloat(item.lat)}, ${parseFloat(item.lon)}, '${item.display_name.replace(/'/g, "\\'")}')">
+                    <div class="search-result-title">${item.display_name.split(',')[0]}</div>
+                    <div class="search-result-details">${item.display_name}</div>
+                  </div>
+                `).join('');
+                resultsDiv.style.display = 'block';
+              } else {
+                resultsDiv.innerHTML = '<div class="search-result-item" style="cursor:default;color:#999">No results found</div>';
+                resultsDiv.style.display = 'block';
+              }
+            } catch(err) {
+              console.error('Search error:', err);
+              resultsDiv.style.display = 'none';
+            }
+          }, 300);
+        };
+        
+        // Enter tuşu ile ilk sonucu seç
+        $('#locationSearch').onkeypress = async function(e) {
+          if(e.key === 'Enter') {
+            e.preventDefault();
+            const query = this.value.trim();
+            if(!query) return;
+            
+            const resultsDiv = $('#searchResults');
+            const firstResult = resultsDiv.querySelector('.search-result-item');
+            if(firstResult && !firstResult.textContent.includes('No results')) {
+              firstResult.click();
+            } else {
+              // Eğer sonuç yoksa, direkt arama yap
+              try {
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&viewbox=28.5,41.0,29.2,41.2&bounded=0`;
+                const response = await fetch(url, {
+                  headers: {
+                    'User-Agent': 'HIVE TimeBank App'
+                  }
+                });
+                const data = await response.json();
+                if(data.length > 0) {
+                  selectSearchResult(parseFloat(data[0].lat), parseFloat(data[0].lon), data[0].display_name);
+                } else {
+                  Swal.fire({
+                    icon: 'warning',
+                    title: 'Location Not Found',
+                    text: 'Please try a different search term',
+                    confirmButtonColor: '#3085d6',
+                    timer: 3000,
+                    showConfirmButton: false,
+                    position: 'top-end',
+                    toast: true
+                  });
+                }
+              } catch(err) {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Search Error',
+                  text: 'An error occurred while searching',
+                  confirmButtonColor: '#3085d6',
+                  timer: 3000,
+                  showConfirmButton: false,
+                  position: 'top-end',
+                  toast: true
+                });
+              }
+            }
+          }
+        };
+        
+        // Sonuç seçme fonksiyonu
+        window.selectSearchResult = function(lat, lng, address) {
+          locationMap.setView([lat, lng], 13);
+          locationMarker.setLatLng([lat, lng]);
+          updateLocationFields(lat, lng);
+          $('#inpAddress').value = address;
+          $('#locationSearch').value = address.split(',')[0]; // Sadece ilk kısmı göster
+          $('#searchResults').style.display = 'none';
+        };
+        
+        // Dışarı tıklandığında sonuçları gizle
+        document.addEventListener('click', function(e) {
+          if(!e.target.closest('.search-container-relative')) {
+            $('#searchResults').style.display = 'none';
+          }
+        });
+      } catch(err) {
+        console.error('Error initializing location map:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Map Error',
+          text: 'Failed to load map. Please refresh the page.',
+          confirmButtonColor: '#3085d6'
+        });
+      }
+    }
+
+    function updateLocationFields(lat, lng) {
+      $('#inpLat').value = lat;
+      $('#inpLng').value = lng;
+    }
+
+    async function reverseGeocode(lat, lng) {
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+        const data = await response.json();
+        if(data.display_name) {
+          $('#inpAddress').value = data.display_name;
+        }
+      } catch(err) {
+        console.error('Geocoding error:', err);
+      }
+    }
+
+    $('#listingForm').onsubmit = async e => {
+      e.preventDefault();
+      const t=$('#listingType').value;
+      
+      // Latitude ve longitude'u parse et - geçersizse null gönder
+      // DecimalField için string olarak gönder (max_digits=9, decimal_places=6)
+      // Bu yüzden 6 ondalık basamağa yuvarlamalıyız
+      const latVal = $('#inpLat').value.trim();
+      const lngVal = $('#inpLng').value.trim();
+      
+      function roundTo6Decimals(val) {
+        if(!val || isNaN(parseFloat(val))) return null;
+        return parseFloat(val).toFixed(6);
+      }
+      
+      const latitude = roundTo6Decimals(latVal);
+      const longitude = roundTo6Decimals(lngVal);
+      
+      // FormData kullan (resim varsa)
+      const formData = new FormData();
+      formData.append('title', $('#inpTitle').value);
+      formData.append('category', $('#inpCat').value);
+      formData.append('duration', parseInt($('#inpDur').value));
+      formData.append('description', $('#inpDesc').value);
+      
+      // Sadece değer varsa ekle
+      if(latitude !== null) formData.append('latitude', latitude);
+      if(longitude !== null) formData.append('longitude', longitude);
+      const addr = $('#inpAddress').value.trim();
+      if(addr) formData.append('address', addr);
+      
+      // Resim varsa ekle
+      if(selectedImageFile) {
+        formData.append('image', selectedImageFile);
+      }
+      
+      console.log('Sending data with FormData');
+      
+      try {
+        const r = await req(t==='offer'?'/service-offers/':'/service-requests/','POST',formData, true);
+        console.log('Response:', r);
+        
+        if(r && r.id){ 
+          Swal.fire({
+            icon: 'success',
+            title: 'Listing Created!',
+            timer: 3000,
+            showConfirmButton: false,
+            position: 'top-end',
+            toast: true
+          });
+          closeSheet('listingSheet'); 
+          e.target.reset(); 
+          removeImage();
+          locationMap = null; 
+          locationMarker = null; 
+          $('#locationMap').innerHTML = ''; 
+          loadView(t+'s'); 
+        } else {
+          // Django REST Framework hata formatını parse et
+          let errorMsg = 'Error creating listing';
+          if(r) {
+            if(r.detail) errorMsg = r.detail;
+            else if(r.error) errorMsg = r.error;
+            else if(r.non_field_errors) errorMsg = r.non_field_errors.join(', ');
+            else if(typeof r === 'object') {
+              const fieldErrors = Object.keys(r).map(key => `${key}: ${Array.isArray(r[key]) ? r[key].join(', ') : r[key]}`).join('; ');
+              if(fieldErrors) errorMsg = fieldErrors;
+            }
+          }
+          console.error('Error response:', r);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: errorMsg,
+            confirmButtonColor: '#3085d6'
+          });
+        }
+      } catch(err) {
+        console.error('Request error:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Network Error',
+          text: err.message || 'Network error occurred',
+          confirmButtonColor: '#3085d6'
+        });
+      }
     };
-    // DEBUG erişimi için global değişkenler
-    window.LS = LS;
-    window.render = render;
-    window.activeTab = activeTab;
-  });
+
   </script>
 </body>
 </html>

@@ -18,7 +18,7 @@ load_dotenv(str(dotenv_path))
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-q-xl_9&p7ye53v$)2x*lle-l2p%5e7#6t(6-i)94b%&^-#gs_+")
 
 # Production ortamında debug kapalı olmalı
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     'hive-zi00.onrender.com',
@@ -70,6 +70,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'market.context_processors.notification_count',
             ],
         },
     },
@@ -106,6 +107,10 @@ USE_TZ = True
 # === Static files ===
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# === Media files ===
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # === Default primary key field type ===
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -1,23 +1,23 @@
-# webapp/core/urls.py
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import TemplateView
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
-    # 🌐 Admin paneli
+    # Admin Paneli
     path('admin/', admin.site.urls),
 
-    # 🏠 Frontend (Ana HTML sayfası)
+    # Ana Sayfa (Frontend)
     path('', TemplateView.as_view(template_name='timebank.html'), name='home'),
 
-    # 🔐 JWT Authentication endpoints
-    path('api/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-
-    # 👤 Accounts API (örneğin kullanıcı giriş/kayıt işlemleri)
-    path('api/accounts/', include('accounts.urls')),
-
-    # 🧩 Market API (offers, requests, transactions)
+    # Market API'leri (İlanlar, Mesajlar vb.)
     path('api/', include('market.api_urls')),
+
+    # Accounts API'leri (Login, Register - ARTIK BURADAN ÇALIŞACAK)
+    path('api/', include('accounts.urls')),
 ]
+
+# Media files serving (sadece DEBUG=True iken)
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
