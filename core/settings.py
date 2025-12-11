@@ -144,3 +144,13 @@ REST_FRAMEWORK = {
 # Hata ayıklamak için şimdilik tüm originlere izin ver
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+# === Session Settings ===
+# Oturum süresini 2 hafta yap (saniye cinsinden: 14 gün * 24 saat * 60 dakika * 60 saniye)
+SESSION_COOKIE_AGE = 1209600
+
+# Kullanıcı sitede her tıkladığında oturum süresini sıfırla (aktifken atılmaz)
+SESSION_SAVE_EVERY_REQUEST = True
+
+# Tarayıcıyı kapatsa bile oturum açık kalsın
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False

@@ -144,7 +144,7 @@
     /* FORM STYLE (FIXED) */
     .form-style .field{margin-bottom:16px}
     .form-style .label{display:block;margin-bottom:8px;font-weight:700;font-size:14px;color:#4b5563}
-    .form-style .input{width:100%;padding:14px;border-radius:12px;border:2px solid #e5e7eb;font-size:15px;background:#fff}
+    .form-style .input{width:100%;padding:14px;border-radius:12px;border:2px solid #e5e7eb;font-size:15px;background:#fff;font-family:inherit;color:inherit;line-height:1.5}
     .form-style .btn{width:100%;padding:14px;border-radius:12px;border:0;font-weight:800;background:var(--primary);color:#fff;cursor:pointer;font-size:15px;display:block}
     .map-container{width:100%;height:300px;border-radius:12px;border:2px solid #e5e7eb;margin-bottom:16px;overflow:hidden}
     .map-search{width:100%;padding:10px;border-radius:8px;border:2px solid #e5e7eb;margin-bottom:12px;font-size:14px}
@@ -430,6 +430,43 @@
       // Ana haritayı başlat - biraz gecikme ile (DOM hazır olsun)
       setTimeout(() => initMainMap(), 100);
       setInterval(() => { if(!ACTIVE_CHAT_ID) { fetchProfile(); checkNotifications(); } }, 5000); 
+      setupPasteHandlers();
+    }
+    
+    // Paste event handler - Yapıştırılan içeriği uygulama stillerine uyarla
+    function setupPasteHandlers() {
+      // Form alanları için paste handler
+      const formFields = ['#inpTitle', '#inpDesc', '#msgInput'];
+      
+      formFields.forEach(selector => {
+        const element = $(selector);
+        if(element) {
+          element.addEventListener('paste', function(e) {
+            e.preventDefault();
+            
+            // Clipboard'dan plain text al
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text/plain');
+            
+            // Mevcut seçili metni al
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            const currentValue = this.value;
+            
+            // Yeni değeri oluştur (seçili metni yapıştırılan metinle değiştir)
+            const newValue = currentValue.substring(0, start) + pastedText + currentValue.substring(end);
+            
+            // Değeri ayarla
+            this.value = newValue;
+            
+            // Cursor pozisyonunu ayarla
+            const newCursorPos = start + pastedText.length;
+            this.setSelectionRange(newCursorPos, newCursorPos);
+            
+            // Input event'ini tetikle (form validation için)
+            this.dispatchEvent(new Event('input', { bubbles: true }));
+          });
+        }
+      });
     }
 
     function initMainMap(){
