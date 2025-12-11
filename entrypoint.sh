@@ -1,23 +1,18 @@
 #!/bin/bash
 
-# Hata olursa dur
+# Herhangi bir komut hata verirse işlemi durdur
 set -e
 
-echo "Running entrypoint script..."
+echo "🚀 Entrypoint script started..."
 
-# Veritabanı URL var mı kontrol et (Sadece varlığını kontrol et, bağlanmayı değil)
-if [ -z "$DATABASE_URL" ]; then
-    echo "ERROR: DATABASE_URL environment variable is missing!"
-    exit 1
-fi
-
-echo "DATABASE_URL found. Starting migrations..."
-
-# Direkt migrate yap. Eğer veritabanı yoksa Django burada hata verir ve biz de loglarda görürüz.
+# 1. Veritabanı tablolarını oluştur (Veritabanı yoksa Django burada hata verir, biz de logda görürüz)
+echo "Applying database migrations..."
 python manage.py migrate
 
+# 2. Statik dosyaları topla
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
+# 3. Uygulamayı başlat
 echo "Starting Gunicorn..."
-gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
+exec gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
