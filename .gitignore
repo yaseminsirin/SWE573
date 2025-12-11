@@ -1,9 +1,10 @@
-_pycache_/
+__pycache__/
 *.pyc
 *.sqlite3
 .env
 staticfiles/
 media/
+postgres_data/
 node_modules/
 *.log
 *.idea/

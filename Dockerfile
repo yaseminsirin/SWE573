@@ -1,22 +1,35 @@
-FROM python:3.10-slim
+# Base image
+FROM python:3.9-slim
 
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential && rm -rf /var/lib/apt/lists/*
+# Python ayarları
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
+# Sistem kütüphanelerini kur (Pillow ve psycopg2 için gerekli)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libpq-dev \
+    libjpeg-dev \
+    zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Working directory
 WORKDIR /app
 
+# Requirements dosyasını kopyala ve bağımlılıkları kur
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
+# Proje dosyalarını kopyala
 COPY . .
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Entrypoint script'ini kopyala ve çalıştırılabilir yap
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
-# Render’ın dinlediği PORT değişkenini kullan
-EXPOSE 10000
+# Port
+EXPOSE 8000
 
-# collectstatic hata verse bile build devam etsin
-RUN python manage.py collectstatic --noinput || true
-
-# Gunicorn ile başlat
-CMD gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
+# Entrypoint
+ENTRYPOINT ["/app/entrypoint.sh"]
