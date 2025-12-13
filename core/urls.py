@@ -14,6 +14,9 @@ urlpatterns = [
 
     # Market API'leri (İlanlar, Mesajlar vb.)
     path('api/', include('market.api_urls')),
+    
+    # Market views (Profile page, etc.)
+    path('', include('market.urls')),
 
     # Accounts API'leri (Login, Register - ARTIK BURADAN ÇALIŞACAK)
     path('api/', include('accounts.urls')),

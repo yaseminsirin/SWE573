@@ -13,12 +13,45 @@
   <!-- SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
+    /* Z-INDEX FIX: UI elementlerini haritanın üzerine çıkar */
+    /* Haritanın z-index'ini kontrol altında tut */
+    #mainMap, #map, .leaflet-container, .leaflet-pane {
+      z-index: 1 !important;
+    }
+    .leaflet-top, .leaflet-bottom {
+      z-index: 2 !important;
+    }
+    
+    /* Navbar ve dropdown'lar haritanın üzerinde */
+    header, .navbar {
+      z-index: 10000 !important;
+      position: relative;
+    }
+    .actions {
+      z-index: 10001 !important;
+      position: relative;
+    }
+    .dropdown-menu, .profile-menu {
+      z-index: 10001 !important;
+    }
+    .notifications-dropdown {
+      z-index: 10001 !important;
+    }
+    
     /* SweetAlert2 z-index override - sidebar'dan yüksek olmalı */
     .swal2-container {
-      z-index: 10000 !important;
+      z-index: 10002 !important;
     }
     .swal2-container.swal2-backdrop-show {
-      z-index: 10000 !important;
+      z-index: 10002 !important;
+    }
+    
+    /* Toast container yüksek z-index */
+    .toast-container {
+      z-index: 10002 !important;
+    }
+    .toast {
+      z-index: 10002 !important;
     }
     :root{
       --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -29,9 +62,29 @@
     .hidden{display:none !important}
     .app{max-width:1100px;margin:0 auto;padding-bottom:100px;position:relative}
 
-    header{background:#fff;border-radius:24px;padding:16px 24px;margin-bottom:24px;display:flex;justify-content:space-between;box-shadow:0 10px 40px rgba(0,0,0,0.15);position:relative;z-index:50}
+    header{background:#fff;border-radius:24px;padding:12px 24px;margin-bottom:24px;display:flex;justify-content:space-between;box-shadow:0 10px 40px rgba(0,0,0,0.15);position:relative;z-index:1000 !important;height:60px;align-items:center}
     .logo{font-size:26px;font-weight:900;background:var(--primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:flex;align-items:center;gap:8px}
-    .actions{display:flex;align-items:center;gap:12px;position:relative}
+    .actions{display:flex;align-items:center;gap:12px;position:relative;z-index:10001}
+    
+    /* Navbar profil hizalaması */
+    .navbar-profile-section {
+      display: flex;
+      align-items: center; /* Dikeyde tam ortala */
+      gap: 10px; /* Resim ve yazı arası boşluk */
+    }
+    .navbar-profile-section img {
+      object-fit: cover; /* Resim bozulmasın */
+    }
+    .navbar-profile-section span {
+      line-height: 1; /* Yazı satır boşluğunu sıfırla */
+      margin: 0;
+    }
+    .profile-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
     
     .pill{background:#f3f4f6;padding:8px 16px;border-radius:99px;font-weight:700;color:#555;font-size:14px}
     .icon-btn{width:44px;height:44px;border-radius:50%;border:0;cursor:pointer;background:#f3f4f6;font-size:18px;display:grid;place-items:center;position:relative;transition:0.2s}
@@ -40,11 +93,11 @@
     .notif-badge{position:absolute;top:-2px;right:-2px;background:#ef4444;color:#fff;width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:800;display:grid;place-items:center;opacity:0;transform:scale(0);transition:0.2s}
     .notif-badge.show{opacity:1;transform:scale(1)}
 
-    .profile-menu{position:absolute;top:70px;right:0;width:220px;background:#fff;border-radius:16px;padding:16px;box-shadow:0 15px 50px rgba(0,0,0,0.2);z-index:100;display:none;flex-direction:column;gap:10px}
+    .profile-menu{position:absolute;top:70px;right:0;width:220px;background:#fff;border-radius:16px;padding:16px;box-shadow:0 15px 50px rgba(0,0,0,0.2);z-index:10001;display:none;flex-direction:column;gap:10px}
     .profile-menu.show{display:flex}
     .pm-btn{background:#fee2e2;color:#dc2626;border:0;padding:10px;border-radius:10px;font-weight:700;cursor:pointer;width:100%}
     .pm-btn:hover{background:#fecaca}
-    .notifications-dropdown{position:absolute;top:70px;right:0;width:420px;max-height:600px;background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.15);z-index:5000;display:none;flex-direction:column;overflow:hidden}
+    .notifications-dropdown{position:absolute;top:70px;right:0;width:420px;max-height:600px;background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.15);z-index:10001;display:none;flex-direction:column;overflow:hidden}
     .notifications-dropdown.show{display:flex}
     .notif-header{padding:20px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;background:#fff;position:sticky;top:0;z-index:10}
     .notif-header h3{margin:0;font-size:18px;font-weight:800;color:#1f2937}
@@ -66,7 +119,7 @@
     .notif-date{font-size:11px;color:#9ca3af;font-weight:500;white-space:nowrap}
     .notif-message{font-size:14px;color:#4b5563;line-height:1.5;margin:0;margin-top:4px}
     .notif-empty{padding:40px 20px;text-align:center;color:#9ca3af;font-size:14px}
-    .notifications-dropdown{position:absolute;top:70px;right:0;width:420px;max-height:600px;background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.15);z-index:5000;display:none;flex-direction:column;overflow:hidden}
+    .notifications-dropdown{position:absolute;top:70px;right:0;width:420px;max-height:600px;background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.15);z-index:10001;display:none;flex-direction:column;overflow:hidden}
     .notifications-dropdown.show{display:flex}
     .notif-header{padding:20px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;background:#fff;position:sticky;top:0;z-index:10}
     .notif-header h3{margin:0;font-size:18px;font-weight:800;color:#1f2937}
@@ -111,8 +164,11 @@
     .grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:20px}
     .card{background:#fff;border-radius:20px;padding:22px;box-shadow:0 4px 12px rgba(0,0,0,0.05);position:relative;display:flex;flex-direction:column;transition:transform .2s;z-index:1}
     .card:hover{transform:translateY(-4px); box-shadow:0 12px 30px rgba(0,0,0,0.1)}
-    .card-cat{position:absolute;top:20px;right:20px;font-size:11px;font-weight:800;background:#ede9fe;color:#7c3aed;padding:5px 10px;border-radius:99px}
-    .card h3{font-size:20px;margin-bottom:8px;padding-right:60px;font-weight:800}
+    .card-cat{position:absolute;top:20px;right:20px;font-size:11px;font-weight:800;background:#ede9fe;color:#7c3aed;padding:5px 10px;border-radius:99px;z-index:2}
+    .card-badges{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;align-items:center}
+    .card-type-badge{font-size:10px;font-weight:800;padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:0.5px;display:inline-block}
+    .card-online-badge{font-size:9px;font-weight:800;background:#3b82f6;color:#fff;padding:4px 8px;border-radius:99px;display:inline-flex;align-items:center;gap:4px}
+    .card h3{font-size:20px;margin-bottom:8px;font-weight:800;margin-top:0}
     .card p{color:#666;font-size:14px;line-height:1.5;margin-bottom:16px;flex:1}
     .card-meta{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;color:#888;border-top:1px solid #f0f0f0;padding-top:14px;margin-top:auto}
     
@@ -136,7 +192,9 @@
 
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px)}
     .modal-overlay.open{display:flex}
-    .sheet{position:fixed;top:0;right:-100%;width:100%;max-width:480px;height:100%;background:#fff;z-index:1500;transition:right .3s;box-shadow:-10px 0 60px rgba(0,0,0,0.2);display:flex;flex-direction:column}
+    /* Review modal sidebar'ın üstünde olmalı */
+    #reviewModal{z-index:100000 !important}
+    .sheet{position:fixed !important;top:0 !important;right:-100%;width:100%;max-width:480px;height:100vh !important;background:#fff;z-index:99999 !important;transition:right .3s;box-shadow:-10px 0 60px rgba(0,0,0,0.2);display:flex;flex-direction:column;padding-top:0 !important}
     .sheet.open{right:0}
     .sheet-head{padding:20px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:16px}
     .sheet-body{flex:1;overflow-y:auto;padding:20px;background:#f9fafb}
@@ -166,13 +224,15 @@
     .image-remove-btn{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.6);color:#fff;border:0;border-radius:50%;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;z-index:10;transition:background .2s}
     .image-remove-btn:hover{background:rgba(0,0,0,0.8)}
     .main-map-container{width:100%;height:500px;border-radius:20px;overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,0.06);margin-bottom:24px;background:#fff}
-    .detail-sidebar{position:fixed;top:0;right:-100%;width:100%;max-width:420px;height:100%;background:#fff;z-index:1600;transition:right .3s;box-shadow:-10px 0 60px rgba(0,0,0,0.2);display:flex;flex-direction:column;overflow-y:auto}
+    .detail-sidebar{position:fixed !important;top:0 !important;right:-100%;width:100%;max-width:420px;height:100vh !important;background:#fff;z-index:99999 !important;transition:right .3s;box-shadow:-10px 0 60px rgba(0,0,0,0.2);display:flex;flex-direction:column;overflow-y:auto;padding-top:0 !important}
     .detail-sidebar.open{right:0}
     .detail-sidebar-header{padding:20px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;background:#fff;position:sticky;top:0;z-index:10}
     .detail-sidebar-body{padding:20px;flex:1}
-    .detail-badge{display:inline-block;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:800;text-transform:uppercase;margin-bottom:12px;letter-spacing:0.5px}
+    .detail-badge{display:inline-block;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px}
     .detail-badge.offer{background:#667eea;color:#fff}
     .detail-badge.request{background:#10b981;color:#fff}
+    .detail-online-badge{display:inline-flex;align-items:center;gap:6px;background:#3b82f6;color:#fff;padding:6px 12px;border-radius:99px;font-size:12px;font-weight:700;margin-left:8px}
+    .detail-badges-container{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}
     .detail-image{width:100%;height:200px;object-fit:cover;border-radius:12px;margin-bottom:16px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px}
     .detail-image img{width:100%;height:100%;object-fit:cover;border-radius:12px}
     .detail-title{font-size:24px;font-weight:800;margin-bottom:8px;color:#1f2937}
@@ -203,7 +263,8 @@
     .ab-btn{padding:8px 16px;border-radius:8px;border:0;font-weight:700;cursor:pointer;color:#fff;font-size:13px;white-space:nowrap}
     .green{background:#10b981} .red{background:#ef4444} .blue{background:#3b82f6}
 
-    .toast{position:fixed;bottom:30px;right:30px;background:#1f2937;color:#fff;padding:12px 24px;border-radius:12px;font-weight:700;z-index:3000;box-shadow:0 10px 30px rgba(0,0,0,0.2);animation:slideUp .3s}
+    .toast{position:fixed;top:20px;right:20px;background:#1f2937;color:#fff;padding:12px 24px;border-radius:12px;font-weight:700;z-index:10002;box-shadow:0 10px 30px rgba(0,0,0,0.2);animation:slideUp .3s}
+    .toast-container{position:fixed;top:20px;right:20px;z-index:10002;display:flex;flex-direction:column;gap:10px}
     @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
     @keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
     @media (max-width:900px){.grid{grid-template-columns:1fr}.hero{grid-template-columns:1fr}.sheet{width:100%}}
@@ -246,6 +307,7 @@
         <button class="icon-btn profile-btn" id="headerProfileBtn">JD</button>
         <div class="profile-menu" id="profileMenu">
           <div class="pm-info"><b id="menuUsername" style="font-size:16px">User</b></div>
+          <button class="pm-btn" id="viewProfileBtn" style="background:#dbeafe;color:#2563eb;margin-bottom:8px">View Profile</button>
           <button class="pm-btn" id="logoutBtn">Logout</button>
         </div>
         <div class="notifications-dropdown" id="notificationsDropdown">
@@ -320,6 +382,12 @@
           <input type="file" id="imageFileInput" accept="image/*" style="display:none">
         </div>
         <div class="field">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="inpIsOnline" style="width:18px;height:18px;cursor:pointer">
+            <span>This service is Online / Remote (Location not required)</span>
+          </label>
+        </div>
+        <div class="field" id="locationField">
           <label class="label">Location</label>
           <div class="search-container-relative">
             <input type="text" class="map-search" id="locationSearch" placeholder="Search address or click on map..." autocomplete="off">
@@ -344,6 +412,38 @@
       </form>
     </div>
   </aside>
+
+  <!-- Review Modal -->
+  <div class="modal-overlay" id="reviewModal">
+    <div class="modal-content" style="background:#fff;border-radius:20px;padding:30px;max-width:500px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+        <h3 style="margin:0;font-size:22px;font-weight:800">Leave a Review</h3>
+        <button onclick="closeReviewModal()" style="border:0;background:none;font-size:28px;cursor:pointer;color:#666;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background .2s" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='transparent'">×</button>
+      </div>
+      
+      <div style="margin-bottom:20px">
+        <label style="display:block;margin-bottom:12px;font-weight:700;font-size:14px;color:#4b5563">Rating *</label>
+        <div class="star-rating" id="starRating" style="display:flex;gap:8px;font-size:32px;cursor:pointer">
+          <span class="star" data-rating="1" style="color:#e5e7eb;transition:color .2s">★</span>
+          <span class="star" data-rating="2" style="color:#e5e7eb;transition:color .2s">★</span>
+          <span class="star" data-rating="3" style="color:#e5e7eb;transition:color .2s">★</span>
+          <span class="star" data-rating="4" style="color:#e5e7eb;transition:color .2s">★</span>
+          <span class="star" data-rating="5" style="color:#e5e7eb;transition:color .2s">★</span>
+        </div>
+        <input type="hidden" id="reviewRating" value="0">
+      </div>
+      
+      <div style="margin-bottom:24px">
+        <label style="display:block;margin-bottom:12px;font-weight:700;font-size:14px;color:#4b5563">Comment (Optional)</label>
+        <textarea id="reviewComment" placeholder="Share your experience..." style="width:100%;min-height:120px;padding:12px;border-radius:12px;border:2px solid #e5e7eb;font-size:15px;font-family:inherit;resize:vertical" rows="4"></textarea>
+      </div>
+      
+      <div style="display:flex;gap:12px">
+        <button onclick="closeReviewModal()" style="flex:1;padding:14px;border-radius:12px;border:2px solid #e5e7eb;background:#fff;color:#4b5563;font-weight:700;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='#d1d5db'" onmouseout="this.style.borderColor='#e5e7eb'">Cancel</button>
+        <button onclick="submitReview()" style="flex:1;padding:14px;border-radius:12px;border:0;background:var(--primary);color:#fff;font-weight:800;cursor:pointer;transition:all .2s" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Submit Review</button>
+      </div>
+    </div>
+  </div>
 
   <aside class="detail-sidebar" id="detailSidebar">
     <div class="detail-sidebar-header">
@@ -550,17 +650,21 @@
       // Badge HTML
       const badgeClass = type === 'offer' ? 'offer' : 'request';
       const badgeText = type === 'offer' ? 'OFFER' : 'REQUEST';
+      const onlineBadge = item.is_online ? '<span class="detail-online-badge"><i class="fas fa-globe"></i> Online / Remote</span>' : '';
       
       // Resim HTML - sadece resim varsa göster
       const imageHtml = item.image_url ? 
         `<div class="detail-image"><img src="${item.image_url}" alt="${item.title}"></div>` : '';
       
       body.innerHTML = `
-        <span class="detail-badge ${badgeClass}">${badgeText}</span>
-        ${imageHtml}
+        <div class="detail-badges-container">
+          <span class="detail-badge ${badgeClass}">${badgeText}</span>
+          ${onlineBadge}
+        </div>
         <h2 class="detail-title">${item.title}</h2>
+        ${imageHtml}
         <div class="detail-meta">
-          <div class="detail-meta-item"><span>👤</span> <span>${item.user_info.username}</span></div>
+          <div class="detail-meta-item"><span>👤</span> <a href="/profile/${item.user_info.username}/" style="color:#667eea;text-decoration:none;font-weight:700">${item.user_info.username}</a></div>
           <div class="detail-meta-item"><span>⏱️</span> <span>${item.duration}h</span></div>
           <div class="detail-meta-item"><span>📂</span> <span>${item.category}</span></div>
           <div class="detail-meta-item"><span>📅</span> <span>${formatDate(item.created_at)}</span></div>
@@ -570,6 +674,9 @@
         ${!isOwn ? `
           <div class="detail-actions">
             <button class="detail-btn primary" onclick="startChatFromDetail(${item.id}, '${type}')">Contact</button>
+            <button class="detail-btn danger" onclick="blockUser('${item.user_info.username}')" style="background:#fee2e2;color:#dc2626">
+              <i class="fas fa-ban"></i> Block User
+            </button>
             <button class="detail-btn secondary" onclick="closeDetailSidebar()">Close</button>
           </div>
         ` : `
@@ -616,7 +723,10 @@
       try {
         const endpoint = type === 'offer' ? `/service-offers/${id}/` : `/service-requests/${id}/`;
         const deleteResult = await req(endpoint, 'DELETE');
-        if(deleteResult.error) {
+        
+        // DELETE başarılı olabilir (204 No Content veya success response)
+        // Hata kontrolü
+        if(deleteResult && deleteResult.error) {
           await Swal.fire({
             icon: 'error',
             title: 'Error',
@@ -626,6 +736,7 @@
           return;
         }
         
+        // Başarılı mesajı göster
         Swal.fire({
           icon: 'success',
           title: 'Deleted!',
@@ -636,12 +747,19 @@
           toast: true
         });
         
+        // myListingsData'dan silinen ilanı kaldır
+        myListingsData = myListingsData.filter(item => !(item.id === id && item.type === type));
+        
+        // Detail sidebar'ı kapat
         closeDetailSidebar();
-        // Listeleri yenile
+        
+        // Listeyi yenile (await ile)
+        await fetchMyListings();
+        
+        // Ana sayfadaki listeyi de yenile
         if(currentListingType) {
-          fetchListings(currentListingType);
+          await fetchListings(currentListingType);
         }
-        fetchMyListings();
         // Haritayı da yenile
         if(window.mainMap) {
           updateMapMarkers();
@@ -658,9 +776,45 @@
     
     window.deleteListingFromDetail = deleteListingFromDetail;
 
-    $('#headerProfileBtn').onclick = e => { e.stopPropagation(); $('#profileMenu').classList.toggle('show'); };
+    $('#headerProfileBtn').onclick = e => { 
+      e.stopPropagation(); 
+      $('#profileMenu').classList.toggle('show');
+    };
     document.onclick = e => { if(!e.target.closest('.actions')) $('#profileMenu').classList.remove('show'); };
-    $('#logoutBtn').onclick = () => { localStorage.clear(); location.reload(); };
+    $('#viewProfileBtn').onclick = () => { 
+      if(USER && USER.username) {
+        window.location.href = `/profile/${USER.username}/`;
+      }
+    };
+    $('#logoutBtn').onclick = () => { 
+      localStorage.clear(); 
+      TOKEN = null;
+      USER = {};
+      ACTIVE_CHAT_ID = null;
+      LAST_RENDER_KEY = '';
+      if(POLLER) {
+        clearInterval(POLLER);
+        POLLER = null;
+      }
+      // Tüm sidebar'ları kapat
+      $('#chatSheet').classList.remove('open');
+      $('#detailSidebar').classList.remove('open');
+      $('#listingSheet').classList.remove('open');
+      $('#notificationsDropdown').classList.remove('show');
+      $('#reviewModal').classList.remove('open');
+      // İçerikleri temizle
+      $('#gridView').innerHTML = '';
+      $('#inboxContainer').innerHTML = '';
+      $('#msgArea').innerHTML = '';
+      $('#actionBar').style.display = 'none';
+      // Auth modal'ı aç
+      $('#authModal').classList.add('open');
+      // Navbar'ı güncelle - profil butonunu gizle
+      const profileBtn = document.querySelector('.profile-btn');
+      const profileMenu = document.querySelector('.profile-menu');
+      if(profileBtn) profileBtn.style.display = 'none';
+      if(profileMenu) profileMenu.style.display = 'none';
+    };
 
     $('#tabLogin').onclick = () => { $('#loginForm').classList.remove('hidden'); $('#signupForm').classList.add('hidden'); $('#tabLogin').classList.add('active'); $('#tabSignup').classList.remove('active'); };
     $('#tabSignup').onclick = () => { $('#signupForm').classList.remove('hidden'); $('#loginForm').classList.add('hidden'); $('#tabSignup').classList.add('active'); $('#tabLogin').classList.remove('active'); };
@@ -766,11 +920,22 @@
         const itemType = currentListingType === 'all' ? (i._type || 'offer') : singularType;
         const buttonType = currentListingType === 'all' ? (i._type === 'request' ? 'requests' : 'offers') : currentListingType;
         
+        // Badge HTML
+        const badgeText = itemType === 'offer' ? 'OFFER' : 'REQUEST';
+        const badgeClass = itemType === 'offer' ? 'offer' : 'request';
+        const badgeColor = itemType === 'offer' ? 'background:#667eea;color:#fff' : 'background:#10b981;color:#fff';
+        const onlineBadge = i.is_online ? '<span class="card-online-badge"><i class="fas fa-globe"></i> Online / Remote</span>' : '';
+        
         return `
-        <div class="card" data-item-id="${i.id}" data-item-type="${itemType}" data-item-index="${idx}" style="cursor:pointer">
-          <span class="card-cat">${i.category}</span><h3>${i.title}</h3><p>${i.description}</p>
+        <div class="card" data-item-id="${i.id}" data-item-type="${itemType}" data-item-index="${idx}" style="cursor:pointer;position:relative">
+          <span class="card-cat">${i.category}</span>
+          <div class="card-badges">
+            <span class="card-type-badge ${badgeClass}" style="${badgeColor}">${badgeText}</span>
+            ${onlineBadge}
+          </div>
+          <h3>${i.title}</h3><p>${i.description}</p>
           <div class="card-meta">
-            <div class="user-tag"><div class="u-avatar">${i.user_info.username[0].toUpperCase()}</div>${i.user_info.username}</div>
+            <div class="user-tag"><div class="u-avatar">${i.user_info.username[0].toUpperCase()}</div><a href="/profile/${i.user_info.username}/" style="color:inherit;text-decoration:none;font-weight:700">${i.user_info.username}</a></div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
               <div>⏱️ ${i.duration}h</div>
               <div style="font-size:11px;color:#999;font-weight:500">${formatDate(i.created_at)}</div>
@@ -835,12 +1000,19 @@
     }
     
     // Bildirim dropdown fonksiyonları
-    $('#notifBtn').onclick = function(e) {
+    $('#notifBtn').onclick = async function(e) {
       e.stopPropagation();
       const dropdown = $('#notificationsDropdown');
+      const wasOpen = dropdown.classList.contains('show');
       dropdown.classList.toggle('show');
-      if(dropdown.classList.contains('show')) {
-        loadNotifications();
+      
+      if(dropdown.classList.contains('show') && !wasOpen) {
+        // İlk açılışta bildirimleri yükle ve okundu olarak işaretle
+        await loadNotifications();
+        // Tüm okunmamış bildirimleri okundu olarak işaretle
+        await req('/notifications/mark-read/', 'POST');
+        // Sayıyı güncelle
+        await checkNotifications();
       }
     };
     
@@ -859,10 +1031,21 @@
     
     // Bildirim türüne göre ikon ve renk belirleme
     function getNotificationIcon(status, type) {
-      if(status === 'accepted') {
+      // type field'ını öncelikli olarak kullan
+      if(type === 'message') {
+        return { icon: 'fa-comment', class: 'message' };
+      } else if(type === 'interaction_accepted' || status === 'accepted') {
         return { icon: 'fa-check-circle', class: 'accepted' };
-      } else if(status === 'completed') {
+      } else if(type === 'completed' || status === 'completed') {
         return { icon: 'fa-clock', class: 'time-credit' };
+      } else if(type === 'date_proposed') {
+        return { icon: 'fa-calendar', class: 'message' };
+      } else if(type === 'date_rejected') {
+        return { icon: 'fa-times-circle', class: 'warning' };
+      } else if(type === 'date_accepted') {
+        return { icon: 'fa-check-circle', class: 'accepted' };
+      } else if(type === 'scheduled') {
+        return { icon: 'fa-calendar-check', class: 'accepted' };
       } else if(status === 'pending') {
         return { icon: 'fa-comment', class: 'message' };
       } else if(status === 'declined' || status === 'cancelled') {
@@ -874,46 +1057,61 @@
     
     // Bildirim başlığı oluştur
     function getNotificationTitle(notification) {
-      const sender = notification.sender_username;
-      const status = notification.status;
+      const type = notification.type || 'message';
       
-      if(status === 'pending') {
-        return `${sender} sent a request`;
-      } else if(status === 'accepted') {
-        return `Request accepted`;
-      } else if(status === 'completed') {
-        return `Transaction completed`;
-      } else if(status === 'declined') {
-        return `Request declined`;
-      } else if(status === 'date_proposed') {
-        return `Date proposed`;
-      } else if(status === 'scheduled') {
-        return `Event scheduled`;
+      if(type === 'message') {
+        return 'New Message';
+      } else if(type === 'interaction_accepted') {
+        return 'Request Accepted';
+      } else if(type === 'date_proposed') {
+        return 'Date Proposed';
+      } else if(type === 'date_rejected') {
+        return 'Date Rejected';
+      } else if(type === 'date_accepted') {
+        return 'Date Accepted';
+      } else if(type === 'scheduled') {
+        return 'Scheduled';
+      } else if(type === 'completed') {
+        return 'Transaction Completed';
+      } else {
+        return 'Notification';
       }
-      return `New notification`;
     }
     
     // Bildirim mesajı oluştur
     function getNotificationMessage(notification) {
-      const status = notification.status;
-      const listingTitle = notification.title || 'Listing';
-      
-      if(status === 'pending') {
-        return `New request for "${listingTitle}"`;
-      } else if(status === 'accepted') {
-        return `Your request for "${listingTitle}" has been accepted`;
-      } else if(status === 'completed') {
-        return `Transaction for "${listingTitle}" completed successfully`;
-      } else if(notification.message) {
+      // notification.message field'ı direkt kullanılabilir
+      if(notification.message) {
         return notification.message;
       }
-      return `Update on "${listingTitle}"`;
+      
+      const type = notification.type || 'message';
+      const listingTitle = notification.title || 'Listing';
+      
+      if(type === 'message') {
+        return 'You have a new message';
+      } else if(type === 'interaction_accepted') {
+        return `Your request for "${listingTitle}" has been accepted`;
+      } else if(type === 'date_proposed') {
+        return 'A date has been proposed for your transaction';
+      } else if(type === 'date_rejected') {
+        return 'Your proposed date was rejected';
+      } else if(type === 'date_accepted') {
+        return 'Your proposed date was accepted';
+      } else if(type === 'scheduled') {
+        return 'Transaction has been scheduled';
+      } else if(type === 'completed') {
+        return `Transaction for "${listingTitle}" has been completed`;
+      } else {
+        return 'You have a new notification';
+      }
     }
     
     // Bildirimleri yükle
     async function loadNotifications() {
       const data = await req('/notifications/list/');
-      const notifications = data.notifications || [];
+      // API direkt array döndürüyor, data.notifications değil
+      const notifications = Array.isArray(data) ? data : (data.notifications || []);
       const body = $('#notificationsBody');
       
       if(notifications.length === 0) {
@@ -922,14 +1120,15 @@
       }
       
       body.innerHTML = notifications.map(notif => {
-        const iconInfo = getNotificationIcon(notif.status, notif.type);
-        const isUnread = notif.status === 'pending';
+        const iconInfo = getNotificationIcon(notif.status || '', notif.type || 'message');
+        const isUnread = !notif.is_read; // is_read field'ını kullan
         const title = getNotificationTitle(notif);
         const message = getNotificationMessage(notif);
         const date = formatDate(notif.created_at);
+        const interactionId = notif.interaction_id || null;
         
         return `
-          <div class="notif-card ${isUnread ? 'unread' : ''}" onclick="handleNotificationClick(${notif.id}, '${notif.status}')">
+          <div class="notif-card ${isUnread ? 'unread' : ''}" onclick="handleNotificationClick(${interactionId}, '${notif.type || 'message'}')">
             <div class="notif-icon-box ${iconInfo.class}">
               <i class="fas ${iconInfo.icon}"></i>
             </div>
@@ -946,10 +1145,17 @@
     }
     
     // Bildirime tıklandığında
-    function handleNotificationClick(interactionId, status) {
+    function handleNotificationClick(interactionId, type) {
       closeNotifications();
-      // Eğer pending veya accepted ise chat'e yönlendir
-      if(status === 'pending' || status === 'accepted' || status === 'date_proposed' || status === 'scheduled') {
+      
+      // interaction_id null ise inbox'a yönlendir
+      if(!interactionId || interactionId === 'null') {
+        loadView('inbox');
+        return;
+      }
+      
+      // Mesaj veya etkileşim bildirimleri için chat'i aç
+      if(type === 'message' || type === 'interaction_accepted' || type === 'date_proposed' || type === 'date_rejected' || type === 'date_accepted' || type === 'scheduled') {
         openChat(interactionId);
       } else {
         loadView('inbox');
@@ -1086,13 +1292,59 @@
 
     async function fetchChats(){
       const d = await req('/interactions/');
-      $('#inboxContent').innerHTML = d.map(i=>`
-        <div class="inbox-item" onclick="openChat(${i.id})">
+      $('#inboxContent').innerHTML = d.map(i=>{
+        const otherUser = i.sender_username===USER.username ? i.receiver_username : i.sender_username;
+        return `
+        <div class="inbox-item" style="position:relative">
+          <div class="inbox-item-content" onclick="openChat(${i.id})" style="flex:1;display:flex;gap:16px;align-items:center;cursor:pointer">
           <div class="inbox-icon">${i.sender_username===USER.username?'📤':'📥'}</div>
-          <div class="inbox-info"><div class="inbox-title">${i.title}</div><span class="status-badge st-${i.status.toLowerCase()}">${i.status.replace('_',' ')}</span></div>
-          <div style="font-size:13px;color:#666">With: ${i.sender_username===USER.username?i.receiver_username:i.sender_username}</div>
-        </div>`).join('') || '<div style="padding:20px;text-align:center;color:#eee">No conversations.</div>';
+            <div class="inbox-info" style="flex:1"><div class="inbox-title">${i.title}</div><span class="status-badge st-${i.status.toLowerCase()}">${i.status.replace('_',' ')}</span></div>
+            <div style="font-size:13px;color:#666">With: <a href="/profile/${otherUser}/" style="color:#667eea;text-decoration:none;font-weight:700" onclick="event.stopPropagation()">${otherUser}</a></div>
+          </div>
+          <button class="delete-listing-btn" onclick="event.stopPropagation(); deleteConversation(${i.id})" title="Delete conversation" style="margin-left:8px">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </div>`;
+      }).join('') || '<div style="padding:20px;text-align:center;color:#eee">No conversations.</div>';
     }
+    
+    async function deleteConversation(interactionId) {
+      const result = await Swal.fire({
+        title: 'Delete Conversation?',
+        text: 'This conversation will be deleted. This action cannot be undone.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+      });
+      
+      if(result.isConfirmed) {
+        const r = await req(`/interaction/${interactionId}/delete/`, 'POST');
+        if(r.status === 'success') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Deleted!',
+            text: 'Conversation has been deleted',
+            timer: 2000,
+            showConfirmButton: false,
+            position: 'top-end',
+            toast: true
+          });
+          fetchChats();
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: r.message || 'Failed to delete conversation',
+            confirmButtonColor: '#3085d6'
+          });
+        }
+      }
+    }
+    
+    window.deleteConversation = deleteConversation;
 
     // My listings verilerini sakla
     let myListingsData = [];
@@ -1184,7 +1436,10 @@
         try {
             const endpoint = type === 'offer' ? `/service-offers/${id}/` : `/service-requests/${id}/`;
             const deleteResult = await req(endpoint, 'DELETE');
-            if(deleteResult.error) {
+            
+            // DELETE başarılı olabilir (204 No Content veya success response)
+            // Hata kontrolü
+            if(deleteResult && deleteResult.error) {
                 await Swal.fire({
                   icon: 'error',
                   title: 'Error',
@@ -1194,6 +1449,7 @@
                 return;
             }
             
+            // Başarılı mesajı göster
             Swal.fire({
               icon: 'success',
               title: 'Deleted!',
@@ -1204,10 +1460,20 @@
               toast: true
             });
             
-            fetchMyListings(); // Listeyi yenile
+            // myListingsData'dan silinen ilanı kaldır
+            myListingsData = myListingsData.filter(item => !(item.id === id && item.type === type));
+            
+            // Listeyi yenile
+            await fetchMyListings();
+            
+            // Eğer detail sidebar açıksa ve silinen ilan gösteriliyorsa kapat
+            if(currentDetailItem && currentDetailItem.item.id === id && currentDetailItem.type === type) {
+                closeDetailSidebar();
+            }
+            
             // Ana sayfadaki listeyi de yenile
             if(currentListingType) {
-                fetchListings(currentListingType);
+                await fetchListings(currentListingType);
             }
             // Haritayı da yenile
             if(window.mainMap) {
@@ -1293,7 +1559,7 @@
         const date = new Date(d.appointment_date).toLocaleString();
         const imProposer = d.date_proposed_by_username === USER.username;
         if(imProposer) html = `You proposed <b>${date}</b>. Waiting.`;
-        else html = `<span>Proposed: <b>${date}</b></span> <button class="ab-btn green" onclick="act('accept_date')">Confirm Date</button>`;
+        else html = `<span>Proposed: <b>${date}</b></span> <div style="display:flex;gap:8px"><button class="ab-btn green" onclick="act('accept_date')">Accept</button> <button class="ab-btn red" onclick="act('reject_date')">Reject</button></div>`;
       }
       else if(d.status==='scheduled'){
         title = "Scheduled";
@@ -1307,7 +1573,34 @@
             else html=`Waiting for payment...`;
         } else html=`Event: <b>${date}</b>`;
       }
-      else if(d.status==='completed'){ title = "Completed"; html = `Transaction successful.`; }
+      else if(d.status==='completed'){ 
+        title = "Completed"; 
+        html = `Transaction successful.`;
+        
+        // Karşı tarafı belirle
+        const otherUser = d.sender_username === USER.username ? d.receiver_username : d.sender_username;
+        const listingType = d.type || 'offer';
+        const listingId = d.offer_id || d.request_id || null;
+        
+        // Review kontrolü yap (asenkron)
+        if(listingId) {
+          checkReviewAndShowButton(otherUser, listingType, listingId, d.id).then(reviewExists => {
+            let finalHtml = html;
+            if(!reviewExists) {
+              finalHtml += `<div style="margin-top:12px"><button class="ab-btn blue" onclick="openReviewModal('${otherUser}', '${listingType}', ${listingId}, ${d.id})">⭐ Leave a Review</button></div>`;
+            } else {
+              finalHtml += `<div style="margin-top:12px;color:#10b981;font-size:14px">✓ You reviewed this user</div>`;
+            }
+            bar.innerHTML = `<div class="ab-header"><span class="ab-title">${title}</span> <span class="status-badge st-${d.status}">${d.status.replace('_',' ')}</span></div>` + (finalHtml ? `<div class="ab-content ${d.status==='completed'?'success':''}">${finalHtml}</div>` : '');
+            bar.style.display = 'flex';
+          });
+        } else {
+          // listingId yoksa direkt göster
+          bar.innerHTML = `<div class="ab-header"><span class="ab-title">${title}</span> <span class="status-badge st-${d.status}">${d.status.replace('_',' ')}</span></div>` + (html ? `<div class="ab-content ${d.status==='completed'?'success':''}">${html}</div>` : '');
+          bar.style.display = 'flex';
+        }
+        return; // Asenkron işlem yapıldığı için buradan çık
+      }
 
       bar.innerHTML = `<div class="ab-header"><span class="ab-title">${title}</span> <span class="status-badge st-${d.status}">${d.status.replace('_',' ')}</span></div>` + (html ? `<div class="ab-content ${d.status==='completed'?'success':''}">${html}</div>` : '');
       bar.style.display = 'flex';
@@ -1329,10 +1622,11 @@
         p={date:v}; 
       }
       const r = await req(`/interaction/${ACTIVE_CHAT_ID}/${a}/`, 'POST', p);
-      if(r.status){ 
+      if(r.status || r.status === 'negotiating'){ 
         Swal.fire({
           icon: 'success',
-          title: 'Updated!',
+          title: a === 'reject_date' ? 'Date Rejected' : 'Updated!',
+          text: a === 'reject_date' ? 'Please propose a new date' : 'Action completed',
           timer: 2000,
           showConfirmButton: false,
           position: 'top-end',
@@ -1370,12 +1664,17 @@
       $('#listingType').value = type;
       // Resim yükleme alanını sıfırla
       removeImage();
+      // is_online checkbox'ını sıfırla
+      $('#inpIsOnline').checked = false;
+      toggleLocationField();
       // Haritayı başlat - sidebar açıldıktan sonra biraz bekle
       setTimeout(() => {
-        initLocationMap();
-        // Harita başlatıldıktan sonra invalidateSize çağır (görünürlük değiştiği için)
-        if(locationMap) {
-          setTimeout(() => locationMap.invalidateSize(), 200);
+        if(!$('#inpIsOnline').checked) {
+          initLocationMap();
+          // Harita başlatıldıktan sonra invalidateSize çağır (görünürlük değiştiği için)
+          if(locationMap) {
+            setTimeout(() => locationMap.invalidateSize(), 200);
+          }
         }
       }, 150);
     }
@@ -1449,6 +1748,40 @@
         handleImageFile(e.target.files[0]);
       }
     };
+
+    // is_online checkbox handler - haritayı gizle/göster
+    function toggleLocationField() {
+      const isOnline = $('#inpIsOnline').checked;
+      const locationField = $('#locationField');
+      const locationMapEl = $('#locationMap');
+      
+      if(isOnline) {
+        locationField.style.display = 'none';
+        // Haritayı temizle
+        if(locationMapEl) {
+          locationMapEl.innerHTML = '';
+        }
+        if(locationMap) {
+          try {
+            locationMap.remove();
+          } catch(e) {
+            console.warn('Error removing map:', e);
+          }
+          locationMap = null;
+          locationMarker = null;
+        }
+      } else {
+        locationField.style.display = 'block';
+        // Haritayı yeniden başlat
+        setTimeout(() => {
+          if(!locationMap) {
+            initLocationMap();
+          }
+        }, 100);
+      }
+    }
+    
+    $('#inpIsOnline').onchange = toggleLocationField;
 
     function initLocationMap(){
       const mapEl = $('#locationMap');
@@ -1663,11 +1996,17 @@
       formData.append('duration', parseInt($('#inpDur').value));
       formData.append('description', $('#inpDesc').value);
       
-      // Sadece değer varsa ekle
-      if(latitude !== null) formData.append('latitude', latitude);
-      if(longitude !== null) formData.append('longitude', longitude);
-      const addr = $('#inpAddress').value.trim();
-      if(addr) formData.append('address', addr);
+      // is_online kontrolü
+      const isOnline = $('#inpIsOnline').checked;
+      formData.append('is_online', isOnline ? 'true' : 'false');
+      
+      // Sadece offline ise konum bilgilerini ekle
+      if(!isOnline) {
+        if(latitude !== null) formData.append('latitude', latitude);
+        if(longitude !== null) formData.append('longitude', longitude);
+        const addr = $('#inpAddress').value.trim();
+        if(addr) formData.append('address', addr);
+      }
       
       // Resim varsa ekle
       if(selectedImageFile) {
@@ -1727,6 +2066,296 @@
       }
     };
 
+    async function blockUser(username) {
+      const result = await Swal.fire({
+        title: 'Block User?',
+        text: `Are you sure you want to block ${username}? You won't see their listings or messages.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, block!',
+        cancelButtonText: 'Cancel'
+      });
+      
+      if(result.isConfirmed) {
+        const r = await req(`/block/${username}/`, 'POST');
+        if(r.status === 'success') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Blocked!',
+            text: `${username} has been blocked`,
+            timer: 2000,
+            showConfirmButton: false,
+            position: 'top-end',
+            toast: true
+          });
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: r.message || 'Failed to block user',
+            confirmButtonColor: '#3085d6'
+          });
+        }
+      }
+    }
+    
+    window.blockUser = blockUser;
+    
+    // Review Modal ve Fonksiyonları
+    let currentReviewData = null;
+    
+    function openReviewModal(targetUsername, listingType, listingId, interactionId) {
+      currentReviewData = {
+        targetUsername,
+        listingType,
+        listingId,
+        interactionId
+      };
+      $('#reviewModal').classList.add('open');
+      $('#reviewRating').value = '0';
+      $('#reviewComment').value = '';
+      updateStars(0);
+      // Yıldız rating'i başlat
+      setTimeout(() => {
+        const stars = document.querySelectorAll('#reviewModal .star');
+        stars.forEach(star => {
+          star.onclick = function() {
+            const rating = parseInt(this.dataset.rating);
+            $('#reviewRating').value = rating;
+            updateStars(rating);
+          };
+          star.onmouseenter = function() {
+            const rating = parseInt(this.dataset.rating);
+            updateStars(rating);
+          };
+        });
+        const starRating = document.getElementById('starRating');
+        if(starRating) {
+          starRating.onmouseleave = function() {
+            const currentRating = parseInt($('#reviewRating').value) || 0;
+            updateStars(currentRating);
+          };
+        }
+      }, 100);
+    }
+    
+    function closeReviewModal() {
+      $('#reviewModal').classList.remove('open');
+      currentReviewData = null;
+    }
+    
+    window.closeReviewModal = closeReviewModal;
+    
+    // Yıldız rating sistemi - initStarRating fonksiyonu ile başlatılacak
+    
+    function updateStars(rating) {
+      document.querySelectorAll('.star').forEach((star, index) => {
+        if(index < rating) {
+          star.style.color = '#fbbf24'; // Altın sarısı
+        } else {
+          star.style.color = '#e5e7eb'; // Gri
+        }
+      });
+    }
+    
+    async function checkReviewAndShowButton(targetUsername, listingType, listingId, interactionId) {
+      if(!listingId) return false;
+      try {
+        const result = await req(`/review/check/${listingType}/${listingId}/`);
+        return result.exists || false;
+      } catch(err) {
+        console.error('Review check error:', err);
+        return false;
+      }
+    }
+    
+    async function submitReview() {
+      if(!currentReviewData) return;
+      
+      const rating = parseInt($('#reviewRating').value);
+      if(!rating || rating < 1 || rating > 5) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Rating Required',
+          text: 'Please select a rating (1-5 stars)',
+          confirmButtonColor: '#3085d6'
+        });
+        return;
+      }
+      
+      const comment = $('#reviewComment').value.trim();
+      
+      try {
+        const reviewData = {
+          rating: rating,
+          comment: comment,
+          target_username: currentReviewData.targetUsername
+        };
+        
+        // Listing ID'yi ekle
+        if(currentReviewData.listingType === 'offer') {
+          reviewData.offer_id = currentReviewData.listingId;
+        } else {
+          reviewData.request_id = currentReviewData.listingId;
+        }
+        
+        const result = await req(`/profile/${currentReviewData.targetUsername}/add-review/`, 'POST', reviewData);
+        
+        if(result.status === 'success') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Thank You!',
+            text: 'Your review has been submitted successfully.',
+            timer: 2000,
+            showConfirmButton: false,
+            position: 'top-end',
+            toast: true
+          });
+          
+          closeReviewModal();
+          
+          // Action bar'ı yenile
+          if(ACTIVE_CHAT_ID) {
+            loadChatMessages();
+          }
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: result.message || 'Failed to submit review',
+            confirmButtonColor: '#3085d6'
+          });
+        }
+      } catch(err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: err.message || 'Unknown error occurred',
+          confirmButtonColor: '#3085d6'
+        });
+      }
+    }
+    
+    window.openReviewModal = openReviewModal;
+    window.submitReview = submitReview;
+    
+    // Sayfa yüklendiğinde yıldız rating'i başlat
+    function initStarRating() {
+      const stars = document.querySelectorAll('.star');
+      if(stars.length === 0) return;
+      
+      stars.forEach(star => {
+        star.onclick = function() {
+          const rating = parseInt(this.dataset.rating);
+          $('#reviewRating').value = rating;
+          updateStars(rating);
+        };
+        
+        star.onmouseenter = function() {
+          const rating = parseInt(this.dataset.rating);
+          updateStars(rating);
+        };
+      });
+      
+      const starRating = document.getElementById('starRating');
+      if(starRating) {
+        starRating.onmouseleave = function() {
+          const currentRating = parseInt($('#reviewRating').value) || 0;
+          updateStars(currentRating);
+        };
+      }
+    }
+    
+    function updateStars(rating) {
+      document.querySelectorAll('.star').forEach((star, index) => {
+        if(index < rating) {
+          star.style.color = '#fbbf24'; // Altın sarısı
+        } else {
+          star.style.color = '#e5e7eb'; // Gri
+        }
+      });
+    }
+    
+    async function checkReviewAndShowButton(targetUsername, listingType, listingId, interactionId) {
+      if(!listingId) return false;
+      try {
+        const result = await req(`/review/check/${listingType}/${listingId}/`);
+        return result.exists || false;
+      } catch(err) {
+        console.error('Review check error:', err);
+        return false;
+      }
+    }
+    
+    async function submitReview() {
+      if(!currentReviewData) return;
+      
+      const rating = parseInt($('#reviewRating').value);
+      if(!rating || rating < 1 || rating > 5) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Rating Required',
+          text: 'Please select a rating (1-5 stars)',
+          confirmButtonColor: '#3085d6'
+        });
+        return;
+      }
+      
+      const comment = $('#reviewComment').value.trim();
+      
+      try {
+        const reviewData = {
+          rating: rating,
+          comment: comment,
+          target_username: currentReviewData.targetUsername
+        };
+        
+        // Listing ID'yi ekle
+        if(currentReviewData.listingType === 'offer') {
+          reviewData.offer_id = currentReviewData.listingId;
+        } else {
+          reviewData.request_id = currentReviewData.listingId;
+        }
+        
+        const result = await req(`/profile/${currentReviewData.targetUsername}/add-review/`, 'POST', reviewData);
+        
+        if(result.status === 'success') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Thank You!',
+            text: 'Your review has been submitted successfully.',
+            timer: 2000,
+            showConfirmButton: false,
+            position: 'top-end',
+            toast: true
+          });
+          
+          closeReviewModal();
+          
+          // Action bar'ı yenile
+          if(ACTIVE_CHAT_ID) {
+            loadChatMessages();
+          }
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: result.message || 'Failed to submit review',
+            confirmButtonColor: '#3085d6'
+          });
+        }
+      } catch(err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: err.message || 'Unknown error occurred',
+          confirmButtonColor: '#3085d6'
+        });
+      }
+    }
   </script>
 </body>
 </html>

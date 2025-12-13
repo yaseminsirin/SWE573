@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HIVE | Profile - {{ profile_user.username }}</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root{
+      --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --bg: #f3f4f6; --text: #1f2937;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;outline:none;font-family:'Segoe UI',sans-serif}
+    body{background:var(--primary);min-height:100vh;padding:20px;color:var(--text)}
+    .app{max-width:1200px;margin:0 auto;padding-bottom:100px;position:relative}
+    
+    header{background:#fff;border-radius:24px;padding:16px 24px;margin-bottom:24px;display:flex;justify-content:space-between;box-shadow:0 10px 40px rgba(0,0,0,0.15)}
+    .logo{font-size:26px;font-weight:900;background:var(--primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none}
+    .logo:hover{opacity:0.8}
+    
+    .profile-container{background:#fff;border-radius:24px;padding:40px;box-shadow:0 10px 40px rgba(0,0,0,0.15)}
+    
+    /* Sol Sütun - Kimlik Kartı */
+    .profile-card{background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);border-radius:20px;padding:30px;color:#fff;text-align:center;margin-bottom:30px}
+    .profile-avatar-large{width:120px;height:120px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;color:#667eea;font-weight:800;font-size:48px;margin:0 auto 20px;overflow:hidden;border:4px solid rgba(255,255,255,0.3);box-shadow:0 8px 20px rgba(0,0,0,0.2)}
+    .profile-avatar-large img{width:100%;height:100%;object-fit:cover}
+    .profile-name{font-size:28px;font-weight:900;margin-bottom:8px}
+    .profile-location{font-size:14px;opacity:0.9;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:6px}
+    .profile-location i{font-size:12px}
+    
+    .rating-display{display:flex;align-items:center;justify-content:center;gap:8px;margin:20px 0;font-size:18px}
+    .rating-stars{color:#fbbf24;font-size:22px;letter-spacing:3px}
+    .rating-value{font-weight:700;font-size:20px}
+    
+    .profile-bio{background:rgba(255,255,255,0.15);border-radius:12px;padding:16px;margin-top:20px;font-size:14px;line-height:1.6;backdrop-filter:blur(10px)}
+    
+    .btn-edit{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:#fff;color:#667eea;border-radius:12px;font-weight:700;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,0.2);transition:transform .2s;margin-top:20px;border:none;cursor:pointer}
+    .btn-edit:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.3);color:#667eea}
+    
+    /* Sağ Sütun - İçerik */
+    .content-section{margin-top:30px}
+    
+    .nav-tabs{border-bottom:2px solid #f3f4f6;margin-bottom:24px}
+    .nav-tabs .nav-link{border:none;color:#6b7280;font-weight:700;padding:16px 24px;transition:all .2s}
+    .nav-tabs .nav-link:hover{border-color:transparent;color:#667eea}
+    .nav-tabs .nav-link.active{color:#667eea;border-bottom:3px solid #667eea;background:transparent}
+    
+    /* İlan Kartları */
+    .listings-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:20px}
+    .listing-card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.05);transition:transform .2s;border:2px solid #f3f4f6;position:relative;cursor:pointer}
+    .listing-card:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,0.1);border-color:#667eea}
+    .listing-badge{position:absolute;top:16px;left:16px;font-size:10px;font-weight:800;padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:0.5px}
+    .listing-badge.offer{background:#667eea;color:#fff}
+    .listing-badge.request{background:#10b981;color:#fff}
+    .listing-badge.online{position:absolute;top:45px;left:16px;background:#3b82f6;color:#fff;font-size:9px;padding:4px 8px}
+    .listing-card h4{font-size:18px;font-weight:800;margin-bottom:8px;padding-right:60px}
+    .listing-card p{color:#666;font-size:14px;line-height:1.5;margin-bottom:12px}
+    .listing-meta{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;color:#888;border-top:1px solid #f0f0f0;padding-top:12px}
+    
+    /* Yorum Kartları */
+    .review-item{background:#f9fafb;border-radius:16px;padding:20px;margin-bottom:16px;border-left:4px solid #667eea;transition:transform .2s}
+    .review-item:hover{transform:translateX(4px);box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+    .review-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .review-author{font-weight:700;color:#1f2937;font-size:16px}
+    .review-rating{display:flex;gap:4px;color:#fbbf24;font-size:18px}
+    .review-comment{color:#4b5563;line-height:1.6;margin-top:8px}
+    .review-date{font-size:12px;color:#9ca3af;margin-top:8px}
+    .review-service-badge{display:inline-block;background:#e0e7ff;color:#667eea;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;margin-bottom:8px}
+    
+    .empty-state{text-align:center;padding:60px 20px;color:#9ca3af}
+    .empty-state i{font-size:64px;margin-bottom:16px;opacity:0.3}
+    .empty-state-text{font-size:18px;font-weight:600}
+    
+    .nav-pills .nav-link.active {
+      color: #667eea !important;
+      border-bottom-color: #667eea !important;
+      background: transparent !important;
+    }
+    .nav-pills .nav-link:hover {
+      color: #667eea !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <a href="/" class="logo">⏰ HIVE</a>
+      <a href="/" class="btn-edit" style="background:#fff;color:#667eea;padding:10px 20px;font-size:14px">
+        <i class="fas fa-arrow-left"></i> Back to Home
+      </a>
+    </header>
+
+    <div class="profile-container">
+      <div class="row">
+        <!-- Sol Sütun - Kimlik Kartı -->
+        <div class="col-md-4">
+          <div class="profile-card">
+            <div class="profile-avatar-large">
+              {% if profile.avatar %}
+                <img src="{{ profile.avatar.url }}" alt="{{ profile_user.username }}">
+              {% else %}
+                <div>{{ profile_user.username|first|upper }}{{ profile_user.username|slice:"1:2"|upper }}</div>
+              {% endif %}
+            </div>
+            <h1 class="profile-name">{{ profile_user.username }}</h1>
+            {% if profile.location %}
+              <div class="profile-location">
+                <i class="fas fa-map-marker-alt"></i> {{ profile.location }}
+              </div>
+            {% endif %}
+            
+            <div class="rating-display">
+              <div class="rating-stars">
+                {% with rating=avg_rating_overall %}
+                  {% for i in "12345" %}
+                    {% if forloop.counter <= rating|floatformat:0|add:"0" %}
+                      ★
+                    {% else %}
+                      ☆
+                    {% endif %}
+                  {% endfor %}
+                {% endwith %}
+              </div>
+              <span class="rating-value">
+                {% if avg_rating_overall > 0 %}
+                  {{ avg_rating_overall|floatformat:1 }}
+                {% else %}
+                  N/A
+                {% endif %}
+              </span>
+              <span style="opacity:0.8;font-size:14px">/5</span>
+            </div>
+            
+            {% if profile.bio %}
+              <div class="profile-bio">{{ profile.bio }}</div>
+            {% endif %}
+            
+            {% if request.user.is_authenticated %}
+              {% if request.user != profile_user %}
+                <button class="btn-edit" onclick="blockUser('{{ profile_user.username }}'); return false;" style="background:#fee2e2;color:#dc2626;margin-top:10px">
+                  <i class="fas fa-ban"></i> Block User
+                </button>
+              {% else %}
+                <button class="btn-edit" onclick="openEditModal(); return false;">
+                  <i class="fas fa-edit"></i> Edit Profile
+                </button>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Sağ Sütun - İçerik -->
+        <div class="col-md-8">
+          <div class="content-section">
+            <!-- Bootstrap Tabs -->
+            <ul class="nav nav-tabs" id="profileTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="listings-tab" data-bs-toggle="tab" data-bs-target="#listings" type="button" role="tab">
+                  <i class="fas fa-list"></i> My Listings ({{ listing_count }})
+                </button>
+              </li>
+              {% if is_own_profile or profile.show_history %}
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
+                  <i class="fas fa-history"></i> Transaction History
+                </button>
+              </li>
+              {% endif %}
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">
+                  <i class="fas fa-star"></i> Reviews ({{ reviews|length }})
+                </button>
+              </li>
+            </ul>
+
+            <div class="tab-content" id="profileTabContent">
+              <!-- İlanlarım Sekmesi -->
+              <div class="tab-pane fade show active" id="listings" role="tabpanel">
+                {% if listings %}
+                  <div class="listings-grid">
+                    {% for listing in listings %}
+                      <div class="listing-card">
+                        <span class="listing-badge {{ listing.type }}">{{ listing.type|upper }}</span>
+                        {% if listing.is_online %}
+                          <span class="listing-badge online"><i class="fas fa-globe"></i> Online</span>
+                        {% endif %}
+                        {% if listing.image_url %}
+                          <img src="{{ listing.image_url }}" alt="{{ listing.title }}" style="width:100%;height:150px;object-fit:cover;border-radius:12px;margin-bottom:12px">
+                        {% endif %}
+                        <h4>{{ listing.title }}</h4>
+                        <p>{{ listing.description|truncatewords:20 }}</p>
+                        <div class="listing-meta">
+                          <div>⏱️ {{ listing.duration }}h</div>
+                          <div style="font-size:11px;color:#999">{{ listing.created_at|date:"M d, Y" }}</div>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <div class="empty-state-text">No listings yet</div>
+                  </div>
+                {% endif %}
+              </div>
+
+              <!-- Transaction History Sekmesi -->
+              {% if is_own_profile or profile.show_history %}
+              <div class="tab-pane fade" id="history" role="tabpanel">
+                <div id="historyContainer">
+                  <div class="empty-state">
+                    <i class="fas fa-history"></i>
+                    <div class="empty-state-text">Loading transaction history...</div>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+
+              <!-- Yorumlar Sekmesi -->
+              <div class="tab-pane fade" id="reviews" role="tabpanel">
+                <!-- Alt Sekmeler (Nav Pills) -->
+                <ul class="nav nav-pills mb-4" id="reviewTabs" role="tablist" style="border-bottom:2px solid #f3f4f6;padding-bottom:0">
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="provider-reviews-tab" data-bs-toggle="tab" data-bs-target="#provider-reviews" type="button" role="tab" style="border:none;color:#6b7280;font-weight:700;padding:12px 20px;border-radius:0;border-bottom:3px solid transparent;transition:all .2s">
+                      <i class="fas fa-hand-holding-heart"></i> As a Provider 
+                      {% if avg_rating_provider > 0 %}
+                        (⭐ {{ avg_rating_provider|floatformat:1 }})
+                      {% else %}
+                        ({{ provider_count }})
+                      {% endif %}
+                    </button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="receiver-reviews-tab" data-bs-toggle="tab" data-bs-target="#receiver-reviews" type="button" role="tab" style="border:none;color:#6b7280;font-weight:700;padding:12px 20px;border-radius:0;border-bottom:3px solid transparent;transition:all .2s">
+                      <i class="fas fa-user-check"></i> As a Receiver 
+                      {% if avg_rating_receiver > 0 %}
+                        (⭐ {{ avg_rating_receiver|floatformat:1 }})
+                      {% else %}
+                        ({{ receiver_count }})
+                      {% endif %}
+                    </button>
+                  </li>
+                </ul>
+                
+                <div class="tab-content" id="reviewTabContent">
+                  <!-- Provider Reviews -->
+                  <div class="tab-pane fade show active" id="provider-reviews" role="tabpanel">
+                    {% if reviews_as_provider %}
+                      {% for review in reviews_as_provider %}
+                        <div class="review-item">
+                          <div class="review-header">
+                            <div>
+                              <div class="review-author">{{ review.reviewer.username }}</div>
+                              {% if review.offer %}
+                                <span class="review-service-badge">For: {{ review.offer.title }}</span>
+                              {% elif review.service_request %}
+                                <span class="review-service-badge">For: {{ review.service_request.title }}</span>
+                              {% endif %}
+                            </div>
+                            <div class="review-rating">
+                              {% for i in "12345" %}
+                                {% if forloop.counter <= review.rating %}
+                                  ★
+                                {% else %}
+                                  ☆
+                                {% endif %}
+                              {% endfor %}
+                            </div>
+                          </div>
+                          {% if review.comment %}
+                            <div class="review-comment">{{ review.comment }}</div>
+                          {% endif %}
+                          <div class="review-date">{{ review.created_at|date:"F d, Y" }}</div>
+                        </div>
+                      {% endfor %}
+                    {% else %}
+                      <div class="empty-state">
+                        <i class="fas fa-hand-holding-heart"></i>
+                        <div class="empty-state-text">No reviews as a provider yet</div>
+                      </div>
+                    {% endif %}
+                  </div>
+                  
+                  <!-- Receiver Reviews -->
+                  <div class="tab-pane fade" id="receiver-reviews" role="tabpanel">
+                    {% if reviews_as_receiver %}
+                      {% for review in reviews_as_receiver %}
+                        <div class="review-item">
+                          <div class="review-header">
+                            <div>
+                              <div class="review-author">{{ review.reviewer.username }}</div>
+                              {% if review.offer %}
+                                <span class="review-service-badge">For: {{ review.offer.title }}</span>
+                              {% elif review.service_request %}
+                                <span class="review-service-badge">For: {{ review.service_request.title }}</span>
+                              {% endif %}
+                            </div>
+                            <div class="review-rating">
+                              {% for i in "12345" %}
+                                {% if forloop.counter <= review.rating %}
+                                  ★
+                                {% else %}
+                                  ☆
+                                {% endif %}
+                              {% endfor %}
+                            </div>
+                          </div>
+                          {% if review.comment %}
+                            <div class="review-comment">{{ review.comment }}</div>
+                          {% endif %}
+                          <div class="review-date">{{ review.created_at|date:"F d, Y" }}</div>
+                        </div>
+                      {% endfor %}
+                    {% else %}
+                      <div class="empty-state">
+                        <i class="fas fa-user-check"></i>
+                        <div class="empty-state-text">No reviews as a receiver yet</div>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <script>
+    const API = '/api';
+    let TOKEN = localStorage.getItem('token');
+    
+    async function req(ep, m='GET', b){
+      try{
+        const headers = {'Authorization':`Bearer ${TOKEN}`};
+        if(m !== 'DELETE') headers['Content-Type'] = 'application/json';
+        const r = await fetch(API+ep, {method:m, headers:headers, body:b?JSON.stringify(b):null});
+        if(r.status===401){ localStorage.clear(); location.href='/'; return null; }
+        return r.json();
+      }catch{ return null; }
+    }
+    
+    async function loadHistory() {
+      const d = await req(`/profile/{{ profile_user.username }}/history/`);
+      const container = document.getElementById('historyContainer');
+      if(!d || d.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-history"></i><div class="empty-state-text">No transaction history yet</div></div>';
+        return;
+      }
+      container.innerHTML = d.map(i => {
+        const date = new Date(i.created_at).toLocaleDateString();
+        return `
+          <div class="review-item">
+            <div class="review-header">
+              <div class="review-author">${i.title || 'Transaction'}</div>
+              <div style="font-size:12px;color:#9ca3af">${date}</div>
+            </div>
+            <div class="review-comment">Status: ${i.status}</div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    // Tab değiştiğinde history yükle
+    document.getElementById('history-tab')?.addEventListener('shown.bs.tab', function() {
+      loadHistory();
+    });
+    
+    function openEditModal() {
+      Swal.fire({
+        title: 'Edit Profile',
+        text: 'Profile editing feature will be available soon!',
+        icon: 'info',
+        confirmButtonColor: '#667eea'
+      });
+    }
+    
+    async function blockUser(username) {
+      const result = await Swal.fire({
+        title: 'Block User?',
+        text: `Are you sure you want to block ${username}? You won't see their listings or messages.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, block!',
+        cancelButtonText: 'Cancel'
+      });
+      
+      if(result.isConfirmed) {
+        const r = await req(`/block/${username}/`, 'POST');
+        if(r.status === 'success') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Blocked!',
+            text: `${username} has been blocked`,
+            timer: 2000,
+            showConfirmButton: false,
+            position: 'top-end',
+            toast: true
+          });
+          setTimeout(() => location.href='/', 1000);
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: r.message || 'Failed to block user',
+            confirmButtonColor: '#3085d6'
+          });
+        }
+      }
+    }
+  </script>
+</body>
+</html>
+
