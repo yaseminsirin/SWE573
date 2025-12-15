@@ -419,6 +419,14 @@
           <option value="Other">Other</option>
         </select></div>
         <div class="field" id="customCategoryField" style="display:none"><label class="label">Custom Category</label><input type="text" class="input" id="inpCustomCat" oninvalid="this.setCustomValidity('Please enter a custom category')" oninput="this.setCustomValidity('')" placeholder="Enter your custom category"></div>
+        <div class="field">
+          <label class="label">Tags (Optional - Search Wikidata)</label>
+          <div style="position:relative">
+            <input type="text" class="input" id="tagSearchInput" placeholder="Search for tags (e.g., 'guitar', 'cooking')..." autocomplete="off" style="margin-bottom:8px">
+            <div id="tagSuggestions" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;max-height:200px;overflow-y:auto;z-index:1000;display:none;box-shadow:0 4px 12px rgba(0,0,0,0.1)"></div>
+          </div>
+          <div id="selectedTags" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;min-height:32px"></div>
+        </div>
         <div class="field"><label class="label">Duration (Hours)</label><input type="number" class="input" id="inpDur" value="1" min="1" step="1"></div>
         <div class="field" id="capacityField" style="display:none"><label class="label">Capacity (Number of Spots)</label><input type="number" class="input" id="inpCapacity" value="1" min="1" step="1" placeholder="How many people can join?"></div>
         <div class="field"><label class="label">Description</label><textarea class="input" id="inpDesc" rows="5" required oninvalid="this.setCustomValidity('Please enter a description')" oninput="this.setCustomValidity('')" placeholder="Details..."></textarea></div>
@@ -1326,6 +1334,7 @@
     
     // Arama fonksiyonu
     function filterListings(searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
       if(!searchTerm || searchTerm.trim() === '') {
         // Arama terimi yoksa tüm ilanları göster
         renderListings(allListings);
@@ -1351,6 +1360,12 @@
         if(item.address && item.address.toLowerCase().includes(term)) return true;
         // Kategoride ara
         if(item.category && item.category.toLowerCase().includes(term)) return true;
+        // Tags'de ara
+        if(item.tags && Array.isArray(item.tags)) {
+          for(const tag of item.tags) {
+            if(tag && tag.toLowerCase().includes(term)) return true;
+          }
+        }
         return false;
       });
       
@@ -2731,6 +2746,10 @@
     
     // Resim yükleme değişkenleri
     let selectedImageFile = null;
+    
+    // Tag değişkenleri
+    let selectedTags = [];
+    let tagSearchTimeout = null;
 
     $('#btnOffer').onclick = () => openSheet('offer');
     $('#btnRequest').onclick = () => openSheet('request');
@@ -2760,6 +2779,11 @@
           $('#inpCustomCat').value = '';
         }
       };
+      // Tags'ı sıfırla
+      selectedTags = [];
+      $('#selectedTags').innerHTML = '';
+      $('#tagSearchInput').value = '';
+      $('#tagSuggestions').style.display = 'none';
       // Resim yükleme alanını sıfırla
       removeImage();
       // is_online checkbox'ını sıfırla
@@ -3136,6 +3160,11 @@
       // Resim varsa ekle
       if(selectedImageFile) {
         formData.append('image', selectedImageFile);
+      }
+      
+      // Tags ekle (JSON string olarak)
+      if(selectedTags.length > 0) {
+        formData.append('tags', JSON.stringify(selectedTags));
       }
       
       console.log('Sending data with FormData');
@@ -3710,6 +3739,84 @@
     window.showAdminTab = showAdminTab;
     window.deleteAdminListing = deleteAdminListing;
     window.deleteAdminTopic = deleteAdminTopic;
+    
+    // Tag search functionality
+    function displayTagSuggestions(tags) {
+      const suggestionsEl = $('#tagSuggestions');
+      if(!tags || tags.length === 0) {
+        suggestionsEl.style.display = 'none';
+        return;
+      }
+      
+      suggestionsEl.innerHTML = tags.map(tag => {
+        const escapedTag = tag.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        return `<div class="tag-suggestion" onclick="selectTag('${escapedTag}')" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid #e5e7eb;transition:background .2s" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#fff'">${tag}</div>`;
+      }).join('');
+      suggestionsEl.style.display = 'block';
+    }
+    
+    window.selectTag = function(tag) {
+      if(!selectedTags.includes(tag)) {
+        selectedTags.push(tag);
+        renderSelectedTags();
+      }
+      $('#tagSearchInput').value = '';
+      $('#tagSuggestions').style.display = 'none';
+    };
+    
+    window.removeTag = function(tag) {
+      selectedTags = selectedTags.filter(t => t !== tag);
+      renderSelectedTags();
+    };
+    
+    function renderSelectedTags() {
+      const container = $('#selectedTags');
+      if(selectedTags.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+      container.innerHTML = selectedTags.map(tag => {
+        const escapedTag = tag.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        return `<span class="tag-chip" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#667eea;color:#fff;border-radius:20px;font-size:13px;font-weight:600">
+          ${tag}
+          <button type="button" onclick="removeTag('${escapedTag}')" style="background:none;border:none;color:#fff;cursor:pointer;font-size:16px;line-height:1;padding:0;width:18px;height:18px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background .2s" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='transparent'">×</button>
+        </span>`;
+      }).join('');
+    }
+    
+    // Initialize tag search input handler
+    setTimeout(() => {
+      const tagSearchInput = $('#tagSearchInput');
+      if(tagSearchInput) {
+        tagSearchInput.oninput = function() {
+          const query = this.value.trim();
+          clearTimeout(tagSearchTimeout);
+          
+          if(query.length < 2) {
+            $('#tagSuggestions').style.display = 'none';
+            return;
+          }
+          
+          tagSearchTimeout = setTimeout(async () => {
+            try {
+              const result = await req(`/wikidata/tags/?q=${encodeURIComponent(query)}`);
+              if(result && result.tags && Array.isArray(result.tags)) {
+                displayTagSuggestions(result.tags);
+              }
+            } catch(err) {
+              console.error('Error fetching tags:', err);
+            }
+          }, 300);
+        };
+      }
+      
+      // Close suggestions when clicking outside
+      document.addEventListener('click', function(e) {
+        if(!e.target.closest('#tagSearchInput') && !e.target.closest('#tagSuggestions')) {
+          $('#tagSuggestions').style.display = 'none';
+        }
+      });
+    }, 100);
   </script>
 </body>
 </html>

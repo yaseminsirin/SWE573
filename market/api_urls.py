@@ -9,7 +9,7 @@ from .views import (
     user_reviews_api, create_review_api, check_review_exists_api, edit_profile_api, add_review_api,
     block_user_api, blocked_users_api, delete_conversation_api, delete_message_api,
     forum_topics_api, forum_topic_detail_api, forum_comments_api, pending_requests_api,
-    admin_dashboard_stats_api
+    admin_dashboard_stats_api, wikidata_tags_api
 )
 
 router = DefaultRouter()
@@ -48,4 +48,5 @@ urlpatterns = [
     path('forum-topics/<int:topic_id>/', forum_topic_detail_api, name='api-forum-topic-detail'),
     path('forum-topics/<int:topic_id>/comments/', forum_comments_api, name='api-forum-comments'),
     path('admin/dashboard-stats/', admin_dashboard_stats_api, name='api-admin-dashboard-stats'),
+    path('wikidata/tags/', wikidata_tags_api, name='api-wikidata-tags'),
 ]

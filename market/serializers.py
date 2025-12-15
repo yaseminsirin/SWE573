@@ -144,7 +144,7 @@ class ServiceOfferSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = ServiceOffer
-        fields = ['id','user','user_info','title','description','category','duration','capacity','accepted_count','pending_interactions','latitude','longitude','address','location','image','image_url','is_visible','is_online','created_at']
+        fields = ['id','user','user_info','title','description','category','duration','capacity','accepted_count','pending_interactions','latitude','longitude','address','location','image','image_url','is_visible','is_online','tags','created_at']
         extra_kwargs = {
             'latitude': {'required': False, 'allow_null': True},
             'longitude': {'required': False, 'allow_null': True},
@@ -194,7 +194,7 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = ServiceRequest
-        fields = ['id','user','user_info','title','description','category','duration','latitude','longitude','address','location','image','image_url','is_visible','is_online','created_at']
+        fields = ['id','user','user_info','title','description','category','duration','latitude','longitude','address','location','image','image_url','is_visible','is_online','tags','created_at']
         extra_kwargs = {
             'latitude': {'required': False, 'allow_null': True},
             'longitude': {'required': False, 'allow_null': True},

@@ -46,6 +46,7 @@ class ServiceOffer(models.Model):
     image = models.ImageField(upload_to='listings/', blank=True, null=True, help_text="Listing image")
     is_visible = models.BooleanField(default=True)
     is_online = models.BooleanField(default=False)
+    tags = models.JSONField(default=list, blank=True, help_text="Semantic tags from Wikidata")
     created_at = models.DateTimeField(auto_now_add=True)
     def __str__(self): return self.title
 
@@ -62,6 +63,7 @@ class ServiceRequest(models.Model):
     image = models.ImageField(upload_to='listings/', blank=True, null=True, help_text="Listing image")
     is_visible = models.BooleanField(default=True)
     is_online = models.BooleanField(default=False)
+    tags = models.JSONField(default=list, blank=True, help_text="Semantic tags from Wikidata")
     created_at = models.DateTimeField(auto_now_add=True)
     def __str__(self): return self.title
 

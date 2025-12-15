@@ -108,6 +108,21 @@ class ServiceOfferViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer): 
         instance = serializer.save(user=self.request.user)
+        
+        # Tags'i parse et ve kaydet
+        tags_data = self.request.data.get('tags')
+        if tags_data:
+            try:
+                if isinstance(tags_data, str):
+                    tags = json.loads(tags_data)
+                else:
+                    tags = tags_data
+                if isinstance(tags, list):
+                    instance.tags = tags
+                    instance.save(update_fields=['tags'])
+            except (json.JSONDecodeError, TypeError):
+                pass
+        
         # is_visible'i zorla True yap (güvenlik için)
         instance.is_visible = True
         instance.save()
@@ -247,6 +262,21 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer): 
         instance = serializer.save(user=self.request.user)
+        
+        # Tags'i parse et ve kaydet
+        tags_data = self.request.data.get('tags')
+        if tags_data:
+            try:
+                if isinstance(tags_data, str):
+                    tags = json.loads(tags_data)
+                else:
+                    tags = tags_data
+                if isinstance(tags, list):
+                    instance.tags = tags
+                    instance.save(update_fields=['tags'])
+            except (json.JSONDecodeError, TypeError):
+                pass
+        
         # is_visible'i zorla True yap (güvenlik için)
         instance.is_visible = True
         instance.save()
@@ -1640,3 +1670,19 @@ def admin_dashboard_stats_api(request):
         'total_forum_topics': total_forum_topics,
         'recent_activity': recent_activity
     })
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def wikidata_tags_api(request):
+    """Get Wikidata tag suggestions for a search query"""
+    from .wikidata import get_wikidata_suggestions
+    
+    query = request.GET.get('q', '').strip()
+    if not query:
+        return Response({'tags': []}, status=status.HTTP_200_OK)
+    
+    try:
+        tags = get_wikidata_suggestions(query)
+        return Response({'tags': tags}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e), 'tags': []}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
