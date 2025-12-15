@@ -557,27 +557,58 @@
     };
     
     async function authReq(url, body, isSign=false){
+      try {
       const res = await fetch(API+url, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
-      const data = await res.json();
-      if(res.ok){
-        if(isSign){ 
-        Swal.fire({
-          icon: 'success',
-          title: 'Account Created!',
-          text: 'Please login now.',
-          timer: 3000,
-          showConfirmButton: false,
-          position: 'top-end',
-          toast: true
-        });
-          $('#tabLogin').click(); 
+        let data = {};
+        try {
+          const text = await res.text();
+          if(text) {
+            data = JSON.parse(text);
+          }
+        } catch(e) {
+          // Response body JSON değilse veya boşsa, data boş kalır
+          console.warn('Could not parse response:', e);
         }
-        else { localStorage.setItem('token',data.access); localStorage.setItem('user',JSON.stringify({username:body.username})); TOKEN=data.access; USER={username:body.username}; initApp(); }
-      } else {
+        
+      if(res.ok){
+          if(isSign){ 
+            Swal.fire({
+              icon: 'success',
+              title: 'Account Created!',
+              text: 'Please login now.',
+              timer: 3000,
+              showConfirmButton: false,
+              position: 'top-end',
+              toast: true
+            });
+            $('#tabLogin').click(); 
+          }
+          else { 
+            if(data.access) {
+              localStorage.setItem('token',data.access); 
+              localStorage.setItem('user',JSON.stringify({username:body.username})); 
+              TOKEN=data.access; 
+              USER={username:body.username}; 
+              initApp(); 
+            } else {
+              throw new Error('No access token received');
+            }
+          }
+        } else {
+          const errorMsg = data.error || (res.status === 401 ? 'Invalid username or password' : 'An error occurred');
+          await Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: errorMsg,
+            confirmButtonColor: '#3085d6'
+          });
+        }
+      } catch(err) {
+        console.error('Auth request failed:', err);
         await Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: data.error || 'An error occurred',
+          text: err.message || 'Network error. Please try again.',
           confirmButtonColor: '#3085d6'
         });
       }
@@ -740,6 +771,14 @@
           <div class="detail-meta-item"><span>📅</span> <span>${formatDate(item.created_at)}</span></div>
         </div>
         <div class="detail-description">${item.description}</div>
+        ${item.tags && Array.isArray(item.tags) && item.tags.length > 0 ? `
+          <div style="margin-top:16px;margin-bottom:16px">
+            <div style="font-size:13px;font-weight:700;color:#4b5563;margin-bottom:8px">Tags:</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              ${item.tags.map(tag => `<span style="display:inline-block;padding:6px 12px;background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;border-radius:16px;font-size:12px;font-weight:600">🏷️ ${tag}</span>`).join('')}
+            </div>
+          </div>
+        ` : ''}
         ${item.address ? `<div class="detail-address">📍 ${item.address}</div>` : ''}
         ${isOwn && type === 'offer' && item.pending_interactions && item.pending_interactions.length > 0 ? `
           <div style="margin-top:20px;padding:16px;background:#f9fafb;border-radius:12px">
@@ -1415,6 +1454,13 @@
           </div>
         ` : '';
         
+        // Tags HTML
+        const tagsHtml = i.tags && Array.isArray(i.tags) && i.tags.length > 0 ? `
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;margin-bottom:8px">
+            ${i.tags.map(tag => `<span style="display:inline-block;padding:4px 10px;background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;border-radius:12px;font-size:11px;font-weight:600">🏷️ ${tag}</span>`).join('')}
+          </div>
+        ` : '';
+        
         return `
         <div class="card" data-item-id="${i.id}" data-item-type="${itemType}" data-item-index="${idx}" style="cursor:pointer;position:relative">
           <div class="card-header-row">
@@ -1427,6 +1473,7 @@
           ${spotsHtml}
           <h3>${i.title}</h3>
           <p>${i.description}</p>
+          ${tagsHtml}
           <div class="card-meta">
             <div class="user-tag"><div class="u-avatar">${i.user_info.username[0].toUpperCase()}</div><a href="/profile/${i.user_info.username}/" style="color:inherit;text-decoration:none;font-weight:700">${i.user_info.username}</a></div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
