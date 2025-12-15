@@ -38,6 +38,7 @@ class ServiceOffer(models.Model):
     description = models.TextField()
     category = models.CharField(max_length=50)
     duration = models.IntegerField(default=1)
+    capacity = models.IntegerField(default=1, help_text="Number of spots available for this offer")
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, help_text="Latitude coordinate")
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, help_text="Longitude coordinate")
     address = models.TextField(blank=True, null=True, help_text="Address text")
@@ -193,6 +194,46 @@ class Notification(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.notification_type}"
+
+class ForumTopic(models.Model):
+    """Forum topic modeli"""
+    CATEGORY_CHOICES = [
+        ('general', 'General'),
+        ('group_request', 'Group Request'),
+        ('event', 'Event'),
+        ('help', 'Help'),
+    ]
+    
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='forum_topics')
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='general')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return self.title
+    
+    @property
+    def comment_count(self):
+        return self.comments.count()
+
+class ForumComment(models.Model):
+    """Forum comment modeli"""
+    topic = models.ForeignKey(ForumTopic, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='forum_comments')
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['created_at']
+    
+    def __str__(self):
+        return f"Comment by {self.author.username} on {self.topic.title}"
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

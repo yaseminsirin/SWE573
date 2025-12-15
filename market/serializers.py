@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ServiceOffer, ServiceRequest, TimeTransaction, InteractionRequest, Profile, ChatMessage, Review
+from .models import ServiceOffer, ServiceRequest, TimeTransaction, InteractionRequest, Profile, ChatMessage, Review, ForumTopic, ForumComment
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -75,6 +75,9 @@ class InteractionRequestSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     offer_id = serializers.SerializerMethodField()
     request_id = serializers.SerializerMethodField()
+    offer_capacity = serializers.SerializerMethodField(read_only=True)
+    is_group_chat = serializers.SerializerMethodField(read_only=True)
+    group_participants = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = InteractionRequest
@@ -83,7 +86,8 @@ class InteractionRequestSerializer(serializers.ModelSerializer):
             'title', 'duration', 'type', # Dinamik alanlar
             'message', 'status', 'appointment_date', 'date_proposed_by_username',
             'is_completed_by_provider', 'is_confirmed_by_receiver', 'created_at',
-            'offer_id', 'request_id' # Listing ID'leri
+            'offer_id', 'request_id', 'offer_capacity', # Listing ID'leri ve capacity
+            'is_group_chat', 'group_participants' # Grup chat bilgileri
         ]
         read_only_fields = ['status', 'created_at']
 
@@ -101,15 +105,46 @@ class InteractionRequestSerializer(serializers.ModelSerializer):
     
     def get_request_id(self, obj):
         return obj.service_request.id if obj.service_request else None
+    
+    def get_offer_capacity(self, obj):
+        """Offer capacity bilgisini getir (grup kontrolü için)"""
+        return obj.offer.capacity if obj.offer else None
+    
+    def get_is_group_chat(self, obj):
+        """Grup chat olup olmadığını kontrol et"""
+        # Serializer context'inden gelen is_group_chat değerini kullan
+        if hasattr(obj, '_is_group_chat'):
+            return obj._is_group_chat
+        # Veya direkt kontrol et
+        if obj.offer and obj.offer.capacity > 1 and obj.status == 'accepted':
+            from .models import InteractionRequest
+            group_count = InteractionRequest.objects.filter(
+                offer=obj.offer,
+                status='accepted'
+            ).count()
+            return group_count > 1
+        return False
+    
+    def get_group_participants(self, obj):
+        """Grup chat'teki katılımcı sayısını getir"""
+        if obj.offer and obj.offer.capacity > 1 and obj.status == 'accepted':
+            from .models import InteractionRequest
+            return InteractionRequest.objects.filter(
+                offer=obj.offer,
+                status='accepted'
+            ).count()
+        return 0
 
 class ServiceOfferSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     user_info = serializers.SerializerMethodField(read_only=True)
     image_url = serializers.SerializerMethodField(read_only=True)
+    accepted_count = serializers.SerializerMethodField(read_only=True)
+    pending_interactions = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = ServiceOffer
-        fields = ['id','user','user_info','title','description','category','duration','latitude','longitude','address','location','image','image_url','is_visible','is_online','created_at']
+        fields = ['id','user','user_info','title','description','category','duration','capacity','accepted_count','pending_interactions','latitude','longitude','address','location','image','image_url','is_visible','is_online','created_at']
         extra_kwargs = {
             'latitude': {'required': False, 'allow_null': True},
             'longitude': {'required': False, 'allow_null': True},
@@ -126,6 +161,31 @@ class ServiceOfferSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.image.url)
             return obj.image.url
         return None
+    
+    def get_accepted_count(self, obj):
+        """Accepted interaction sayısını hesapla"""
+        from .models import InteractionRequest
+        return InteractionRequest.objects.filter(
+            offer=obj,
+            status='accepted'
+        ).count()
+    
+    def get_pending_interactions(self, obj):
+        """Pending interaction'ları getir (sadece listing sahibi için)"""
+        from .models import InteractionRequest
+        request = self.context.get('request')
+        if request and request.user.is_authenticated and obj.user == request.user:
+            pending = InteractionRequest.objects.filter(
+                offer=obj,
+                status='pending'
+            ).select_related('sender').order_by('-created_at')
+            return [{
+                'id': p.id,
+                'sender_username': p.sender.username,
+                'message': p.message,
+                'created_at': p.created_at
+            } for p in pending]
+        return []
 
 class ServiceRequestSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
@@ -156,3 +216,24 @@ class TimeTransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TimeTransaction
         fields = '__all__'
+
+class ForumCommentSerializer(serializers.ModelSerializer):
+    author_username = serializers.CharField(source='author.username', read_only=True)
+    
+    class Meta:
+        model = ForumComment
+        fields = ['id', 'topic', 'author', 'author_username', 'content', 'created_at', 'updated_at']
+        read_only_fields = ['topic', 'author', 'created_at', 'updated_at']
+
+class ForumTopicSerializer(serializers.ModelSerializer):
+    author_username = serializers.CharField(source='author.username', read_only=True)
+    comment_count = serializers.SerializerMethodField()
+    comments = ForumCommentSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = ForumTopic
+        fields = ['id', 'author', 'author_username', 'title', 'content', 'category', 'created_at', 'updated_at', 'comment_count', 'comments']
+        read_only_fields = ['author', 'created_at', 'updated_at']
+    
+    def get_comment_count(self, obj):
+        return obj.comments.count()

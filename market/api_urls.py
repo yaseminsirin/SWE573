@@ -7,7 +7,9 @@ from .views import (
     my_profile_api, interaction_messages_api, interaction_action_api, my_interactions_api,
     my_listings_api, profile_by_username_api, user_listings_api, user_history_api,
     user_reviews_api, create_review_api, check_review_exists_api, edit_profile_api, add_review_api,
-    block_user_api, blocked_users_api, delete_conversation_api, delete_message_api
+    block_user_api, blocked_users_api, delete_conversation_api, delete_message_api,
+    forum_topics_api, forum_topic_detail_api, forum_comments_api, pending_requests_api,
+    admin_dashboard_stats_api
 )
 
 router = DefaultRouter()
@@ -31,6 +33,7 @@ urlpatterns = [
     path('review/check/<str:listing_type>/<int:listing_id>/', check_review_exists_api, name='api-check-review'),
     path('interactions/', my_interactions_api, name='api-my-interactions'),
     path('my-listings/', my_listings_api, name='api-my-listings'),
+    path('pending-requests/', pending_requests_api, name='api-pending-requests'),
     path('interaction/<int:interaction_id>/messages/', interaction_messages_api, name='api-interaction-messages'),
     path('interaction/<int:interaction_id>/delete/', delete_conversation_api, name='api-delete-conversation'),
     path('interaction/<int:interaction_id>/<str:action>/', interaction_action_api, name='api-interaction-action'),
@@ -41,4 +44,8 @@ urlpatterns = [
     path('block/<str:username>/', block_user_api, name='api-block-user'),
     path('blocked-users/', blocked_users_api, name='api-blocked-users'),
     path('message/<int:message_id>/delete/', delete_message_api, name='api-delete-message'),
+    path('forum-topics/', forum_topics_api, name='api-forum-topics'),
+    path('forum-topics/<int:topic_id>/', forum_topic_detail_api, name='api-forum-topic-detail'),
+    path('forum-topics/<int:topic_id>/comments/', forum_comments_api, name='api-forum-comments'),
+    path('admin/dashboard-stats/', admin_dashboard_stats_api, name='api-admin-dashboard-stats'),
 ]

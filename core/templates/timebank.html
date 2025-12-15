@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HIVE | Time Bank</title>
+  <title>TimeBank | Time Bank</title>
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <!-- Leaflet CSS -->
@@ -164,11 +164,10 @@
     .grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:20px}
     .card{background:#fff;border-radius:20px;padding:22px;box-shadow:0 4px 12px rgba(0,0,0,0.05);position:relative;display:flex;flex-direction:column;transition:transform .2s;z-index:1}
     .card:hover{transform:translateY(-4px); box-shadow:0 12px 30px rgba(0,0,0,0.1)}
-    .card-cat{position:absolute;top:20px;right:20px;font-size:11px;font-weight:800;background:#ede9fe;color:#7c3aed;padding:5px 10px;border-radius:99px;z-index:2}
-    .card-badges{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;align-items:center}
+    .card-header-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;width:100%}
     .card-type-badge{font-size:10px;font-weight:800;padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:0.5px;display:inline-block}
-    .card-online-badge{font-size:9px;font-weight:800;background:#3b82f6;color:#fff;padding:4px 8px;border-radius:99px;display:inline-flex;align-items:center;gap:4px}
-    .card h3{font-size:20px;margin-bottom:8px;font-weight:800;margin-top:0}
+    .card-cat{font-size:11px;font-weight:800;background:#ede9fe;color:#7c3aed;padding:5px 10px;border-radius:99px;display:inline-block}
+    .card h3{font-size:20px;margin-bottom:8px;margin-top:0;font-weight:800;word-wrap:break-word;line-height:1.3}
     .card p{color:#666;font-size:14px;line-height:1.5;margin-bottom:16px;flex:1}
     .card-meta{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;color:#888;border-top:1px solid #f0f0f0;padding-top:14px;margin-top:auto}
     
@@ -228,11 +227,9 @@
     .detail-sidebar.open{right:0}
     .detail-sidebar-header{padding:20px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;background:#fff;position:sticky;top:0;z-index:10}
     .detail-sidebar-body{padding:20px;flex:1}
-    .detail-badge{display:inline-block;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px}
+    .detail-badge{display:inline-block;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:800;text-transform:uppercase;margin-bottom:12px;letter-spacing:0.5px}
     .detail-badge.offer{background:#667eea;color:#fff}
     .detail-badge.request{background:#10b981;color:#fff}
-    .detail-online-badge{display:inline-flex;align-items:center;gap:6px;background:#3b82f6;color:#fff;padding:6px 12px;border-radius:99px;font-size:12px;font-weight:700;margin-left:8px}
-    .detail-badges-container{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}
     .detail-image{width:100%;height:200px;object-fit:cover;border-radius:12px;margin-bottom:16px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px}
     .detail-image img{width:100%;height:100%;object-fit:cover;border-radius:12px}
     .detail-title{font-size:24px;font-weight:800;margin-bottom:8px;color:#1f2937}
@@ -249,9 +246,12 @@
     .detail-btn.danger:hover{background:#fecaca}
 
     .chat-area{flex:1;display:flex;flex-direction:column;gap:12px;padding:20px;padding-bottom:30px}
-    .chat-bubble{max-width:80%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.5;box-shadow:0 2px 5px rgba(0,0,0,0.03)}
-    .chat-bubble.me{align-self:flex-end;background:var(--primary);color:#fff;border-bottom-right-radius:4px}
-    .chat-bubble.them{align-self:flex-start;background:#fff;color:#333;border:1px solid #eee;border-bottom-left-radius:4px}
+    .chat-bubble{max-width:70%;padding:8px 12px;border-radius:16px;font-size:13px;line-height:1.4;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin:4px 0;word-wrap:break-word}
+    .chat-bubble.me{align-self:flex-end;background:var(--primary);color:#fff;border-bottom-right-radius:4px;margin-left:auto}
+    .chat-bubble.them{align-self:flex-start;background:#fff;color:#333;border:1px solid #e5e7eb;border-bottom-left-radius:4px;margin-right:auto}
+    .chat-bubble-sender{font-size:11px;font-weight:600;margin-bottom:3px;opacity:0.85}
+    .chat-bubble-time{font-size:10px;opacity:0.65;margin-top:4px;text-align:right}
+    .chat-bubble.them .chat-bubble-time{text-align:left}
     .chat-footer{padding:16px;background:#fff;border-top:1px solid #eee;display:flex;gap:10px;align-items:center}
     .chat-input{flex:1;padding:12px 16px;border-radius:99px;border:2px solid #e5e7eb;outline:none}
     
@@ -268,27 +268,51 @@
     @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
     @keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
     @media (max-width:900px){.grid{grid-template-columns:1fr}.hero{grid-template-columns:1fr}.sheet{width:100%}}
+    
+    /* Admin Dashboard Styles */
+    .admin-tab-btn.active {
+      background: #fff !important;
+      border-bottom: 3px solid #667eea !important;
+      color: #667eea !important;
+    }
+    .admin-tab-content {
+      min-height: 400px;
+    }
+    .admin-tab-content table {
+      font-size: 14px;
+    }
+    .admin-tab-content table th {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .admin-tab-content table td {
+      vertical-align: middle;
+    }
+    .admin-tab-content table tr:hover {
+      background: #f9fafb;
+    }
   </style>
 </head>
 <body>
 
   <div class="modal-overlay" id="authModal">
     <div style="background:#fff;width:100%;max-width:400px;border-radius:24px;padding:36px;box-shadow:0 25px 50px rgba(0,0,0,0.25)" class="form-style">
-      <h2 style="text-align:center;margin-bottom:24px;font-size:32px;background:var(--primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900">🚀 HIVE</h2>
+      <h2 style="text-align:center;margin-bottom:24px;font-size:32px;background:var(--primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900">🚀 TimeBank</h2>
       <div style="display:flex;gap:10px;background:#f3f4f6;padding:5px;border-radius:14px;margin-bottom:24px">
         <button id="tabLogin" class="tab active" style="text-align:center;flex:1">Login</button>
         <button id="tabSignup" class="tab" style="text-align:center;flex:1">Sign Up</button>
       </div>
       <form id="loginForm">
-        <div class="field"><label class="label">Username</label><input class="input" name="username" required></div>
-        <div class="field"><label class="label">Password</label><input class="input" type="password" name="password" required></div>
+        <div class="field"><label class="label">Username</label><input class="input" name="username" required oninvalid="this.setCustomValidity('Please enter your username')" oninput="this.setCustomValidity('')"></div>
+        <div class="field"><label class="label">Password</label><input class="input" type="password" name="password" required oninvalid="this.setCustomValidity('Please enter your password')" oninput="this.setCustomValidity('')"></div>
         <button type="submit" class="btn">Login</button>
       </form>
       <form id="signupForm" class="hidden">
-        <div class="field"><label class="label">Username</label><input class="input" name="username" required></div>
-        <div class="field"><label class="label">Email</label><input class="input" name="email" required></div>
-        <div class="field"><label class="label">Password</label><input class="input" type="password" name="password" required></div>
-        <div class="field"><label class="label">Confirm</label><input class="input" type="password" name="confirm" required></div>
+        <div class="field"><label class="label">Username</label><input class="input" name="username" required oninvalid="this.setCustomValidity('Please enter a username')" oninput="this.setCustomValidity('')"></div>
+        <div class="field"><label class="label">Email</label><input class="input" type="email" name="email" required oninvalid="this.setCustomValidity('Please enter a valid email address')" oninput="this.setCustomValidity('')"></div>
+        <div class="field"><label class="label">Password</label><input class="input" type="password" name="password" required oninvalid="this.setCustomValidity('Please enter a password')" oninput="this.setCustomValidity('')"></div>
+        <div class="field"><label class="label">Confirm</label><input class="input" type="password" name="confirm" required oninvalid="this.setCustomValidity('Please confirm your password')" oninput="this.setCustomValidity('')"></div>
         <button type="submit" class="btn">Create Account</button>
       </form>
     </div>
@@ -296,7 +320,7 @@
 
   <div class="app hidden" id="app">
     <header>
-      <div class="logo">⏰ HIVE</div>
+      <div class="logo">⏰ TimeBank</div>
       <div class="actions">
         <div class="pill balance">⏱️ <span id="balanceDisplay">0h</span></div>
         <button class="icon-btn" id="notifBtn" title="Notifications" style="position:relative">
@@ -338,7 +362,9 @@
         <button class="tab active" data-view="all">ALL</button>
         <button class="tab" data-view="offers">Offers</button>
         <button class="tab" data-view="requests">Requests</button>
+        <button class="tab" data-view="forum">Forum</button>
         <button class="tab" data-view="inbox">Inbox</button>
+        <button class="tab" data-view="admin" style="display:none">👑 Admin Panel</button>
       </div>
     </div>
 
@@ -348,9 +374,18 @@
       </div>
       <div class="grid" id="gridView"></div>
       
+      <div class="hidden" id="forumContainer">
+        <div id="forumView"></div>
+      </div>
+      
+      <div class="hidden" id="adminContainer">
+        <div id="adminView"></div>
+      </div>
+      
       <div class="hidden" id="inboxContainer">
         <div class="sub-tabs">
             <button class="sub-tab active" onclick="loadInboxSub('chats')">💬 Chats</button>
+            <button class="sub-tab" onclick="loadInboxSub('pending')">⏳ Pending Requests</button>
             <button class="sub-tab" onclick="loadInboxSub('listings')">📋 My Listings</button>
         </div>
         <div class="inbox-list" id="inboxContent"></div>
@@ -365,10 +400,28 @@
         <input type="hidden" id="listingType" value="offer">
         <input type="hidden" id="inpLat" value="">
         <input type="hidden" id="inpLng" value="">
-        <div class="field"><label class="label">Title</label><input class="input" id="inpTitle" required placeholder="e.g. Guitar Lessons"></div>
-        <div class="field"><label class="label">Category</label><select class="input" id="inpCat"><option>Education</option><option>Tech</option><option>Home</option><option>Art</option><option>Sports</option></select></div>
+        <div class="field"><label class="label">Title</label><input class="input" id="inpTitle" required oninvalid="this.setCustomValidity('Please enter a title')" oninput="this.setCustomValidity('')" placeholder="e.g. Guitar Lessons"></div>
+        <div class="field"><label class="label">Category</label><select class="input" id="inpCat" required oninvalid="this.setCustomValidity('Please select a category')" oninput="this.setCustomValidity('')">
+          <option value="" disabled selected>Please select a category</option>
+          <option value="Education">Education</option>
+          <option value="Tech">Tech</option>
+          <option value="Home">Home</option>
+          <option value="Art">Art</option>
+          <option value="Sports">Sports</option>
+          <option value="Health">Health</option>
+          <option value="Music">Music</option>
+          <option value="Language">Language</option>
+          <option value="Cooking">Cooking</option>
+          <option value="Photography">Photography</option>
+          <option value="Writing">Writing</option>
+          <option value="Design">Design</option>
+          <option value="Business">Business</option>
+          <option value="Other">Other</option>
+        </select></div>
+        <div class="field" id="customCategoryField" style="display:none"><label class="label">Custom Category</label><input type="text" class="input" id="inpCustomCat" oninvalid="this.setCustomValidity('Please enter a custom category')" oninput="this.setCustomValidity('')" placeholder="Enter your custom category"></div>
         <div class="field"><label class="label">Duration (Hours)</label><input type="number" class="input" id="inpDur" value="1" min="1" step="1"></div>
-        <div class="field"><label class="label">Description</label><textarea class="input" id="inpDesc" rows="5" required placeholder="Details..."></textarea></div>
+        <div class="field" id="capacityField" style="display:none"><label class="label">Capacity (Number of Spots)</label><input type="number" class="input" id="inpCapacity" value="1" min="1" step="1" placeholder="How many people can join?"></div>
+        <div class="field"><label class="label">Description</label><textarea class="input" id="inpDesc" rows="5" required oninvalid="this.setCustomValidity('Please enter a description')" oninput="this.setCustomValidity('')" placeholder="Details..."></textarea></div>
         <div class="field">
           <label class="label">Image (Optional)</label>
           <div class="image-upload-area" id="imageUploadArea" tabindex="0">
@@ -645,32 +698,61 @@
     function openDetailSidebar(item, type) {
       currentDetailItem = {item, type};
       const body = $('#detailSidebarBody');
+      // user_info kontrolü
+      if(!item.user_info || !item.user_info.username) {
+        console.error('Invalid item data:', item);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Invalid listing data',
+          confirmButtonColor: '#3085d6'
+        });
+        return;
+      }
       const isOwn = item.user_info.username === USER.username;
       
       // Badge HTML
       const badgeClass = type === 'offer' ? 'offer' : 'request';
       const badgeText = type === 'offer' ? 'OFFER' : 'REQUEST';
-      const onlineBadge = item.is_online ? '<span class="detail-online-badge"><i class="fas fa-globe"></i> Online / Remote</span>' : '';
+      const onlineBadge = item.is_online ? '<span class="detail-online-badge" style="display:inline-flex;align-items:center;gap:6px;background:#3b82f6;color:#fff;padding:6px 12px;border-radius:99px;font-size:12px;font-weight:700;margin-left:8px"><i class="fas fa-globe"></i> Online / Remote</span>' : '';
       
       // Resim HTML - sadece resim varsa göster
       const imageHtml = item.image_url ? 
         `<div class="detail-image"><img src="${item.image_url}" alt="${item.title}"></div>` : '';
       
       body.innerHTML = `
-        <div class="detail-badges-container">
-          <span class="detail-badge ${badgeClass}">${badgeText}</span>
-          ${onlineBadge}
-        </div>
-        <h2 class="detail-title">${item.title}</h2>
+        <span class="detail-badge ${badgeClass}">${badgeText}</span>${onlineBadge}
         ${imageHtml}
+        <h2 class="detail-title">${item.title}</h2>
         <div class="detail-meta">
           <div class="detail-meta-item"><span>👤</span> <a href="/profile/${item.user_info.username}/" style="color:#667eea;text-decoration:none;font-weight:700">${item.user_info.username}</a></div>
           <div class="detail-meta-item"><span>⏱️</span> <span>${item.duration}h</span></div>
           <div class="detail-meta-item"><span>📂</span> <span>${item.category}</span></div>
+          ${type === 'offer' && item.capacity ? `<div class="detail-meta-item"><span>👥</span> <span>${item.capacity} ${item.capacity === 1 ? 'spot' : 'spots'} available</span></div>` : ''}
           <div class="detail-meta-item"><span>📅</span> <span>${formatDate(item.created_at)}</span></div>
         </div>
         <div class="detail-description">${item.description}</div>
         ${item.address ? `<div class="detail-address">📍 ${item.address}</div>` : ''}
+        ${isOwn && type === 'offer' && item.pending_interactions && item.pending_interactions.length > 0 ? `
+          <div style="margin-top:20px;padding:16px;background:#f9fafb;border-radius:12px">
+            <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;color:#1f2937">Pending Requests (${item.pending_interactions.length})</h3>
+            ${item.pending_interactions.map(p => `
+              <div style="background:#fff;padding:12px;border-radius:8px;margin-bottom:8px;border:1px solid #e5e7eb">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="width:32px;height:32px;border-radius:50%;background:#667eea;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">${(p.sender_username || 'U')[0].toUpperCase()}</div>
+                    <a href="/profile/${p.sender_username}/" style="color:#667eea;text-decoration:none;font-weight:700;font-size:14px">${p.sender_username}</a>
+                  </div>
+                  <div style="display:flex;gap:6px">
+                    <button onclick="acceptRequestFromDetail(${p.id})" style="padding:6px 12px;border-radius:6px;border:0;background:#10b981;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Accept</button>
+                    <button onclick="declineRequestFromDetail(${p.id})" style="padding:6px 12px;border-radius:6px;border:0;background:#ef4444;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Decline</button>
+                  </div>
+                </div>
+                ${p.message ? `<div style="font-size:13px;color:#4b5563;margin-top:8px;padding-top:8px;border-top:1px solid #e5e7eb">${(p.message || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
         ${!isOwn ? `
           <div class="detail-actions">
             <button class="detail-btn primary" onclick="startChatFromDetail(${item.id}, '${type}')">Contact</button>
@@ -694,6 +776,118 @@
     function closeDetailSidebar() {
       $('#detailSidebar').classList.remove('open');
       currentDetailItem = null;
+    }
+    
+    async function acceptRequestFromDetail(interactionId) {
+      try {
+        const r = await req(`/interaction/${interactionId}/accept/`, 'POST');
+        if(r.status || r.status === 'accepted') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Accepted!',
+            text: 'Request has been accepted',
+            timer: 2000,
+            showConfirmButton: false,
+            position: 'top-end',
+            toast: true
+          });
+          // Sidebar'ı yenile
+          if(currentDetailItem && currentDetailItem.item && currentDetailItem.item.id) {
+            try {
+              const endpoint = currentDetailItem.type === 'offer' ? `/service-offers/${currentDetailItem.item.id}/` : `/service-requests/${currentDetailItem.item.id}/`;
+              const item = await req(endpoint);
+              if(item && item.user_info && item.user_info.username) {
+                openDetailSidebar(item, currentDetailItem.type);
+              } else {
+                // Listing bulunamadı veya eksik veri, sidebar'ı kapat
+                closeDetailSidebar();
+              }
+            } catch(loadErr) {
+              // Listing bulunamadı, sidebar'ı kapat
+              console.error('Error reloading listing:', loadErr);
+              closeDetailSidebar();
+            }
+          }
+          // Listeleri yenile
+          if(currentListingType) {
+            await fetchListings(currentListingType);
+          }
+          // Pending requests listesini de yenile
+          if(CURRENT_INBOX_SUB === 'pending') {
+            fetchPendingRequests();
+          }
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: r.error || 'Failed to accept request',
+            confirmButtonColor: '#3085d6'
+          });
+        }
+      } catch(err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: err.message || 'Failed to accept request',
+          confirmButtonColor: '#3085d6'
+        });
+      }
+    }
+    
+    async function declineRequestFromDetail(interactionId) {
+      try {
+        const r = await req(`/interaction/${interactionId}/decline/`, 'POST');
+        if(r.status || r.status === 'declined') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Declined',
+            text: 'Request has been declined',
+            timer: 2000,
+            showConfirmButton: false,
+            position: 'top-end',
+            toast: true
+          });
+          // Sidebar'ı yenile
+          if(currentDetailItem && currentDetailItem.item && currentDetailItem.item.id) {
+            try {
+              const endpoint = currentDetailItem.type === 'offer' ? `/service-offers/${currentDetailItem.item.id}/` : `/service-requests/${currentDetailItem.item.id}/`;
+              const item = await req(endpoint);
+              if(item && item.user_info && item.user_info.username) {
+                openDetailSidebar(item, currentDetailItem.type);
+              } else {
+                // Listing bulunamadı veya eksik veri, sidebar'ı kapat
+                closeDetailSidebar();
+              }
+            } catch(loadErr) {
+              // Listing bulunamadı, sidebar'ı kapat
+              console.error('Error reloading listing:', loadErr);
+              closeDetailSidebar();
+            }
+          }
+          // Listeleri yenile
+          if(currentListingType) {
+            await fetchListings(currentListingType);
+          }
+          // Pending requests listesini de yenile
+          if(CURRENT_INBOX_SUB === 'pending') {
+            fetchPendingRequests();
+          }
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: r.error || 'Failed to decline request',
+            confirmButtonColor: '#3085d6'
+          });
+        }
+      } catch(err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: err.message || 'Failed to decline request',
+          confirmButtonColor: '#3085d6'
+        });
+      }
     }
 
     window.closeDetailSidebar = closeDetailSidebar;
@@ -752,6 +946,12 @@
         
         // Detail sidebar'ı kapat
         closeDetailSidebar();
+        
+        // Eğer profil sayfasındaysak, sayfayı yenile
+        if(window.location.pathname.includes('/profile/')) {
+          window.location.reload();
+          return;
+        }
         
         // Listeyi yenile (await ile)
         await fetchMyListings();
@@ -825,12 +1025,36 @@
       document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view===view));
       if(view === 'inbox') {
         $('#gridView').classList.add('hidden');
+        $('#forumContainer').classList.add('hidden');
+        $('#adminContainer').classList.add('hidden');
         $('#inboxContainer').classList.remove('hidden');
         $('#searchContainer').style.display = 'none';
         loadInboxSub('chats');
+      } else if(view === 'forum') {
+        $('#gridView').classList.add('hidden');
+        $('#inboxContainer').classList.add('hidden');
+        $('#adminContainer').classList.add('hidden');
+        $('#forumContainer').classList.remove('hidden');
+        $('#searchContainer').style.display = 'none';
+        fetchForumTopics();
+      } else if(view === 'admin') {
+        // Check if user is admin before loading admin panel
+        if(!USER.is_superuser && !USER.is_staff) {
+          toast('Access denied. Admin privileges required.');
+          loadView('all');
+          return;
+        }
+        $('#gridView').classList.add('hidden');
+        $('#inboxContainer').classList.add('hidden');
+        $('#forumContainer').classList.add('hidden');
+        $('#adminContainer').classList.remove('hidden');
+        $('#searchContainer').style.display = 'none';
+        loadAdminDashboard();
       } else {
         $('#gridView').classList.remove('hidden');
         $('#inboxContainer').classList.add('hidden');
+        $('#forumContainer').classList.add('hidden');
+        $('#adminContainer').classList.add('hidden');
         $('#searchContainer').style.display = 'block';
         // Arama kutusunu sıfırla
         $('#searchInput').value = '';
@@ -840,9 +1064,245 @@
 
     window.loadInboxSub = function(sub){
         CURRENT_INBOX_SUB = sub;
-        document.querySelectorAll('.sub-tab').forEach(t => t.classList.toggle('active', t.innerText.toLowerCase().includes(sub)));
-        sub==='chats' ? fetchChats() : fetchMyListings();
+        // Tüm sekmeleri deaktif et
+        document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+        // İlgili sekmeyi aktif et
+        document.querySelectorAll('.sub-tab').forEach(t => {
+            const tabText = t.innerText.toLowerCase();
+            if((sub === 'chats' && tabText.includes('chat')) || 
+               (sub === 'pending' && tabText.includes('pending')) || 
+               (sub === 'listings' && tabText.includes('listing'))) {
+                t.classList.add('active');
+            }
+        });
+        if(sub==='chats') fetchChats();
+        else if(sub==='pending') fetchPendingRequests();
+        else if(sub==='listings') fetchMyListings();
     }
+
+    async function fetchForumTopics(){
+      try {
+        const topics = await req('/forum-topics/').catch(() => []);
+        const forumView = $('#forumView');
+        
+        if(!Array.isArray(topics) || topics.length === 0) {
+          forumView.innerHTML = `
+            <div style="margin-bottom:24px">
+              <button class="action-btn" onclick="openForumCreate()" style="width:100%;max-width:400px;background:var(--primary);color:#fff;font-weight:700;padding:14px 24px;border-radius:12px;border:0;cursor:pointer;transition:transform .2s;box-shadow:0 4px 12px rgba(102,126,234,0.3);font-size:15px">
+                ➕ Create New Topic
+              </button>
+            </div>
+            <div style="text-align:center;padding:60px 20px;background:#fff;border-radius:12px;box-shadow:0 2px 4px rgba(0,0,0,0.05)">
+              <div style="font-size:48px;margin-bottom:16px">💬</div>
+              <h3 style="font-size:24px;font-weight:800;margin-bottom:12px;color:#1f2937">No Topics Yet</h3>
+              <p style="color:#6b7280;margin-bottom:24px">Be the first to start a discussion!</p>
+            </div>
+          `;
+          return;
+        }
+        
+        const categoryLabels = {
+          'general': 'General',
+          'group_request': 'Group Request',
+          'event': 'Event',
+          'help': 'Help'
+        };
+        
+        forumView.innerHTML = `
+          <div style="margin-bottom:24px">
+            <button class="action-btn" onclick="openForumCreate()" style="width:100%;max-width:400px;background:var(--primary);color:#fff;font-weight:700;padding:14px 24px;border-radius:12px;border:0;cursor:pointer;transition:transform .2s;box-shadow:0 4px 12px rgba(102,126,234,0.3);font-size:15px">
+              ➕ Create New Topic
+            </button>
+          </div>
+          <div class="inbox-list">
+            ${topics.map(topic => {
+              const cat = topic.category || 'general';
+              const catLabel = categoryLabels[cat] || cat;
+              const commentCount = topic.comment_count || 0;
+              const authorInitial = (topic.author_username || 'U')[0].toUpperCase();
+              
+              return `
+              <div class="inbox-item" onclick="openForumTopic(${topic.id})">
+                <div class="inbox-icon" style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:#fff;font-weight:800;font-size:18px">
+                  ${authorInitial}
+                </div>
+                <div class="inbox-info" style="flex:1">
+                  <div class="inbox-title" style="font-size:18px;font-weight:800;color:#1f2937;margin-bottom:6px">${topic.title || 'Untitled'}</div>
+                  <div style="font-size:13px;color:#666;margin-bottom:8px;line-height:1.5">
+                    ${(topic.content || '').replace(/\n/g, ' ').substring(0, 100)}${(topic.content || '').length > 100 ? '...' : ''}
+                  </div>
+                  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:#6b7280">
+                    <span>👤 <a href="/profile/${topic.author_username || 'unknown'}/" style="color:#667eea;text-decoration:none;font-weight:700" onclick="event.stopPropagation()">${topic.author_username || 'Unknown'}</a></span>
+                    <span>•</span>
+                    <span>${formatDate(topic.created_at)}</span>
+                    <span>•</span>
+                    <span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;background:#f3f4f6;color:#6b7280;text-transform:uppercase">${catLabel}</span>
+                    <span>•</span>
+                    <span>💬 ${commentCount} ${commentCount === 1 ? 'comment' : 'comments'}</span>
+                  </div>
+                </div>
+              </div>
+            `;
+            }).join('')}
+          </div>
+        `;
+      } catch(err) {
+        console.error('Error fetching forum topics:', err);
+        $('#forumView').innerHTML = `
+          <div style="text-align:center;padding:60px 20px;background:#fff;border-radius:20px;box-shadow:0 4px 12px rgba(0,0,0,0.05)">
+            <div style="font-size:48px;margin-bottom:16px">💬</div>
+            <h3 style="font-size:24px;font-weight:800;margin-bottom:12px;color:#1f2937">Forum</h3>
+            <p style="color:#6b7280">Loading topics...</p>
+          </div>
+        `;
+      }
+    }
+
+    function openForumCreate(){
+      Swal.fire({
+        title: 'Create Forum Topic',
+        html: `
+          <input id="forumTitle" class="swal2-input" placeholder="Topic Title">
+          <select id="forumCategory" class="swal2-input" style="margin-top:10px">
+            <option value="general">General</option>
+            <option value="group_request">Group Request</option>
+            <option value="event">Event</option>
+            <option value="help">Help</option>
+          </select>
+          <textarea id="forumContent" class="swal2-textarea" placeholder="Topic Content" style="margin-top:10px;min-height:150px"></textarea>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Create',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#667eea',
+        preConfirm: () => {
+          const title = document.getElementById('forumTitle').value.trim();
+          const content = document.getElementById('forumContent').value.trim();
+          const category = document.getElementById('forumCategory').value;
+          if(!title || !content) {
+            Swal.showValidationMessage('Please fill in all fields');
+            return false;
+          }
+          return {title, content, category};
+        }
+      }).then(async (result) => {
+        if(result.isConfirmed) {
+          try {
+            const response = await req('/forum-topics/', 'POST', result.value);
+            if(response.id) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Topic Created!',
+                timer: 2000,
+                showConfirmButton: false,
+                position: 'top-end',
+                toast: true
+              });
+              fetchForumTopics();
+            }
+          } catch(err) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: err.message || 'Failed to create topic',
+              confirmButtonColor: '#3085d6'
+            });
+          }
+        }
+      });
+    }
+
+    async function openForumTopic(topicId){
+      try {
+        const topic = await req(`/forum-topics/${topicId}/`);
+        const comments = await req(`/forum-topics/${topicId}/comments/`).catch(() => []);
+        
+        const commentsHtml = Array.isArray(comments) && comments.length > 0 ? comments.map(c => `
+          <div style="background:#f9fafb;padding:16px;border-radius:12px;margin-bottom:12px;border-left:4px solid #667eea">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <div style="font-weight:700;color:#1f2937">👤 ${c.author_username || 'Unknown'}</div>
+              <div style="font-size:12px;color:#6b7280">${formatDate(c.created_at)}</div>
+            </div>
+            <div style="color:#4b5563;line-height:1.6;white-space:pre-wrap">${(c.content || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+          </div>
+        `).join('') : '<p style="color:#6b7280;text-align:center;padding:20px">No comments yet</p>';
+        
+        Swal.fire({
+          title: topic.title || 'Forum Topic',
+          html: `
+            <div style="text-align:left;max-height:60vh;overflow-y:auto">
+              <div style="background:#f0f9ff;padding:16px;border-radius:12px;margin-bottom:20px;border-left:4px solid #667eea">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                  <div style="font-weight:700;color:#1f2937">👤 ${topic.author_username || 'Unknown'}</div>
+                  <div style="font-size:12px;color:#6b7280">${formatDate(topic.created_at)}</div>
+                </div>
+                <div style="color:#4b5563;line-height:1.6;white-space:pre-wrap">${(topic.content || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+              </div>
+              <div style="margin-bottom:16px">
+                <h4 style="font-weight:700;margin-bottom:12px;color:#1f2937">Comments (${Array.isArray(comments) ? comments.length : 0})</h4>
+                ${commentsHtml}
+              </div>
+              <div style="margin-top:20px">
+                <textarea id="newComment" placeholder="Write a comment..." style="width:100%;padding:12px;border-radius:8px;border:2px solid #e5e7eb;min-height:100px;font-family:inherit;resize:vertical"></textarea>
+                <button onclick="submitForumComment(${topicId})" style="width:100%;margin-top:12px;padding:12px;border-radius:8px;border:0;background:var(--primary);color:#fff;font-weight:700;cursor:pointer">Post Comment</button>
+              </div>
+            </div>
+          `,
+          width: '700px',
+          showConfirmButton: true,
+          confirmButtonText: 'Close',
+          confirmButtonColor: '#667eea'
+        });
+      } catch(err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: err.message || 'Failed to load topic',
+          confirmButtonColor: '#3085d6'
+        });
+      }
+    }
+
+    async function submitForumComment(topicId){
+      const content = document.getElementById('newComment')?.value.trim();
+      if(!content) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Required',
+          text: 'Please write a comment',
+          confirmButtonColor: '#3085d6',
+          timer: 2000,
+          showConfirmButton: false,
+          position: 'top-end',
+          toast: true
+        });
+        return;
+      }
+      
+      try {
+        await req(`/forum-topics/${topicId}/comments/`, 'POST', {content});
+        Swal.fire({
+          icon: 'success',
+          title: 'Comment Posted!',
+          timer: 2000,
+          showConfirmButton: false,
+          position: 'top-end',
+          toast: true
+        });
+        openForumTopic(topicId);
+      } catch(err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: err.message || 'Failed to post comment',
+          confirmButtonColor: '#3085d6'
+        });
+      }
+    }
+    
+    window.submitForumComment = submitForumComment;
+    window.openForumCreate = openForumCreate;
+
 
     // Tarih formatlama fonksiyonu
     function formatDate(dateString) {
@@ -923,17 +1383,35 @@
         // Badge HTML
         const badgeText = itemType === 'offer' ? 'OFFER' : 'REQUEST';
         const badgeClass = itemType === 'offer' ? 'offer' : 'request';
-        const badgeColor = itemType === 'offer' ? 'background:#667eea;color:#fff' : 'background:#10b981;color:#fff';
-        const onlineBadge = i.is_online ? '<span class="card-online-badge"><i class="fas fa-globe"></i> Online / Remote</span>' : '';
+        const onlineBadge = i.is_online ? '<span style="font-size:9px;font-weight:800;background:#3b82f6;color:#fff;padding:4px 8px;border-radius:99px;display:inline-flex;align-items:center;gap:4px;margin-left:8px"><i class="fas fa-globe"></i> Online / Remote</span>' : '';
+        
+        // Spot bilgisi (sadece offer için ve capacity varsa)
+        const capacity = i.capacity || 1;
+        const acceptedCount = i.accepted_count || 0;
+        const spotsHtml = itemType === 'offer' && capacity > 1 ? `
+          <div style="margin-top:8px;margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:12px;font-weight:700;color:#4b5563">
+              <span>👥 Spots</span>
+              <span>${acceptedCount}/${capacity}</span>
+            </div>
+            <div style="width:100%;height:8px;background:#e5e7eb;border-radius:99px;overflow:hidden">
+              <div style="width:${(acceptedCount / capacity) * 100}%;height:100%;background:${acceptedCount >= capacity ? '#10b981' : '#667eea'};transition:width .3s;border-radius:99px"></div>
+            </div>
+          </div>
+        ` : '';
         
         return `
         <div class="card" data-item-id="${i.id}" data-item-type="${itemType}" data-item-index="${idx}" style="cursor:pointer;position:relative">
-          <span class="card-cat">${i.category}</span>
-          <div class="card-badges">
-            <span class="card-type-badge ${badgeClass}" style="${badgeColor}">${badgeText}</span>
-            ${onlineBadge}
+          <div class="card-header-row">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span class="card-type-badge ${badgeClass}" style="${itemType === 'offer' ? 'background:#667eea;color:#fff' : 'background:#10b981;color:#fff'}">${badgeText}</span>
+              ${onlineBadge}
+            </div>
+            <span class="card-cat">${i.category}</span>
           </div>
-          <h3>${i.title}</h3><p>${i.description}</p>
+          ${spotsHtml}
+          <h3>${i.title}</h3>
+          <p>${i.description}</p>
           <div class="card-meta">
             <div class="user-tag"><div class="u-avatar">${i.user_info.username[0].toUpperCase()}</div><a href="/profile/${i.user_info.username}/" style="color:inherit;text-decoration:none;font-weight:700">${i.user_info.username}</a></div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
@@ -983,6 +1461,7 @@
         // DELETE için boş response olabilir
         if(r.status === 204 || (m === 'DELETE' && r.status === 200)) {
           return {success: true};
+
         }
         const data = await r.json();
         return data;
@@ -992,7 +1471,28 @@
       }
     }
 
-    async function fetchProfile(){ const d=await req('/profile/'); if(d) { $('#balanceDisplay').innerText=d.balance+'h'; USER_BALANCE = d.balance; } }
+    async function fetchProfile(){ 
+      const d=await req('/profile/'); 
+      if(d) { 
+        $('#balanceDisplay').innerText=d.balance+'h'; 
+        USER_BALANCE = d.balance; 
+      }
+      // Fetch user details to check admin status
+      try {
+        const userData = await req('/user/');
+        if(userData) {
+          USER.is_superuser = userData.is_superuser || false;
+          USER.is_staff = userData.is_staff || false;
+          // Update admin panel link visibility
+          const adminTab = document.querySelector('.tab[data-view="admin"]');
+          if(adminTab) {
+            adminTab.style.display = (USER.is_superuser || USER.is_staff) ? 'block' : 'none';
+          }
+        }
+      } catch(e) {
+        console.error('Error fetching user data:', e);
+      }
+    }
     async function checkNotifications(){ 
       const d=await req('/notifications/count/'); 
       $('#notifBadge').innerText=d.count; 
@@ -1292,20 +1792,246 @@
 
     async function fetchChats(){
       const d = await req('/interactions/');
-      $('#inboxContent').innerHTML = d.map(i=>{
+      // Grup chat'leri tekilleştir (aynı offer_id'ye sahip olanları birleştir)
+      const seenGroupChats = new Set();
+      const processedChats = [];
+      
+      for(const i of d) {
+        if(i.is_group_chat && i.offer_id) {
+          const groupKey = `group_${i.offer_id}`;
+          if(!seenGroupChats.has(groupKey)) {
+            seenGroupChats.add(groupKey);
+            processedChats.push(i);
+          }
+        } else {
+          processedChats.push(i);
+        }
+      }
+      
+      $('#inboxContent').innerHTML = processedChats.map(i=>{
+        const isGroup = i.is_group_chat && i.group_participants > 1;
         const otherUser = i.sender_username===USER.username ? i.receiver_username : i.sender_username;
+        const listingId = i.offer_id || i.request_id;
+        const listingType = i.type || (i.offer_id ? 'offer' : 'request');
+        const viewListingBtn = listingId ? `
+          <button onclick="event.stopPropagation(); openListingFromInbox(${listingId}, '${listingType}')" style="padding:6px 12px;border-radius:8px;border:0;background:#667eea;color:#fff;font-size:12px;font-weight:700;cursor:pointer;margin-top:8px">
+            📋 View Listing Details
+          </button>
+        ` : '';
+        
+        const groupBadge = isGroup ? `<span style="font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;background:#fef3c7;color:#d97706;margin-left:4px">👥 Group (${i.group_participants})</span>` : '';
+        
         return `
         <div class="inbox-item" style="position:relative">
           <div class="inbox-item-content" onclick="openChat(${i.id})" style="flex:1;display:flex;gap:16px;align-items:center;cursor:pointer">
-          <div class="inbox-icon">${i.sender_username===USER.username?'📤':'📥'}</div>
-            <div class="inbox-info" style="flex:1"><div class="inbox-title">${i.title}</div><span class="status-badge st-${i.status.toLowerCase()}">${i.status.replace('_',' ')}</span></div>
-            <div style="font-size:13px;color:#666">With: <a href="/profile/${otherUser}/" style="color:#667eea;text-decoration:none;font-weight:700" onclick="event.stopPropagation()">${otherUser}</a></div>
+          <div class="inbox-icon">${isGroup ? '👥' : (i.sender_username===USER.username?'📤':'📥')}</div>
+            <div class="inbox-info" style="flex:1">
+              <div class="inbox-title">${i.title || 'Untitled'}${groupBadge}</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap">
+                <span class="status-badge st-${i.status.toLowerCase()}">${i.status.replace('_',' ')}</span>
+                ${i.duration ? `<span style="font-size:11px;color:#666">⏱️ ${i.duration}h</span>` : ''}
+                ${listingType ? `<span style="font-size:11px;color:#666;text-transform:uppercase">${listingType}</span>` : ''}
+              </div>
+              ${viewListingBtn}
+            </div>
+            <div style="font-size:13px;color:#666;text-align:right">
+              ${isGroup ? `<div>Group Chat</div><div style="font-size:11px;color:#999">${i.group_participants} participants</div>` : `<div>With:</div><a href="/profile/${otherUser}/" style="color:#667eea;text-decoration:none;font-weight:700" onclick="event.stopPropagation()">${otherUser}</a>`}
+            </div>
           </div>
           <button class="delete-listing-btn" onclick="event.stopPropagation(); deleteConversation(${i.id})" title="Delete conversation" style="margin-left:8px">
             <i class="fas fa-trash-alt"></i>
           </button>
         </div>`;
       }).join('') || '<div style="padding:20px;text-align:center;color:#eee">No conversations.</div>';
+    }
+    
+    async function openListingFromInbox(listingId, listingType) {
+      try {
+        const endpoint = listingType === 'offer' ? `/service-offers/${listingId}/` : `/service-requests/${listingId}/`;
+        const item = await req(endpoint);
+        
+        // 404 veya boş response kontrolü
+        if (!item || item.detail) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Listing Not Found',
+            text: 'This listing may have been deleted or is no longer available.',
+            confirmButtonColor: '#3085d6'
+          });
+          // Chats listesini yenile (silinen listing'i kaldırmak için)
+          if(CURRENT_INBOX_SUB === 'chats') {
+            fetchChats();
+          }
+          return;
+        }
+        
+        // user_info kontrolü
+        if (!item.user_info || !item.user_info.username) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Invalid listing data',
+            confirmButtonColor: '#3085d6'
+          });
+          return;
+        }
+        
+        // openDetailSidebar fonksiyonunu çağır
+        openDetailSidebar(item, listingType);
+      } catch(err) {
+        console.error('Error loading listing detail from inbox:', err);
+        // 404 hatası kontrolü
+        if(err.message && (err.message.includes('404') || err.message.includes('Not Found'))) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Listing Not Found',
+            text: 'This listing may have been deleted or is no longer available.',
+            confirmButtonColor: '#3085d6'
+          });
+          // Chats listesini yenile
+          if(CURRENT_INBOX_SUB === 'chats') {
+            fetchChats();
+          }
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Could not load listing details',
+            confirmButtonColor: '#3085d6'
+          });
+        }
+      }
+    }
+    
+    // Pending requests'ten ilan detayını açma fonksiyonu
+    async function openListingFromPending(id, type) {
+      try {
+        const endpoint = type === 'offer' ? `/service-offers/${id}/` : `/service-requests/${id}/`;
+        const item = await req(endpoint);
+        
+        // 404 veya boş response kontrolü
+        if (!item || item.detail) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Listing Not Found',
+            text: 'This listing may have been deleted or is no longer available.',
+            confirmButtonColor: '#3085d6'
+          });
+          // Pending requests listesini yenile (silinen listing'i kaldırmak için)
+          if(CURRENT_INBOX_SUB === 'pending') {
+            fetchPendingRequests();
+          }
+          return;
+        }
+        
+        // user_info kontrolü
+        if (!item.user_info || !item.user_info.username) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Invalid listing data',
+            confirmButtonColor: '#3085d6'
+          });
+          return;
+        }
+        
+        // openDetailSidebar fonksiyonunu çağır
+        openDetailSidebar(item, type);
+      } catch (error) {
+        console.error('Error loading listing detail from pending:', error);
+        // 404 hatası kontrolü
+        if(error.message && (error.message.includes('404') || error.message.includes('Not Found'))) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Listing Not Found',
+            text: 'This listing may have been deleted or is no longer available.',
+            confirmButtonColor: '#3085d6'
+          });
+          // Pending requests listesini yenile
+          if(CURRENT_INBOX_SUB === 'pending') {
+            fetchPendingRequests();
+          }
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error loading listing details',
+            confirmButtonColor: '#3085d6'
+          });
+        }
+      }
+    }
+    
+    // Pending requests'ten accept fonksiyonu
+    async function acceptRequestFromPending(interactionId) {
+      try {
+        const r = await req(`/interaction/${interactionId}/accept/`, 'POST');
+        if(r.status || r.status === 'accepted') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Accepted!',
+            text: 'Request has been accepted',
+            timer: 2000,
+            showConfirmButton: false,
+            position: 'top-end',
+            toast: true
+          });
+          // Pending requests listesini yenile
+          fetchPendingRequests();
+          // Chats listesini de yenile (yeni chat açılmış olabilir)
+          if(CURRENT_INBOX_SUB === 'chats') {
+            fetchChats();
+          }
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: r.error || 'Failed to accept request',
+            confirmButtonColor: '#3085d6'
+          });
+        }
+      } catch(err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: err.message || 'Failed to accept request',
+          confirmButtonColor: '#3085d6'
+        });
+      }
+    }
+    
+    // Pending requests'ten decline fonksiyonu
+    async function declineRequestFromPending(interactionId) {
+      try {
+        const r = await req(`/interaction/${interactionId}/decline/`, 'POST');
+        if(r.status || r.status === 'declined') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Declined',
+            text: 'Request has been declined',
+            timer: 2000,
+            showConfirmButton: false,
+            position: 'top-end',
+            toast: true
+          });
+          // Pending requests listesini yenile
+          fetchPendingRequests();
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: r.error || 'Failed to decline request',
+            confirmButtonColor: '#3085d6'
+          });
+        }
+      } catch(err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: err.message || 'Failed to decline request',
+          confirmButtonColor: '#3085d6'
+        });
+      }
     }
     
     async function deleteConversation(interactionId) {
@@ -1348,6 +2074,58 @@
 
     // My listings verilerini sakla
     let myListingsData = [];
+
+    async function fetchPendingRequests(){
+        try {
+            const d = await req('/pending-requests/');
+            if(!Array.isArray(d) || d.length === 0) {
+                $('#inboxContent').innerHTML = '<div style="padding:20px;text-align:center;color:#eee">No pending requests.</div>';
+                return;
+            }
+            
+            $('#inboxContent').innerHTML = d.map(p => {
+                const badgeClass = p.listing_type === 'offer' ? 'offer' : 'request';
+                const badgeText = p.listing_type === 'offer' ? 'OFFER' : 'REQUEST';
+                return `
+                <div class="inbox-item" style="position:relative">
+                    <div class="inbox-item-content" style="flex:1;display:flex;gap:16px;align-items:center">
+                        <div class="inbox-icon" style="background:#fef3c7;color:#d97706">⏳</div>
+                        <div class="inbox-info" style="flex:1">
+                            ${p.listing_title && p.listing_title !== 'Hi' ? `<div class="inbox-title" style="font-weight:700;color:#1f2937">${p.listing_title}</div>` : ''}
+                            <div style="display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap">
+                                <span class="status-badge st-pending" style="background:#fef3c7;color:#d97706;font-weight:700">PENDING</span>
+                                <span style="font-size:12px;color:#666">⏱️ ${p.listing_duration}h</span>
+                                <span style="font-size:12px;font-weight:700;padding:2px 6px;border-radius:4px;background:${p.listing_type === 'offer' ? '#e0e7ff' : '#d1fae5'};color:${p.listing_type === 'offer' ? '#667eea' : '#059669'}">${badgeText}</span>
+                            </div>
+                            <div style="margin-top:8px;font-size:13px;color:#4b5563">
+                                <span style="font-weight:600">Request from:</span> 
+                                <a href="/profile/${p.sender_username}/" style="color:#667eea;text-decoration:none;font-weight:700" onclick="event.stopPropagation()">${p.sender_username}</a>
+                            </div>
+                            ${p.message && p.message.trim() !== 'Hi' && p.message.trim() !== 'Hi!' ? `<div style="margin-top:8px;padding:8px;background:#f9fafb;border-radius:6px;font-size:12px;color:#6b7280;line-height:1.5">${(p.message || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>` : ''}
+                            <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+                                <button onclick="event.stopPropagation(); openListingFromPending(${p.listing_id}, '${p.listing_type}')" style="padding:8px 16px;border-radius:8px;border:0;background:#667eea;color:#fff;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px">
+                                    📋 View Listing Details
+                                </button>
+                                <button onclick="event.stopPropagation(); acceptRequestFromPending(${p.interaction_id})" style="padding:8px 16px;border-radius:8px;border:0;background:#10b981;color:#fff;font-size:12px;font-weight:700;cursor:pointer">
+                                    ✓ Accept
+                                </button>
+                                <button onclick="event.stopPropagation(); declineRequestFromPending(${p.interaction_id})" style="padding:8px 16px;border-radius:8px;border:0;background:#ef4444;color:#fff;font-size:12px;font-weight:700;cursor:pointer">
+                                    ✗ Decline
+                                </button>
+                            </div>
+                        </div>
+                        <div style="font-size:12px;color:#9ca3af;text-align:right">
+                            ${formatDate(p.created_at)}
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        } catch(err) {
+            console.error('Error fetching pending requests:', err);
+            $('#inboxContent').innerHTML = '<div style="padding:20px;text-align:center;color:#eee">Error loading pending requests.</div>';
+        }
+    }
 
     async function fetchMyListings(){
         const d = await req('/my-listings/');
@@ -1525,12 +2303,142 @@
       if(!ACTIVE_CHAT_ID) return;
       const all = await req('/interactions/');
       const chat = all.find(x => x.id === ACTIVE_CHAT_ID);
-      const key = chat.status + (chat.appointment_date||'') + chat.is_completed_by_provider + chat.date_proposed_by_username;
+      if(!chat) return;
+      
+      const isGroupChat = chat.is_group_chat && chat.group_participants > 1;
+      const key = chat.status + (chat.appointment_date||'') + chat.is_completed_by_provider + chat.date_proposed_by_username + (isGroupChat ? '_group' : '');
       if(key!==LAST_RENDER_KEY) { updateBar(chat); LAST_RENDER_KEY=key; }
+      
+      // Chat başlığını güncelle - grup chat ise provider ve tüm üyeleri göster
+      const chatHeader = document.querySelector('#chatSheet .sheet-head h3');
+      if(chatHeader && isGroupChat) {
+        // Grup chat: Tüm üyeleri bul ve göster
+        const offerId = chat.offer_id || (chat.type === 'offer' ? chat.id : null);
+        if(offerId) {
+          const allGroupChats = all.filter(c => {
+            const cOfferId = c.offer_id || (c.type === 'offer' ? c.id : null);
+            return c.is_group_chat && cOfferId === offerId;
+          });
+          
+          const participants = new Set();
+          
+          // Provider'ı bul (offer'ın sahibi) - chat objesinden veya fetch ederek
+          if(chat.receiver_username && chat.type === 'offer') {
+            // Receiver provider olabilir
+            participants.add(chat.receiver_username);
+          }
+          
+          // Tüm kabul edilen üyeleri ekle
+          allGroupChats.forEach(c => {
+            if(c.sender_username) participants.add(c.sender_username);
+            if(c.receiver_username) participants.add(c.receiver_username);
+          });
+          
+          // Provider'ı bulmak için offer'ı fetch et
+          try {
+            const offer = await req(`/service-offers/${offerId}/`);
+            if(offer && offer.user_info && offer.user_info.username) {
+              participants.add(offer.user_info.username);
+            }
+          } catch(e) {
+            // Offer fetch edilemezse devam et
+          }
+          
+          const participantsList = Array.from(participants).join(', ');
+          chatHeader.textContent = `👥 Group Chat (${participants.size}): ${participantsList}`;
+        } else {
+          chatHeader.textContent = '👥 Group Chat';
+        }
+      } else if(chatHeader && !isGroupChat) {
+        // Normal 1-1 chat
+        const otherUser = chat.sender_username === USER.username ? chat.receiver_username : chat.sender_username;
+        chatHeader.textContent = `Chat with ${otherUser}`;
+      }
       
       const msgs = await req(`/interaction/${ACTIVE_CHAT_ID}/messages/`);
       const area = $('#msgArea');
-      area.innerHTML = msgs.map(m=>`<div class="chat-bubble ${m.sender_username === USER.username ? 'me' : 'them'}">${m.content}</div>`).join('');
+      
+      // Completion card'ları tekilleştir (aynı offer_id'ye sahip olanları birleştir)
+      const seenCompletionCards = new Set();
+      const processedMsgs = [];
+      
+      for(const m of msgs) {
+        let content = m.content || '';
+        try {
+          if(content.trim().startsWith('{') && content.trim().endsWith('}')) {
+            const cardData = JSON.parse(content);
+            if(cardData.type === 'completion_card' && cardData.offer_id) {
+              const cardKey = `completion_${cardData.offer_id}`;
+              if(!seenCompletionCards.has(cardKey)) {
+                seenCompletionCards.add(cardKey);
+                processedMsgs.push(m);
+              }
+              // Duplicate completion card'ı atla
+              continue;
+            }
+          }
+        } catch(e) {
+          // JSON parse hatası, normal mesaj olarak devam et
+        }
+        processedMsgs.push(m);
+      }
+      
+      // Mesajları render et - kompakt ve modern
+      area.innerHTML = processedMsgs.map(m => {
+        // Completion card kontrolü
+        let content = m.content || '';
+        try {
+          if(content.trim().startsWith('{') && content.trim().endsWith('}')) {
+            const cardData = JSON.parse(content);
+            if(cardData.type === 'completion_card' && cardData.offer_id) {
+              // Completion card render et
+              const participants = cardData.participants || [];
+              const confirmed = cardData.confirmed || [];
+              const isProvider = chat.receiver_username === USER.username;
+              const userConfirmed = confirmed.includes(USER.username);
+              
+              return `<div style="background:#f0f9ff;border:2px solid #3b82f6;border-radius:12px;padding:16px;margin:12px 0;max-width:85%">
+                <div style="font-weight:700;color:#1e40af;margin-bottom:12px;font-size:14px">✅ Service Completed</div>
+                <div style="font-size:13px;color:#1f2937;margin-bottom:12px">All participants need to confirm payment:</div>
+                <div style="margin-bottom:12px">
+                  ${participants.map(p => {
+                    const confirmedStatus = confirmed.includes(p);
+                    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px">
+                      <span style="font-weight:600;color:#4b5563">${p}</span>
+                      ${confirmedStatus ? '<span style="color:#10b981;font-weight:700">✓ Paid</span>' : '<span style="color:#ef4444;font-weight:700">⏳ Pending</span>'}
+                    </div>`;
+                  }).join('')}
+                </div>
+                ${!isProvider && !userConfirmed ? `
+                  <button onclick="confirmGroupCompletion(${cardData.offer_id})" style="width:100%;padding:10px;border-radius:8px;border:0;background:#10b981;color:#fff;font-weight:700;cursor:pointer;font-size:13px">
+                    💳 Pay (${chat.duration || 0}h)
+                  </button>
+                ` : isProvider ? `
+                  <div style="text-align:center;color:#6b7280;font-size:12px;font-style:italic">Waiting for all participants to pay...</div>
+                ` : `
+                  <div style="text-align:center;color:#10b981;font-size:12px;font-weight:700">✓ You have paid</div>
+                `}
+              </div>`;
+            }
+          }
+        } catch(e) {
+          // JSON parse hatası, normal mesaj olarak devam et
+        }
+        
+        const isMe = m.sender_username === USER.username;
+        const time = new Date(m.timestamp || Date.now()).toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit'});
+        content = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        
+        // Grup chat'te gönderen adını her zaman göster (kendimiz değilse)
+        const showSender = isGroupChat && !isMe && m.sender_username;
+        
+        return `<div class="chat-bubble ${isMe ? 'me' : 'them'}" style="${isGroupChat ? 'max-width:75%' : ''}">
+          ${showSender ? `<div class="chat-bubble-sender">${m.sender_username}</div>` : ''}
+          <div style="white-space:pre-wrap">${content}</div>
+          <div class="chat-bubble-time">${time}</div>
+        </div>`;
+      }).join('');
+      
       area.scrollTop = area.scrollHeight;
     }
 
@@ -1547,43 +2455,142 @@
 
       if(d.status==='pending'){
         title = "New Request";
-        if(d.receiver_username === USER.username) html = `<span>Accept?</span> <div><button class="ab-btn green" onclick="act('accept')">Accept</button> <button class="ab-btn red" onclick="act('decline')">Decline</button></div>`;
+        if(d.receiver_username === USER.username) html = `<span>Please check the listing details to accept or decline.</span>`;
         else { title="Request Sent"; html = `Waiting for provider response...`; }
       }
       else if(d.status==='accepted'){
         title = "Request Accepted";
-        html = `<span>Schedule a date:</span> <div><input type="datetime-local" id="dp" style="padding:6px;border:1px solid #ddd;border-radius:6px"> <button class="ab-btn blue" onclick="act('schedule')">Propose</button></div>`;
+        const isProvider = (d.type === 'offer' && d.receiver_username === USER.username) || (d.type === 'request' && d.sender_username === USER.username);
+        const isGroupChat = d.is_group_chat && d.group_participants > 1;
+        const isConsumer = !isProvider;
+        
+        // Provider için mark complete butonu
+        if(isProvider && !d.is_completed_by_provider) {
+          if(d.type === 'offer' && (d.offer_capacity && d.offer_capacity > 1 || isGroupChat)) {
+            // Grup offer - sadece tüm spotlar dolduğunda mark complete göster
+            const groupParticipants = d.group_participants || 0;
+            const offerCapacity = d.offer_capacity || 1;
+            if(groupParticipants >= offerCapacity) {
+              html = `<span>Mark as complete when service is done:</span> <button class="ab-btn green" onclick="act('complete')">Mark Complete</button>`;
+            } else {
+              html = `<span>Waiting for more participants (${groupParticipants}/${offerCapacity} spots filled).</span>`;
+            }
+          } else {
+            // 1-1 offer veya request
+            html = `<span>Mark as complete when service is done:</span> <button class="ab-btn green" onclick="act('complete')">Mark Complete</button>`;
+          }
+        } 
+        // Consumer için pay butonu (complete edildiyse)
+        else if(isConsumer && d.is_completed_by_provider && !d.is_confirmed_by_receiver) {
+          if(d.type === 'offer' && (d.offer_capacity && d.offer_capacity > 1 || isGroupChat)) {
+            // Grup offer - completion card'da pay butonu var, burada sadece mesaj
+            html = `<span>Service completed. Please confirm payment in the chat.</span>`;
+          } else {
+            // 1-1 offer veya request - direkt pay butonu
+            html = `<span>Service completed. Please confirm payment:</span> <button class="ab-btn green" onclick="act('confirm')">Pay (${d.duration || 0}h)</button>`;
+          }
+        }
+        // Provider için waiting mesajı
+        else if(isProvider && d.is_completed_by_provider) {
+          if(d.type === 'offer' && (d.offer_capacity && d.offer_capacity > 1 || isGroupChat)) {
+            html = `<span>Service completed. Waiting for all participants to confirm payment.</span>`;
+          } else {
+            html = `<span>Service completed. Waiting for payment confirmation.</span>`;
+          }
+        }
+        // Consumer için completed mesajı
+        else if(isConsumer && d.is_completed_by_provider && d.is_confirmed_by_receiver) {
+          html = `<span>✓ Payment confirmed. Transaction completed.</span>`;
+        }
+        // Hiçbir durum uymuyorsa boş
+        else {
+          html = ``;
+        }
       }
       else if(d.status==='date_proposed'){
-        title = "Date Proposed";
-        const date = new Date(d.appointment_date).toLocaleString();
-        const imProposer = d.date_proposed_by_username === USER.username;
-        if(imProposer) html = `You proposed <b>${date}</b>. Waiting.`;
-        else html = `<span>Proposed: <b>${date}</b></span> <div style="display:flex;gap:8px"><button class="ab-btn green" onclick="act('accept_date')">Accept</button> <button class="ab-btn red" onclick="act('reject_date')">Reject</button></div>`;
-      }
-      else if(d.status==='scheduled'){
-        title = "Scheduled";
-        const date = new Date(d.appointment_date).toLocaleString();
+        // Schedule a date kaldırıldı, accepted durumuna yönlendir
+        title = "Request Accepted";
         const isProvider = (d.type === 'offer' && d.receiver_username === USER.username) || (d.type === 'request' && d.sender_username === USER.username);
+        const isGroupChat = d.is_group_chat && d.group_participants > 1;
+        const isConsumer = !isProvider;
         
-        if(isProvider && !d.is_completed_by_provider) html=`<span>Date: <b>${date}</b></span> <button class="ab-btn green" onclick="act('complete')">Mark Complete</button>`;
-        else if(d.is_completed_by_provider && !d.is_confirmed_by_receiver){
-            title = "Job Done!";
-            if(!isProvider) html=`<span>Confirm & Pay?</span> <button class="ab-btn green" onclick="act('confirm')">Pay (${d.duration}h)</button>`;
-            else html=`Waiting for payment...`;
-        } else html=`Event: <b>${date}</b>`;
+        // Provider için mark complete butonu
+        if(isProvider && !d.is_completed_by_provider) {
+          html = `<span>Mark as complete when service is done:</span> <button class="ab-btn green" onclick="act('complete')">Mark Complete</button>`;
+        } 
+        // Consumer için pay butonu (complete edildiyse)
+        else if(isConsumer && d.is_completed_by_provider && !d.is_confirmed_by_receiver) {
+          if(d.type === 'offer' && (d.offer_capacity && d.offer_capacity > 1 || isGroupChat)) {
+            html = `<span>Service completed. Please confirm payment in the chat.</span>`;
+          } else {
+            html = `<span>Service completed. Please confirm payment:</span> <button class="ab-btn green" onclick="act('confirm')">Pay (${d.duration || 0}h)</button>`;
+          }
+        }
+        // Provider için waiting mesajı
+        else if(isProvider && d.is_completed_by_provider) {
+          if(d.type === 'offer' && (d.offer_capacity && d.offer_capacity > 1 || isGroupChat)) {
+            html = `<span>Service completed. Waiting for all participants to confirm payment.</span>`;
+          } else {
+            html = `<span>Service completed. Waiting for payment confirmation.</span>`;
+          }
+        }
+        // Consumer için completed mesajı
+        else if(isConsumer && d.is_completed_by_provider && d.is_confirmed_by_receiver) {
+          html = `<span>✓ Payment confirmed. Transaction completed.</span>`;
+        }
+        // Hiçbir durum uymuyorsa boş
+        else {
+          html = ``;
+        }
+      }
+      else if(d.status==='scheduled' || d.status==='date_proposed'){
+        // Schedule a date kaldırıldı, accepted durumuna yönlendir
+        title = "Request Accepted";
+        const isProvider = (d.type === 'offer' && d.receiver_username === USER.username) || (d.type === 'request' && d.sender_username === USER.username);
+        const isGroupChat = d.is_group_chat && d.group_participants > 1;
+        const isConsumer = !isProvider;
+        
+        // Provider için mark complete butonu
+        if(isProvider && !d.is_completed_by_provider) {
+          html = `<span>Mark as complete when service is done:</span> <button class="ab-btn green" onclick="act('complete')">Mark Complete</button>`;
+        } 
+        // Consumer için pay butonu (complete edildiyse)
+        else if(isConsumer && d.is_completed_by_provider && !d.is_confirmed_by_receiver) {
+          if(d.type === 'offer' && (d.offer_capacity && d.offer_capacity > 1 || isGroupChat)) {
+            html = `<span>Service completed. Please confirm payment in the chat.</span>`;
+          } else {
+            html = `<span>Service completed. Please confirm payment:</span> <button class="ab-btn green" onclick="act('confirm')">Pay (${d.duration || 0}h)</button>`;
+          }
+        }
+        // Provider için waiting mesajı
+        else if(isProvider && d.is_completed_by_provider) {
+          if(d.type === 'offer' && (d.offer_capacity && d.offer_capacity > 1 || isGroupChat)) {
+            html = `<span>Service completed. Waiting for all participants to confirm payment.</span>`;
+          } else {
+            html = `<span>Service completed. Waiting for payment confirmation.</span>`;
+          }
+        }
+        // Consumer için completed mesajı
+        else if(isConsumer && d.is_completed_by_provider && d.is_confirmed_by_receiver) {
+          html = `<span>✓ Payment confirmed. Transaction completed.</span>`;
+        }
+        // Hiçbir durum uymuyorsa boş
+        else {
+          html = ``;
+        }
       }
       else if(d.status==='completed'){ 
         title = "Completed"; 
         html = `Transaction successful.`;
         
+        // Her iki taraf da birbirine review verebilir
         // Karşı tarafı belirle
         const otherUser = d.sender_username === USER.username ? d.receiver_username : d.sender_username;
         const listingType = d.type || 'offer';
         const listingId = d.offer_id || d.request_id || null;
         
-        // Review kontrolü yap (asenkron)
-        if(listingId) {
+        // Review kontrolü yap (asenkron) - her iki taraf da review verebilir
+        if(listingId && otherUser) {
           checkReviewAndShowButton(otherUser, listingType, listingId, d.id).then(reviewExists => {
             let finalHtml = html;
             if(!reviewExists) {
@@ -1644,6 +2651,75 @@
         });
       }
     }
+    
+    // Grup chat completion confirmation
+    async function confirmGroupCompletion(offerId) {
+      try {
+        // Kullanıcının bu offer'a sahip interaction'ını bul
+        const all = await req('/interactions/');
+        const userInteraction = all.find(i => 
+          i.offer_id === offerId && 
+          (i.sender_username === USER.username || i.receiver_username === USER.username) &&
+          i.status === 'accepted'
+        );
+        
+        if(!userInteraction) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Interaction not found',
+            confirmButtonColor: '#3085d6'
+          });
+          return;
+        }
+        
+        // Confirm action'ını çağır
+        const r = await req(`/interaction/${userInteraction.id}/confirm/`, 'POST');
+        
+        if(r.status === 'completed') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Payment Confirmed!',
+            text: 'All participants confirmed. Transaction completed!',
+            timer: 3000,
+            showConfirmButton: false,
+            position: 'top-end',
+            toast: true
+          });
+        } else if(r.status === 'waiting_others') {
+          Swal.fire({
+            icon: 'info',
+            title: 'Payment Confirmed',
+            text: r.message || 'Waiting for other participants to confirm.',
+            timer: 3000,
+            showConfirmButton: false,
+            position: 'top-end',
+            toast: true
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: r.error || 'Failed to confirm payment',
+            confirmButtonColor: '#3085d6'
+          });
+        }
+        
+        LAST_RENDER_KEY = "";
+        loadChatMessages();
+        fetchProfile();
+      } catch(err) {
+        console.error('Error confirming group completion:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: err.message || 'Failed to confirm payment',
+          confirmButtonColor: '#3085d6'
+        });
+      }
+    }
+    
+    window.confirmGroupCompletion = confirmGroupCompletion;
 
     // Harita değişkenleri
     let locationMap = null;
@@ -1662,6 +2738,28 @@
     function openSheet(type){ 
       $('#listingSheet').classList.add('open'); 
       $('#listingType').value = type;
+      // Capacity field'ını sadece offer için göster
+      if(type === 'offer') {
+        $('#capacityField').style.display = 'block';
+      } else {
+        $('#capacityField').style.display = 'none';
+      }
+      // Category'yi sıfırla ve custom category field'ını gizle
+      $('#inpCat').value = '';
+      $('#customCategoryField').style.display = 'none';
+      $('#inpCustomCat').value = '';
+      $('#inpCustomCat').required = false;
+      // Category change event listener'ı ekle
+      $('#inpCat').onchange = function() {
+        if(this.value === 'Other') {
+          $('#customCategoryField').style.display = 'block';
+          $('#inpCustomCat').required = true;
+        } else {
+          $('#customCategoryField').style.display = 'none';
+          $('#inpCustomCat').required = false;
+          $('#inpCustomCat').value = '';
+        }
+      };
       // Resim yükleme alanını sıfırla
       removeImage();
       // is_online checkbox'ını sıfırla
@@ -1851,7 +2949,7 @@
               const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&viewbox=28.5,41.0,29.2,41.2&bounded=0&addressdetails=1`;
               const response = await fetch(url, {
                 headers: {
-                  'User-Agent': 'HIVE TimeBank App'
+                  'User-Agent': 'TimeBank App'
                 }
               });
               const data = await response.json();
@@ -1893,7 +2991,7 @@
                 const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&viewbox=28.5,41.0,29.2,41.2&bounded=0`;
                 const response = await fetch(url, {
                   headers: {
-                    'User-Agent': 'HIVE TimeBank App'
+                    'User-Agent': 'TimeBank App'
                   }
                 });
                 const data = await response.json();
@@ -1992,9 +3090,36 @@
       // FormData kullan (resim varsa)
       const formData = new FormData();
       formData.append('title', $('#inpTitle').value);
-      formData.append('category', $('#inpCat').value);
+      // Category: "Other" seçilmişse custom category'yi kullan
+      const selectedCategory = $('#inpCat').value;
+      if(!selectedCategory || selectedCategory === '') {
+        Swal.fire({
+          icon: 'error',
+          title: 'Category Required',
+          text: 'Please select a category',
+          confirmButtonColor: '#3085d6'
+        });
+        return;
+      }
+      const categoryValue = selectedCategory === 'Other' ? $('#inpCustomCat').value.trim() : selectedCategory;
+      if(!categoryValue || (selectedCategory === 'Other' && !$('#inpCustomCat').value.trim())) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Category Required',
+          text: selectedCategory === 'Other' ? 'Please enter a custom category' : 'Please select a category',
+          confirmButtonColor: '#3085d6'
+        });
+        return;
+      }
+      formData.append('category', categoryValue);
       formData.append('duration', parseInt($('#inpDur').value));
       formData.append('description', $('#inpDesc').value);
+      
+      // Capacity sadece offer için ekle
+      if(t === 'offer') {
+        const capacity = parseInt($('#inpCapacity').value) || 1;
+        formData.append('capacity', capacity);
+      }
       
       // is_online kontrolü
       const isOnline = $('#inpIsOnline').checked;
@@ -2172,11 +3297,18 @@
       }
     }
     
+    let isSubmittingReview = false;
+    
     async function submitReview() {
       if(!currentReviewData) return;
       
+      // Çoklu tıklamayı engelle
+      if(isSubmittingReview) return;
+      isSubmittingReview = true;
+      
       const rating = parseInt($('#reviewRating').value);
       if(!rating || rating < 1 || rating > 5) {
+        isSubmittingReview = false;
         Swal.fire({
           icon: 'warning',
           title: 'Rating Required',
@@ -2217,11 +3349,23 @@
           
           closeReviewModal();
           
-          // Action bar'ı yenile
+          // Action bar'ı yenile - review submit edildikten sonra butonun kalkması için
           if(ACTIVE_CHAT_ID) {
-            loadChatMessages();
+            try {
+              // Chat bilgisini al ve action bar'ı güncelle
+              const currentChat = await req(`/interactions/${ACTIVE_CHAT_ID}/`);
+              if(currentChat) {
+                updateBar(currentChat);
+              }
+              loadChatMessages();
+            } catch(err) {
+              console.error('Error updating action bar after review:', err);
+              loadChatMessages();
+            }
           }
+          isSubmittingReview = false;
         } else {
+          isSubmittingReview = false;
           Swal.fire({
             icon: 'error',
             title: 'Error',
@@ -2230,6 +3374,7 @@
           });
         }
       } catch(err) {
+        isSubmittingReview = false;
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -2356,6 +3501,215 @@
         });
       }
     }
+    
+    // Admin Dashboard Functions
+    async function loadAdminDashboard() {
+      const adminView = $('#adminView');
+      adminView.innerHTML = '<div style="padding:20px;text-align:center">Loading admin dashboard...</div>';
+      
+      try {
+        // Fetch dashboard stats
+        const stats = await req('/admin/dashboard-stats/');
+        
+        // Fetch all listings
+        const [offers, requests] = await Promise.all([
+          req('/service-offers/').catch(() => []),
+          req('/service-requests/').catch(() => [])
+        ]);
+        
+        // Fetch all forum topics
+        const topics = await req('/forum-topics/').catch(() => []);
+        
+        // Combine all listings
+        const allListings = [
+          ...(offers || []).map(o => ({...o, type: 'offer', listing_type: 'offer'})),
+          ...(requests || []).map(r => ({...r, type: 'request', listing_type: 'request'}))
+        ].sort((a, b) => {
+          // Sort by created_at descending (newest first)
+          const dateA = new Date(a.created_at);
+          const dateB = new Date(b.created_at);
+          return dateB - dateA;
+        });
+        
+        // Use actual count from listings tab instead of stats
+        const actualActiveListings = allListings.length;
+        
+        adminView.innerHTML = `
+          <div style="max-width:1400px;margin:0 auto;padding:24px">
+            <h1 style="font-size:32px;font-weight:900;margin-bottom:32px;color:#1f2937">👑 Admin Control Center</h1>
+            
+            <!-- Overview Cards -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin-bottom:32px">
+              <div style="background:#fff;padding:24px;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.1)">
+                <div style="font-size:14px;color:#6b7280;margin-bottom:8px;font-weight:600">Total Users</div>
+                <div style="font-size:36px;font-weight:800;color:#1f2937">${stats.total_users || 0}</div>
+              </div>
+              <div style="background:#fff;padding:24px;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.1)">
+                <div style="font-size:14px;color:#6b7280;margin-bottom:8px;font-weight:600">New Users (7 days)</div>
+                <div style="font-size:36px;font-weight:800;color:#10b981">${stats.new_users_last_7_days || 0}</div>
+              </div>
+              <div style="background:#fff;padding:24px;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.1)">
+                <div style="font-size:14px;color:#6b7280;margin-bottom:8px;font-weight:600">Active Listings</div>
+                <div style="font-size:36px;font-weight:800;color:#667eea">${actualActiveListings}</div>
+              </div>
+              <div style="background:#fff;padding:24px;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.1)">
+                <div style="font-size:14px;color:#6b7280;margin-bottom:8px;font-weight:600">Forum Topics</div>
+                <div style="font-size:36px;font-weight:800;color:#f59e0b">${stats.total_forum_topics || 0}</div>
+              </div>
+            </div>
+            
+            <!-- Management Tabs -->
+            <div style="background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.1);overflow:hidden">
+              <div style="display:flex;border-bottom:2px solid #e5e7eb;background:#f9fafb">
+                <button class="admin-tab-btn active" onclick="showAdminTab('listings')" style="flex:1;padding:16px;border:0;background:transparent;font-weight:700;cursor:pointer;border-bottom:3px solid #667eea">Listings</button>
+                <button class="admin-tab-btn" onclick="showAdminTab('forum')" style="flex:1;padding:16px;border:0;background:transparent;font-weight:700;cursor:pointer">Forum Topics</button>
+              </div>
+              
+              <!-- Listings Tab -->
+              <div id="adminTabListings" class="admin-tab-content" style="padding:24px">
+                <div style="overflow-x:auto">
+                  <table style="width:100%;border-collapse:collapse">
+                    <thead>
+                      <tr style="background:#f9fafb;border-bottom:2px solid #e5e7eb">
+                        <th style="padding:12px;text-align:left;font-weight:700;color:#1f2937">Title</th>
+                        <th style="padding:12px;text-align:left;font-weight:700;color:#1f2937">Owner</th>
+                        <th style="padding:12px;text-align:left;font-weight:700;color:#1f2937">Type</th>
+                        <th style="padding:12px;text-align:left;font-weight:700;color:#1f2937">Date</th>
+                        <th style="padding:12px;text-align:center;font-weight:700;color:#1f2937">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${allListings.length === 0 ? `
+                        <tr>
+                          <td colspan="5" style="padding:40px;text-align:center;color:#6b7280">No listings found</td>
+                        </tr>
+                      ` : allListings.map(listing => `
+                        <tr style="border-bottom:1px solid #e5e7eb">
+                          <td style="padding:12px;font-weight:600;color:#1f2937">${listing.title || 'Untitled'}</td>
+                          <td style="padding:12px;color:#4b5563">${listing.user_info?.username || 'Unknown'}</td>
+                          <td style="padding:12px">
+                            <span style="padding:4px 8px;border-radius:6px;font-size:12px;font-weight:700;background:${listing.type === 'offer' ? '#667eea' : '#10b981'};color:#fff">
+                              ${listing.type === 'offer' ? 'OFFER' : 'REQUEST'}
+                            </span>
+                          </td>
+                          <td style="padding:12px;color:#6b7280;font-size:14px">${formatDate(listing.created_at)}</td>
+                          <td style="padding:12px;text-align:center">
+                            <button onclick="deleteAdminListing(${listing.id}, '${listing.type}')" style="padding:6px 12px;background:#ef4444;color:#fff;border:0;border-radius:6px;font-weight:700;cursor:pointer;font-size:12px">Delete</button>
+                          </td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              
+              <!-- Forum Tab -->
+              <div id="adminTabForum" class="admin-tab-content" style="display:none;padding:24px">
+                <div style="overflow-x:auto">
+                  <table style="width:100%;border-collapse:collapse">
+                    <thead>
+                      <tr style="background:#f9fafb;border-bottom:2px solid #e5e7eb">
+                        <th style="padding:12px;text-align:left;font-weight:700;color:#1f2937">Title</th>
+                        <th style="padding:12px;text-align:left;font-weight:700;color:#1f2937">Author</th>
+                        <th style="padding:12px;text-align:left;font-weight:700;color:#1f2937">Category</th>
+                        <th style="padding:12px;text-align:left;font-weight:700;color:#1f2937">Date</th>
+                        <th style="padding:12px;text-align:center;font-weight:700;color:#1f2937">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${topics.length === 0 ? `
+                        <tr>
+                          <td colspan="5" style="padding:40px;text-align:center;color:#6b7280">No forum topics found</td>
+                        </tr>
+                      ` : topics.map(topic => `
+                        <tr style="border-bottom:1px solid #e5e7eb">
+                          <td style="padding:12px;font-weight:600;color:#1f2937">${topic.title || 'Untitled'}</td>
+                          <td style="padding:12px;color:#4b5563">${topic.author_username || 'Unknown'}</td>
+                          <td style="padding:12px">
+                            <span style="padding:4px 8px;border-radius:6px;font-size:12px;font-weight:700;background:#f3f4f6;color:#6b7280;text-transform:uppercase">
+                              ${topic.category || 'general'}
+                            </span>
+                          </td>
+                          <td style="padding:12px;color:#6b7280;font-size:14px">${formatDate(topic.created_at)}</td>
+                          <td style="padding:12px;text-align:center">
+                            <button onclick="deleteAdminTopic(${topic.id})" style="padding:6px 12px;background:#ef4444;color:#fff;border:0;border-radius:6px;font-weight:700;cursor:pointer;font-size:12px">Delete</button>
+                          </td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      } catch(err) {
+        adminView.innerHTML = `
+          <div style="padding:40px;text-align:center">
+            <div style="font-size:48px;margin-bottom:16px">⚠️</div>
+            <h3 style="font-size:24px;font-weight:800;margin-bottom:12px;color:#1f2937">Access Denied</h3>
+            <p style="color:#6b7280">You don't have permission to access the admin dashboard.</p>
+          </div>
+        `;
+      }
+    }
+    
+    function showAdminTab(tab) {
+      document.querySelectorAll('.admin-tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.admin-tab-content').forEach(content => content.style.display = 'none');
+      
+      if(tab === 'listings') {
+        document.querySelector('.admin-tab-btn[onclick*="listings"]').classList.add('active');
+        $('#adminTabListings').style.display = 'block';
+      } else if(tab === 'forum') {
+        document.querySelector('.admin-tab-btn[onclick*="forum"]').classList.add('active');
+        $('#adminTabForum').style.display = 'block';
+      }
+    }
+    
+    async function deleteAdminListing(id, type) {
+      if(!window.confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
+        return;
+      }
+      
+      try {
+        const endpoint = type === 'offer' ? `/service-offers/${id}/` : `/service-requests/${id}/`;
+        const result = await req(endpoint, 'DELETE');
+        
+        if(result && result.error) {
+          toast('Error: ' + result.error);
+        } else {
+          toast('Listing deleted successfully');
+          loadAdminDashboard();
+        }
+      } catch(err) {
+        toast('Error deleting listing: ' + err.message);
+      }
+    }
+    
+    async function deleteAdminTopic(id) {
+      if(!window.confirm('Are you sure you want to delete this forum topic? This action cannot be undone.')) {
+        return;
+      }
+      
+      try {
+        const result = await req(`/forum-topics/${id}/`, 'DELETE');
+        
+        if(result && result.error) {
+          toast('Error: ' + result.error);
+        } else {
+          toast('Forum topic deleted successfully');
+          loadAdminDashboard();
+        }
+      } catch(err) {
+        toast('Error deleting topic: ' + err.message);
+      }
+    }
+    
+    window.loadAdminDashboard = loadAdminDashboard;
+    window.showAdminTab = showAdminTab;
+    window.deleteAdminListing = deleteAdminListing;
+    window.deleteAdminTopic = deleteAdminTopic;
   </script>
 </body>
 </html>

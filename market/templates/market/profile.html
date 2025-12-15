@@ -3,423 +3,694 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HIVE | Profile - {{ profile_user.username }}</title>
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- FontAwesome Icons -->
+  <title>{{ profile_user.username }}'s Profile | HIVE</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
-    :root{
-      --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --bg: #f3f4f6; --text: #1f2937;
-    }
-    *{box-sizing:border-box;margin:0;padding:0;outline:none;font-family:'Segoe UI',sans-serif}
-    body{background:var(--primary);min-height:100vh;padding:20px;color:var(--text)}
-    .app{max-width:1200px;margin:0 auto;padding-bottom:100px;position:relative}
-    
-    header{background:#fff;border-radius:24px;padding:16px 24px;margin-bottom:24px;display:flex;justify-content:space-between;box-shadow:0 10px 40px rgba(0,0,0,0.15)}
-    .logo{font-size:26px;font-weight:900;background:var(--primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none}
-    .logo:hover{opacity:0.8}
-    
-    .profile-container{background:#fff;border-radius:24px;padding:40px;box-shadow:0 10px 40px rgba(0,0,0,0.15)}
-    
-    /* Sol Sütun - Kimlik Kartı */
-    .profile-card{background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);border-radius:20px;padding:30px;color:#fff;text-align:center;margin-bottom:30px}
-    .profile-avatar-large{width:120px;height:120px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;color:#667eea;font-weight:800;font-size:48px;margin:0 auto 20px;overflow:hidden;border:4px solid rgba(255,255,255,0.3);box-shadow:0 8px 20px rgba(0,0,0,0.2)}
-    .profile-avatar-large img{width:100%;height:100%;object-fit:cover}
-    .profile-name{font-size:28px;font-weight:900;margin-bottom:8px}
-    .profile-location{font-size:14px;opacity:0.9;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:6px}
-    .profile-location i{font-size:12px}
-    
-    .rating-display{display:flex;align-items:center;justify-content:center;gap:8px;margin:20px 0;font-size:18px}
-    .rating-stars{color:#fbbf24;font-size:22px;letter-spacing:3px}
-    .rating-value{font-weight:700;font-size:20px}
-    
-    .profile-bio{background:rgba(255,255,255,0.15);border-radius:12px;padding:16px;margin-top:20px;font-size:14px;line-height:1.6;backdrop-filter:blur(10px)}
-    
-    .btn-edit{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:#fff;color:#667eea;border-radius:12px;font-weight:700;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,0.2);transition:transform .2s;margin-top:20px;border:none;cursor:pointer}
-    .btn-edit:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.3);color:#667eea}
-    
-    /* Sağ Sütun - İçerik */
-    .content-section{margin-top:30px}
-    
-    .nav-tabs{border-bottom:2px solid #f3f4f6;margin-bottom:24px}
-    .nav-tabs .nav-link{border:none;color:#6b7280;font-weight:700;padding:16px 24px;transition:all .2s}
-    .nav-tabs .nav-link:hover{border-color:transparent;color:#667eea}
-    .nav-tabs .nav-link.active{color:#667eea;border-bottom:3px solid #667eea;background:transparent}
-    
-    /* İlan Kartları */
-    .listings-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:20px}
-    .listing-card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.05);transition:transform .2s;border:2px solid #f3f4f6;position:relative;cursor:pointer}
-    .listing-card:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,0.1);border-color:#667eea}
-    .listing-badge{position:absolute;top:16px;left:16px;font-size:10px;font-weight:800;padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:0.5px}
-    .listing-badge.offer{background:#667eea;color:#fff}
-    .listing-badge.request{background:#10b981;color:#fff}
-    .listing-badge.online{position:absolute;top:45px;left:16px;background:#3b82f6;color:#fff;font-size:9px;padding:4px 8px}
-    .listing-card h4{font-size:18px;font-weight:800;margin-bottom:8px;padding-right:60px}
-    .listing-card p{color:#666;font-size:14px;line-height:1.5;margin-bottom:12px}
-    .listing-meta{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;color:#888;border-top:1px solid #f0f0f0;padding-top:12px}
-    
-    /* Yorum Kartları */
-    .review-item{background:#f9fafb;border-radius:16px;padding:20px;margin-bottom:16px;border-left:4px solid #667eea;transition:transform .2s}
-    .review-item:hover{transform:translateX(4px);box-shadow:0 4px 12px rgba(0,0,0,0.08)}
-    .review-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-    .review-author{font-weight:700;color:#1f2937;font-size:16px}
-    .review-rating{display:flex;gap:4px;color:#fbbf24;font-size:18px}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);min-height:100vh;padding:20px;font-family:'Segoe UI',sans-serif}
+    .container{max-width:1000px;margin:0 auto}
+    .profile-header{background:#fff;border-radius:20px;padding:32px;box-shadow:0 10px 40px rgba(0,0,0,0.15);margin-bottom:24px}
+    .profile-header-content{display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+    .avatar{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);display:flex;align-items:center;justify-content:center;color:#fff;font-size:42px;font-weight:800;flex-shrink:0}
+    .profile-info{flex:1}
+    .username{font-size:32px;font-weight:800;color:#1f2937;margin-bottom:8px}
+    .profile-stats{display:flex;gap:24px;margin-top:16px;flex-wrap:wrap}
+    .stat-item{display:flex;flex-direction:column;gap:4px}
+    .stat-value{font-size:24px;font-weight:800;color:#667eea}
+    .stat-label{font-size:14px;color:#6b7280}
+    .section{background:#fff;border-radius:20px;padding:24px;box-shadow:0 4px 12px rgba(0,0,0,0.05);margin-bottom:24px}
+    .section-title{font-size:24px;font-weight:800;color:#1f2937;margin-bottom:20px}
+    .tabs{display:flex;gap:8px;margin-bottom:24px;border-bottom:2px solid #e5e7eb;padding-bottom:0}
+    .tab-btn{padding:12px 24px;border:0;background:transparent;font-weight:700;color:#6b7280;cursor:pointer;font-size:15px;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;position:relative}
+    .tab-btn:hover{color:#667eea}
+    .tab-btn.active{color:#667eea;border-bottom-color:#667eea}
+    .tab-content{display:none}
+    .tab-content.active{display:block}
+    .review-tab-content{display:none}
+    .review-tab-content.active{display:block}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:20px}
+    .card{background:#f9fafb;border-radius:16px;padding:20px;border:1px solid #e5e7eb;transition:transform .2s;cursor:pointer}
+    .card:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(0,0,0,0.1)}
+    .card-title{font-size:18px;font-weight:800;color:#1f2937;margin-bottom:8px}
+    .card-meta{display:flex;gap:12px;font-size:13px;color:#6b7280;margin-top:12px;flex-wrap:wrap}
+    .completed-badge{background:#10b981;color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;display:inline-block;margin-top:8px}
+    .review-item{background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:12px;border-left:4px solid #667eea}
+    .review-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .review-author{font-weight:700;color:#1f2937}
+    .review-rating{color:#fbbf24;font-size:18px}
     .review-comment{color:#4b5563;line-height:1.6;margin-top:8px}
-    .review-date{font-size:12px;color:#9ca3af;margin-top:8px}
-    .review-service-badge{display:inline-block;background:#e0e7ff;color:#667eea;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;margin-bottom:8px}
-    
-    .empty-state{text-align:center;padding:60px 20px;color:#9ca3af}
-    .empty-state i{font-size:64px;margin-bottom:16px;opacity:0.3}
-    .empty-state-text{font-size:18px;font-weight:600}
-    
-    .nav-pills .nav-link.active {
-      color: #667eea !important;
-      border-bottom-color: #667eea !important;
-      background: transparent !important;
-    }
-    .nav-pills .nav-link:hover {
-      color: #667eea !important;
-    }
+    .back-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:#fff;border-radius:12px;text-decoration:none;color:#667eea;font-weight:700;margin-bottom:20px;box-shadow:0 4px 12px rgba(0,0,0,0.1);transition:transform .2s}
+    .back-btn:hover{transform:translateY(-2px)}
+    .empty-state{text-align:center;padding:60px 20px;color:#6b7280}
+    .empty-state-icon{font-size:64px;margin-bottom:16px;opacity:0.5}
+    .detail-sidebar{position:fixed !important;top:0 !important;right:-100%;width:100%;max-width:420px;height:100vh !important;background:#fff;z-index:99999 !important;transition:right .3s;box-shadow:-10px 0 60px rgba(0,0,0,0.2);display:flex;flex-direction:column;overflow-y:auto;padding-top:0 !important}
+    .detail-sidebar.open{right:0}
+    .detail-sidebar-header{padding:20px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;background:#fff;position:sticky;top:0;z-index:10}
+    .detail-sidebar-body{padding:20px;flex:1}
+    .detail-badge{display:inline-block;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:800;text-transform:uppercase;margin-bottom:12px;letter-spacing:0.5px}
+    .detail-badge.offer{background:#667eea;color:#fff}
+    .detail-badge.request{background:#10b981;color:#fff}
+    .detail-image{width:100%;height:200px;object-fit:cover;border-radius:12px;margin-bottom:16px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px}
+    .detail-image img{width:100%;height:100%;object-fit:cover;border-radius:12px}
+    .detail-title{font-size:24px;font-weight:800;margin-bottom:8px;color:#1f2937}
+    .detail-meta{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+    .detail-meta-item{display:flex;align-items:center;gap:6px;font-size:14px;color:#666}
+    .detail-description{color:#4b5563;line-height:1.6;margin-bottom:20px;font-size:15px}
+    .detail-address{background:#f9fafb;padding:12px;border-radius:8px;margin-bottom:16px;font-size:14px;color:#666}
+    .detail-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+    .detail-btn{flex:1;padding:12px;border-radius:10px;border:0;font-weight:700;cursor:pointer;font-size:14px;transition:transform .2s;display:flex;align-items:center;justify-content:center;gap:8px;min-width:120px}
+    .detail-btn:hover{transform:translateY(-2px)}
+    .detail-btn.primary{background:#667eea;color:#fff}
+    .detail-btn.secondary{background:#f3f4f6;color:#333}
+    .detail-btn.danger{background:#fee2e2;color:#dc2626}
+    .detail-btn.danger:hover{background:#fecaca}
   </style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <a href="/" class="logo">⏰ HIVE</a>
-      <a href="/" class="btn-edit" style="background:#fff;color:#667eea;padding:10px 20px;font-size:14px">
-        <i class="fas fa-arrow-left"></i> Back to Home
-      </a>
-    </header>
-
-    <div class="profile-container">
-      <div class="row">
-        <!-- Sol Sütun - Kimlik Kartı -->
-        <div class="col-md-4">
-          <div class="profile-card">
-            <div class="profile-avatar-large">
-              {% if profile.avatar %}
-                <img src="{{ profile.avatar.url }}" alt="{{ profile_user.username }}">
-              {% else %}
-                <div>{{ profile_user.username|first|upper }}{{ profile_user.username|slice:"1:2"|upper }}</div>
-              {% endif %}
+  <div class="container">
+    <a href="/" class="back-btn">
+      <i class="fas fa-arrow-left"></i> Back to Home
+    </a>
+    
+    <div class="profile-header">
+      <div class="profile-header-content">
+        <div class="avatar">{{ profile_user.username|first|upper }}</div>
+        <div class="profile-info">
+          <h1 class="username">{{ profile_user.username }}</h1>
+          {% if profile.bio %}
+            <p style="color:#4b5563;margin-top:8px;line-height:1.6">{{ profile.bio }}</p>
+          {% endif %}
+          {% if profile.location %}
+            <p style="color:#6b7280;margin-top:8px;font-size:14px">📍 {{ profile.location }}</p>
+          {% endif %}
+          <div class="profile-stats">
+            <div class="stat-item">
+              <span class="stat-value">⭐ {{ average_rating|floatformat:1 }}</span>
+              <span class="stat-label">Average Rating</span>
             </div>
-            <h1 class="profile-name">{{ profile_user.username }}</h1>
-            {% if profile.location %}
-              <div class="profile-location">
-                <i class="fas fa-map-marker-alt"></i> {{ profile.location }}
-              </div>
-            {% endif %}
-            
-            <div class="rating-display">
-              <div class="rating-stars">
-                {% with rating=avg_rating_overall %}
-                  {% for i in "12345" %}
-                    {% if forloop.counter <= rating|floatformat:0|add:"0" %}
-                      ★
-                    {% else %}
-                      ☆
-                    {% endif %}
-                  {% endfor %}
-                {% endwith %}
-              </div>
-              <span class="rating-value">
-                {% if avg_rating_overall > 0 %}
-                  {{ avg_rating_overall|floatformat:1 }}
-                {% else %}
-                  N/A
-                {% endif %}
-              </span>
-              <span style="opacity:0.8;font-size:14px">/5</span>
+            <div class="stat-item">
+              <span class="stat-value">📋 {{ active_count }}</span>
+              <span class="stat-label">Active Listings</span>
             </div>
-            
-            {% if profile.bio %}
-              <div class="profile-bio">{{ profile.bio }}</div>
-            {% endif %}
-            
-            {% if request.user.is_authenticated %}
-              {% if request.user != profile_user %}
-                <button class="btn-edit" onclick="blockUser('{{ profile_user.username }}'); return false;" style="background:#fee2e2;color:#dc2626;margin-top:10px">
-                  <i class="fas fa-ban"></i> Block User
-                </button>
-              {% else %}
-                <button class="btn-edit" onclick="openEditModal(); return false;">
-                  <i class="fas fa-edit"></i> Edit Profile
-                </button>
-              {% endif %}
-            {% endif %}
-          </div>
-        </div>
-
-        <!-- Sağ Sütun - İçerik -->
-        <div class="col-md-8">
-          <div class="content-section">
-            <!-- Bootstrap Tabs -->
-            <ul class="nav nav-tabs" id="profileTabs" role="tablist">
-              <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="listings-tab" data-bs-toggle="tab" data-bs-target="#listings" type="button" role="tab">
-                  <i class="fas fa-list"></i> My Listings ({{ listing_count }})
-                </button>
-              </li>
-              {% if is_own_profile or profile.show_history %}
-              <li class="nav-item" role="presentation">
-                <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
-                  <i class="fas fa-history"></i> Transaction History
-                </button>
-              </li>
-              {% endif %}
-              <li class="nav-item" role="presentation">
-                <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">
-                  <i class="fas fa-star"></i> Reviews ({{ reviews|length }})
-                </button>
-              </li>
-            </ul>
-
-            <div class="tab-content" id="profileTabContent">
-              <!-- İlanlarım Sekmesi -->
-              <div class="tab-pane fade show active" id="listings" role="tabpanel">
-                {% if listings %}
-                  <div class="listings-grid">
-                    {% for listing in listings %}
-                      <div class="listing-card">
-                        <span class="listing-badge {{ listing.type }}">{{ listing.type|upper }}</span>
-                        {% if listing.is_online %}
-                          <span class="listing-badge online"><i class="fas fa-globe"></i> Online</span>
-                        {% endif %}
-                        {% if listing.image_url %}
-                          <img src="{{ listing.image_url }}" alt="{{ listing.title }}" style="width:100%;height:150px;object-fit:cover;border-radius:12px;margin-bottom:12px">
-                        {% endif %}
-                        <h4>{{ listing.title }}</h4>
-                        <p>{{ listing.description|truncatewords:20 }}</p>
-                        <div class="listing-meta">
-                          <div>⏱️ {{ listing.duration }}h</div>
-                          <div style="font-size:11px;color:#999">{{ listing.created_at|date:"M d, Y" }}</div>
-                        </div>
-                      </div>
-                    {% endfor %}
-                  </div>
-                {% else %}
-                  <div class="empty-state">
-                    <i class="fas fa-inbox"></i>
-                    <div class="empty-state-text">No listings yet</div>
-                  </div>
-                {% endif %}
-              </div>
-
-              <!-- Transaction History Sekmesi -->
-              {% if is_own_profile or profile.show_history %}
-              <div class="tab-pane fade" id="history" role="tabpanel">
-                <div id="historyContainer">
-                  <div class="empty-state">
-                    <i class="fas fa-history"></i>
-                    <div class="empty-state-text">Loading transaction history...</div>
-                  </div>
-                </div>
-              </div>
-              {% endif %}
-
-              <!-- Yorumlar Sekmesi -->
-              <div class="tab-pane fade" id="reviews" role="tabpanel">
-                <!-- Alt Sekmeler (Nav Pills) -->
-                <ul class="nav nav-pills mb-4" id="reviewTabs" role="tablist" style="border-bottom:2px solid #f3f4f6;padding-bottom:0">
-                  <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="provider-reviews-tab" data-bs-toggle="tab" data-bs-target="#provider-reviews" type="button" role="tab" style="border:none;color:#6b7280;font-weight:700;padding:12px 20px;border-radius:0;border-bottom:3px solid transparent;transition:all .2s">
-                      <i class="fas fa-hand-holding-heart"></i> As a Provider 
-                      {% if avg_rating_provider > 0 %}
-                        (⭐ {{ avg_rating_provider|floatformat:1 }})
-                      {% else %}
-                        ({{ provider_count }})
-                      {% endif %}
-                    </button>
-                  </li>
-                  <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="receiver-reviews-tab" data-bs-toggle="tab" data-bs-target="#receiver-reviews" type="button" role="tab" style="border:none;color:#6b7280;font-weight:700;padding:12px 20px;border-radius:0;border-bottom:3px solid transparent;transition:all .2s">
-                      <i class="fas fa-user-check"></i> As a Receiver 
-                      {% if avg_rating_receiver > 0 %}
-                        (⭐ {{ avg_rating_receiver|floatformat:1 }})
-                      {% else %}
-                        ({{ receiver_count }})
-                      {% endif %}
-                    </button>
-                  </li>
-                </ul>
-                
-                <div class="tab-content" id="reviewTabContent">
-                  <!-- Provider Reviews -->
-                  <div class="tab-pane fade show active" id="provider-reviews" role="tabpanel">
-                    {% if reviews_as_provider %}
-                      {% for review in reviews_as_provider %}
-                        <div class="review-item">
-                          <div class="review-header">
-                            <div>
-                              <div class="review-author">{{ review.reviewer.username }}</div>
-                              {% if review.offer %}
-                                <span class="review-service-badge">For: {{ review.offer.title }}</span>
-                              {% elif review.service_request %}
-                                <span class="review-service-badge">For: {{ review.service_request.title }}</span>
-                              {% endif %}
-                            </div>
-                            <div class="review-rating">
-                              {% for i in "12345" %}
-                                {% if forloop.counter <= review.rating %}
-                                  ★
-                                {% else %}
-                                  ☆
-                                {% endif %}
-                              {% endfor %}
-                            </div>
-                          </div>
-                          {% if review.comment %}
-                            <div class="review-comment">{{ review.comment }}</div>
-                          {% endif %}
-                          <div class="review-date">{{ review.created_at|date:"F d, Y" }}</div>
-                        </div>
-                      {% endfor %}
-                    {% else %}
-                      <div class="empty-state">
-                        <i class="fas fa-hand-holding-heart"></i>
-                        <div class="empty-state-text">No reviews as a provider yet</div>
-                      </div>
-                    {% endif %}
-                  </div>
-                  
-                  <!-- Receiver Reviews -->
-                  <div class="tab-pane fade" id="receiver-reviews" role="tabpanel">
-                    {% if reviews_as_receiver %}
-                      {% for review in reviews_as_receiver %}
-                        <div class="review-item">
-                          <div class="review-header">
-                            <div>
-                              <div class="review-author">{{ review.reviewer.username }}</div>
-                              {% if review.offer %}
-                                <span class="review-service-badge">For: {{ review.offer.title }}</span>
-                              {% elif review.service_request %}
-                                <span class="review-service-badge">For: {{ review.service_request.title }}</span>
-                              {% endif %}
-                            </div>
-                            <div class="review-rating">
-                              {% for i in "12345" %}
-                                {% if forloop.counter <= review.rating %}
-                                  ★
-                                {% else %}
-                                  ☆
-                                {% endif %}
-                              {% endfor %}
-                            </div>
-                          </div>
-                          {% if review.comment %}
-                            <div class="review-comment">{{ review.comment }}</div>
-                          {% endif %}
-                          <div class="review-date">{{ review.created_at|date:"F d, Y" }}</div>
-                        </div>
-                      {% endfor %}
-                    {% else %}
-                      <div class="empty-state">
-                        <i class="fas fa-user-check"></i>
-                        <div class="empty-state-text">No reviews as a receiver yet</div>
-                      </div>
-                    {% endif %}
-                  </div>
-                </div>
-              </div>
+            <div class="stat-item">
+              <span class="stat-value">✅ {{ completed_count }}</span>
+              <span class="stat-label">Completed</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">💬 {{ total_reviews_count }}</span>
+              <span class="stat-label">Reviews</span>
             </div>
           </div>
         </div>
       </div>
     </div>
+    
+    <div class="section">
+      <h2 class="section-title">Services & Listings</h2>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('active', this)">
+          📋 Active Listings <span style="background:#e0e7ff;color:#667eea;padding:2px 8px;border-radius:99px;font-size:12px;margin-left:6px">{{ active_count }}</span>
+        </button>
+        <button class="tab-btn" onclick="showTab('completed', this)">
+          ✅ Completed Services <span style="background:#d1fae5;color:#059669;padding:2px 8px;border-radius:99px;font-size:12px;margin-left:6px">{{ completed_count }}</span>
+        </button>
+        <button class="tab-btn" onclick="showTab('reviews', this)">
+          💬 Reviews <span style="background:#fef3c7;color:#d97706;padding:2px 8px;border-radius:99px;font-size:12px;margin-left:6px">{{ total_reviews_count }}</span>
+        </button>
+      </div>
+      
+      <!-- Active Listings Tab -->
+      <div id="tab-active" class="tab-content active">
+        {% if active_listings %}
+          <div class="grid">
+            {% for listing in active_listings %}
+              <div class="card" 
+                   onclick="openListingDetailFromTemplate({{ listing.id }}, '{{ listing.type }}')"
+                   data-listing-id="{{ listing.id }}"
+                   data-listing-type="{{ listing.type }}"
+                   data-listing-title="{{ listing.title|escapejs }}"
+                   data-listing-description="{{ listing.description|escapejs }}"
+                   data-listing-category="{{ listing.category|escapejs }}"
+                   data-listing-duration="{{ listing.duration }}"
+                   data-listing-created="{{ listing.created_at|date:'c' }}"
+                   data-listing-online="{{ listing.is_online|yesno:'true,false' }}"
+                   data-listing-image="{{ listing.image_url|default:'' }}"
+                   data-listing-address="{{ listing.address|escapejs }}"
+                   data-listing-user="{{ listing.user_username|escapejs }}">
+                <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px">
+                  <span style="font-size:10px;font-weight:800;padding:4px 10px;border-radius:99px;text-transform:uppercase;background:{% if listing.type == 'offer' %}#667eea{% else %}#10b981{% endif %};color:#fff">
+                    {{ listing.type|upper }}
+                  </span>
+                  {% if listing.is_online %}
+                    <span style="font-size:9px;font-weight:800;padding:4px 8px;border-radius:99px;background:#3b82f6;color:#fff">
+                      🌐 Online
+                    </span>
+                  {% endif %}
+                </div>
+                <h3 class="card-title">{{ listing.title }}</h3>
+                <p style="color:#4b5563;font-size:14px;line-height:1.5;margin-bottom:12px">{{ listing.description|truncatewords:20 }}</p>
+                <div class="card-meta">
+                  <span>⏱️ {{ listing.duration }}h</span>
+                  <span>📂 {{ listing.category }}</span>
+                  <span>📅 {{ listing.created_at|date:"M d, Y" }}</span>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <p>No active listings</p>
+          </div>
+        {% endif %}
+      </div>
+      
+      <!-- Completed Services Tab -->
+      <div id="tab-completed" class="tab-content">
+        {% if completed_services %}
+          <div class="grid">
+            {% for service in completed_services %}
+              <div class="card" style="position:relative">
+                <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px">
+                  <span style="font-size:10px;font-weight:800;padding:4px 10px;border-radius:99px;text-transform:uppercase;background:{% if service.type == 'offer' %}#667eea{% else %}#10b981{% endif %};color:#fff">
+                    {{ service.type|upper }}
+                  </span>
+                  {% if service.is_online %}
+                    <span style="font-size:9px;font-weight:800;padding:4px 8px;border-radius:99px;background:#3b82f6;color:#fff">
+                      🌐 Online
+                    </span>
+                  {% endif %}
+                </div>
+                <h3 class="card-title">{{ service.title }}</h3>
+                <p style="color:#4b5563;font-size:14px;line-height:1.5;margin-bottom:12px">{{ service.description|truncatewords:20 }}</p>
+                <div class="card-meta">
+                  <span>⏱️ {{ service.duration }}h</span>
+                  <span>📂 {{ service.category }}</span>
+                </div>
+                <div class="completed-badge">✅ Completed on {{ service.completed_at|date:"M d, Y" }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-state-icon">✅</div>
+            <p>No completed services yet</p>
+          </div>
+        {% endif %}
+      </div>
+      
+      <!-- Reviews Tab -->
+      <div id="tab-reviews" class="tab-content">
+        <!-- Reviews Statistics -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));gap:16px;margin-bottom:32px">
+          <!-- Provider Stats -->
+          <div style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);border-radius:16px;padding:24px;color:#fff;box-shadow:0 4px 12px rgba(102,126,234,0.2)">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+              <div style="width:48px;height:48px;background:rgba(255,255,255,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">👨‍💼</div>
+              <div>
+                <div style="font-size:14px;opacity:0.9;font-weight:600">As Service Provider</div>
+                <div style="font-size:28px;font-weight:800;margin-top:4px">{{ provider_count }}</div>
+              </div>
+            </div>
+            {% if provider_count > 0 %}
+              <div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.2)">
+                <span style="font-size:20px;color:#fbbf24">★</span>
+                <span style="font-size:18px;font-weight:700">{{ provider_avg }}</span>
+                <span style="font-size:13px;opacity:0.8">average rating</span>
+              </div>
+            {% else %}
+              <div style="font-size:13px;opacity:0.8;margin-top:8px">No reviews yet</div>
+            {% endif %}
+          </div>
+          
+          <!-- Consumer Stats -->
+          <div style="background:linear-gradient(135deg, #10b981 0%, #059669 100%);border-radius:16px;padding:24px;color:#fff;box-shadow:0 4px 12px rgba(16,185,129,0.2)">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+              <div style="width:48px;height:48px;background:rgba(255,255,255,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">👥</div>
+              <div>
+                <div style="font-size:14px;opacity:0.9;font-weight:600">As Participant</div>
+                <div style="font-size:28px;font-weight:800;margin-top:4px">{{ consumer_count }}</div>
+              </div>
+            </div>
+            {% if consumer_count > 0 %}
+              <div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.2)">
+                <span style="font-size:20px;color:#fbbf24">★</span>
+                <span style="font-size:18px;font-weight:700">{{ consumer_avg }}</span>
+                <span style="font-size:13px;opacity:0.8">average rating</span>
+              </div>
+            {% else %}
+              <div style="font-size:13px;opacity:0.8;margin-top:8px">No reviews yet</div>
+            {% endif %}
+          </div>
+        </div>
+        
+        <!-- Reviews Section with Tabs -->
+        <div style="margin-top:24px">
+          <!-- Review Type Tabs -->
+          <div class="tabs" style="margin-bottom:24px;border-bottom:2px solid #e5e7eb;padding-bottom:0">
+            <button class="tab-btn active" onclick="showReviewTypeTab('provider', this)" style="padding:12px 24px;border:0;background:transparent;font-weight:700;color:#6b7280;cursor:pointer;font-size:15px;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;position:relative">
+              👨‍💼 Service Provider <span style="background:#e0e7ff;color:#667eea;padding:2px 8px;border-radius:99px;font-size:12px;margin-left:6px">{{ provider_count }}</span>
+            </button>
+            <button class="tab-btn" onclick="showReviewTypeTab('consumer', this)" style="padding:12px 24px;border:0;background:transparent;font-weight:700;color:#6b7280;cursor:pointer;font-size:15px;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;position:relative">
+              👥 Participant <span style="background:#d1fae5;color:#10b981;padding:2px 8px;border-radius:99px;font-size:12px;margin-left:6px">{{ consumer_count }}</span>
+            </button>
+          </div>
+          
+          <!-- Provider Reviews Tab -->
+          <div id="review-type-provider" class="review-type-content active">
+            {% if reviews_as_provider %}
+              <div style="display:flex;flex-direction:column;gap:16px">
+                {% for review in reviews_as_provider %}
+                  <div class="review-item" style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;transition:all .2s">
+                    <div class="review-header" style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px;flex-wrap:wrap;gap:12px">
+                      <div style="display:flex;align-items:center;gap:12px;flex:1">
+                        <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:800;flex-shrink:0">
+                          {{ review.reviewer.username|first|upper }}
+                        </div>
+                        <div>
+                          <div style="font-weight:700;color:#1f2937;font-size:16px;margin-bottom:4px">{{ review.reviewer.username }}</div>
+                          <div style="font-size:13px;color:#6b7280">{{ review.created_at|date:"M d, Y" }}</div>
+                        </div>
+                      </div>
+                      <span class="review-rating" style="color:#fbbf24;font-size:20px;white-space:nowrap">
+                        {% for i in "12345" %}
+                          {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                        {% endfor %}
+                      </span>
+                    </div>
+                    {% if review.comment %}
+                      <div class="review-comment" style="color:#4b5563;line-height:1.6;margin-bottom:12px;font-size:14px;padding:12px;background:#f9fafb;border-radius:8px">{{ review.comment }}</div>
+                    {% endif %}
+                    {% if review.offer or review.service_request %}
+                      <div style="display:flex;flex-direction:column;gap:8px;padding:10px;background:#f0f9ff;border-radius:8px;border:1px solid #e0f2fe;margin-top:12px">
+                        <div style="display:flex;align-items:center;gap:8px">
+                          <span style="font-size:12px;font-weight:700;color:#3b82f6">📋</span>
+                          <span style="font-size:13px;color:#1e40af;font-weight:600">
+                            {% if review.offer %}
+                              From offer: <strong>{{ review.offer.title|truncatewords:8 }}</strong>
+                            {% elif review.service_request %}
+                              From request: <strong>{{ review.service_request.title|truncatewords:8 }}</strong>
+                            {% endif %}
+                          </span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:6px">
+                          <span style="font-size:11px;font-weight:700;color:#fff;background:#667eea;padding:4px 10px;border-radius:99px">As Provider</span>
+                        </div>
+                      </div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="empty-state" style="padding:60px 20px;text-align:center;background:#f9fafb;border-radius:16px;border:2px dashed #e5e7eb">
+                <div class="empty-state-icon" style="font-size:64px;margin-bottom:16px;opacity:0.4">👨‍💼</div>
+                <h3 style="margin:0 0 8px 0;font-size:20px;font-weight:700;color:#1f2937">No Provider Reviews Yet</h3>
+                <p style="margin:0;color:#6b7280;font-size:15px">This user hasn't received any reviews as a service provider yet</p>
+              </div>
+            {% endif %}
+          </div>
+          
+          <!-- Consumer Reviews Tab -->
+          <div id="review-type-consumer" class="review-type-content">
+            {% if reviews_as_consumer %}
+              <div style="display:flex;flex-direction:column;gap:16px">
+                {% for review in reviews_as_consumer %}
+                  <div class="review-item" style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;transition:all .2s">
+                    <div class="review-header" style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px;flex-wrap:wrap;gap:12px">
+                      <div style="display:flex;align-items:center;gap:12px;flex:1">
+                        <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg, #10b981 0%, #059669 100%);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:800;flex-shrink:0">
+                          {{ review.reviewer.username|first|upper }}
+                        </div>
+                        <div>
+                          <div style="font-weight:700;color:#1f2937;font-size:16px;margin-bottom:4px">{{ review.reviewer.username }}</div>
+                          <div style="font-size:13px;color:#6b7280">{{ review.created_at|date:"M d, Y" }}</div>
+                        </div>
+                      </div>
+                      <span class="review-rating" style="color:#fbbf24;font-size:20px;white-space:nowrap">
+                        {% for i in "12345" %}
+                          {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                        {% endfor %}
+                      </span>
+                    </div>
+                    {% if review.comment %}
+                      <div class="review-comment" style="color:#4b5563;line-height:1.6;margin-bottom:12px;font-size:14px;padding:12px;background:#f9fafb;border-radius:8px">{{ review.comment }}</div>
+                    {% endif %}
+                    {% if review.offer or review.service_request %}
+                      <div style="display:flex;flex-direction:column;gap:8px;padding:10px;background:#ecfdf5;border-radius:8px;border:1px solid #d1fae5;margin-top:12px">
+                        <div style="display:flex;align-items:center;gap:8px">
+                          <span style="font-size:12px;font-weight:700;color:#10b981">📋</span>
+                          <span style="font-size:13px;color:#059669;font-weight:600">
+                            {% if review.offer %}
+                              From offer: <strong>{{ review.offer.title|truncatewords:8 }}</strong>
+                            {% elif review.service_request %}
+                              From request: <strong>{{ review.service_request.title|truncatewords:8 }}</strong>
+                            {% endif %}
+                          </span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:6px">
+                          <span style="font-size:11px;font-weight:700;color:#fff;background:#10b981;padding:4px 10px;border-radius:99px">As Consumer</span>
+                        </div>
+                      </div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="empty-state" style="padding:60px 20px;text-align:center;background:#f9fafb;border-radius:16px;border:2px dashed #e5e7eb">
+                <div class="empty-state-icon" style="font-size:64px;margin-bottom:16px;opacity:0.4">👥</div>
+                <h3 style="margin:0 0 8px 0;font-size:20px;font-weight:700;color:#1f2937">No Participant Reviews Yet</h3>
+                <p style="margin:0;color:#6b7280;font-size:15px">This user hasn't received any reviews as a participant yet</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    
   </div>
-
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- SweetAlert2 -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- Detail Sidebar -->
+  <aside class="detail-sidebar" id="detailSidebar">
+    <div class="detail-sidebar-header">
+      <h3 style="margin:0;font-size:20px;font-weight:800">Listing Details</h3>
+      <button onclick="closeDetailSidebar()" style="border:0;background:none;font-size:24px;cursor:pointer;color:#666">×</button>
+    </div>
+    <div class="detail-sidebar-body" id="detailSidebarBody">
+      <!-- İçerik dinamik olarak doldurulacak -->
+    </div>
+  </aside>
   
   <script>
-    const API = '/api';
-    let TOKEN = localStorage.getItem('token');
+    const USER = {{ request.user.id|default:"null" }};
+    const USERNAME = "{{ request.user.username|default:'' }}";
+    const TOKEN = localStorage.getItem('token') || '';
     
-    async function req(ep, m='GET', b){
-      try{
-        const headers = {'Authorization':`Bearer ${TOKEN}`};
-        if(m !== 'DELETE') headers['Content-Type'] = 'application/json';
-        const r = await fetch(API+ep, {method:m, headers:headers, body:b?JSON.stringify(b):null});
-        if(r.status===401){ localStorage.clear(); location.href='/'; return null; }
-        return r.json();
-      }catch{ return null; }
+    // API request helper
+    async function req(endpoint, method = 'GET', body = null) {
+      try {
+        const headers = {'Authorization': `Bearer ${TOKEN}`};
+        if(method !== 'DELETE') headers['Content-Type'] = 'application/json';
+        
+        const fetchOptions = {
+          method: method,
+          headers: headers
+        };
+        
+        // DELETE için body gönderme
+        if(method !== 'DELETE' && body) {
+          fetchOptions.body = JSON.stringify(body);
+        }
+        
+        const r = await fetch(`/api${endpoint}`, fetchOptions);
+        if(r.status === 401) {
+          localStorage.clear();
+          window.location.reload();
+          return;
+        }
+        // DELETE için boş response olabilir
+        if(r.status === 204 || (method === 'DELETE' && r.status === 200)) {
+          return {success: true};
+        }
+        const data = await r.json();
+        return data;
+      } catch(err) {
+        console.error('Request failed:', err);
+        return {error: err.message || 'Request failed'};
+      }
     }
     
-    async function loadHistory() {
-      const d = await req(`/profile/{{ profile_user.username }}/history/`);
-      const container = document.getElementById('historyContainer');
-      if(!d || d.length === 0) {
-        container.innerHTML = '<div class="empty-state"><i class="fas fa-history"></i><div class="empty-state-text">No transaction history yet</div></div>';
+    // Format date
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+    
+    // Open listing detail sidebar from template data
+    function openListingDetailFromTemplate(id, type) {
+      // Find the card element and get data attributes
+      const card = document.querySelector(`[data-listing-id="${id}"][data-listing-type="${type}"]`);
+      if (!card) {
+        console.error('Listing card not found');
         return;
       }
-      container.innerHTML = d.map(i => {
-        const date = new Date(i.created_at).toLocaleDateString();
-        return `
-          <div class="review-item">
-            <div class="review-header">
-              <div class="review-author">${i.title || 'Transaction'}</div>
-              <div style="font-size:12px;color:#9ca3af">${date}</div>
-            </div>
-            <div class="review-comment">Status: ${i.status}</div>
+      
+      const listingData = {
+        id: parseInt(card.dataset.listingId),
+        type: card.dataset.listingType,
+        title: card.dataset.listingTitle || '',
+        description: card.dataset.listingDescription || '',
+        category: card.dataset.listingCategory || '',
+        duration: parseInt(card.dataset.listingDuration) || 0,
+        created_at: card.dataset.listingCreated || '',
+        is_online: card.dataset.listingOnline === 'true',
+        image_url: card.dataset.listingImage || '',
+        address: card.dataset.listingAddress || '',
+        user_username: card.dataset.listingUser || '',
+      };
+      
+      const body = document.getElementById('detailSidebarBody');
+      const isOwn = listingData.user_username === USERNAME;
+      
+      // Badge HTML
+      const badgeClass = type === 'offer' ? 'offer' : 'request';
+      const badgeText = type === 'offer' ? 'OFFER' : 'REQUEST';
+      const onlineBadge = listingData.is_online ? '<span class="detail-online-badge" style="display:inline-flex;align-items:center;gap:6px;background:#3b82f6;color:#fff;padding:6px 12px;border-radius:99px;font-size:12px;font-weight:700;margin-left:8px"><i class="fas fa-globe"></i> Online / Remote</span>' : '';
+      
+      // Resim HTML
+      const imageHtml = listingData.image_url ? 
+        `<div class="detail-image"><img src="${listingData.image_url}" alt="${listingData.title || ''}"></div>` : '';
+      
+      // Escape HTML to prevent XSS
+      function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+      
+      body.innerHTML = `
+        <span class="detail-badge ${badgeClass}">${badgeText}</span>${onlineBadge}
+        ${imageHtml}
+        <h2 class="detail-title">${escapeHtml(listingData.title || 'Untitled')}</h2>
+        <div class="detail-meta">
+          <div class="detail-meta-item"><span>👤</span> <a href="/profile/${escapeHtml(listingData.user_username || 'unknown')}/" style="color:#667eea;text-decoration:none;font-weight:700">${escapeHtml(listingData.user_username || 'Unknown')}</a></div>
+          <div class="detail-meta-item"><span>⏱️</span> <span>${listingData.duration || 0}h</span></div>
+          <div class="detail-meta-item"><span>📂</span> <span>${escapeHtml(listingData.category || '')}</span></div>
+          <div class="detail-meta-item"><span>📅</span> <span>${listingData.created_at ? formatDate(listingData.created_at) : ''}</span></div>
+        </div>
+        <div class="detail-description">${escapeHtml(listingData.description || '')}</div>
+        ${listingData.address ? `<div class="detail-address">📍 ${escapeHtml(listingData.address)}</div>` : ''}
+        ${!isOwn && USER ? `
+          <div class="detail-actions">
+            <button class="detail-btn primary" onclick="startChatFromDetail(${id}, '${type}')">Contact</button>
+            <button class="detail-btn secondary" onclick="closeDetailSidebar()">Close</button>
           </div>
-        `;
-      }).join('');
+        ` : `
+          <div class="detail-actions">
+            <button class="detail-btn danger" onclick="deleteListingFromDetail(${id}, '${type}')">
+              <i class="fas fa-trash-alt"></i> Delete
+            </button>
+            <button class="detail-btn secondary" onclick="closeDetailSidebar()">Close</button>
+          </div>
+        `}
+      `;
+      document.getElementById('detailSidebar').classList.add('open');
     }
     
-    // Tab değiştiğinde history yükle
-    document.getElementById('history-tab')?.addEventListener('shown.bs.tab', function() {
-      loadHistory();
-    });
-    
-    function openEditModal() {
-      Swal.fire({
-        title: 'Edit Profile',
-        text: 'Profile editing feature will be available soon!',
-        icon: 'info',
-        confirmButtonColor: '#667eea'
-      });
+    function closeDetailSidebar() {
+      document.getElementById('detailSidebar').classList.remove('open');
     }
     
-    async function blockUser(username) {
+    async function startChatFromDetail(id, type) {
+      closeDetailSidebar();
+      // Anasayfaya yönlendir ve chat başlat
+      window.location.href = `/?view=${type}s#listing-${id}`;
+    }
+    
+    async function deleteListingFromDetail(id, type) {
       const result = await Swal.fire({
-        title: 'Block User?',
-        text: `Are you sure you want to block ${username}? You won't see their listings or messages.`,
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
         cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, block!',
-        cancelButtonText: 'Cancel'
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel',
+        zIndex: 99999,
       });
       
-      if(result.isConfirmed) {
-        const r = await req(`/block/${username}/`, 'POST');
-        if(r.status === 'success') {
-          Swal.fire({
-            icon: 'success',
-            title: 'Blocked!',
-            text: `${username} has been blocked`,
-            timer: 2000,
-            showConfirmButton: false,
-            position: 'top-end',
-            toast: true
-          });
-          setTimeout(() => location.href='/', 1000);
-        } else {
-          Swal.fire({
+      if(!result.isConfirmed) {
+        return;
+      }
+      
+      try {
+        const endpoint = type === 'offer' ? `/service-offers/${id}/` : `/service-requests/${id}/`;
+        const deleteResult = await req(endpoint, 'DELETE');
+        
+        // DELETE başarılı olabilir (204 No Content veya success response)
+        // Hata kontrolü
+        if(deleteResult && deleteResult.error) {
+          await Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: r.message || 'Failed to block user',
-            confirmButtonColor: '#3085d6'
+            text: deleteResult.error,
+            confirmButtonColor: '#3085d6',
+            zIndex: 99999,
           });
+          return;
         }
+        
+        // Başarılı mesajı göster
+        Swal.fire({
+          icon: 'success',
+          title: 'Deleted!',
+          text: 'Listing deleted successfully!',
+          timer: 2000,
+          showConfirmButton: false,
+          position: 'top-end',
+          toast: true,
+          zIndex: 99999,
+        });
+        
+        // Detail sidebar'ı kapat
+        closeDetailSidebar();
+        
+        // Profil sayfasını yenile
+        window.location.reload();
+      } catch(err) {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: err.message || 'Unknown error occurred',
+          confirmButtonColor: '#3085d6',
+          zIndex: 99999,
+        });
       }
     }
+    
+    window.deleteListingFromDetail = deleteListingFromDetail;
+    
+    function showTab(tabName, element) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Show selected tab
+      document.getElementById('tab-' + tabName).classList.add('active');
+      if(element) {
+        element.classList.add('active');
+      }
+    }
+    
+    // Show review sub-tab (Received or Given)
+    
+    // Open listing detail from review
+    async function openListingDetailFromReview(id, type) {
+      if(!id || id === 0) return;
+      try {
+        const endpoint = type === 'offer' ? `/api/service-offers/${id}/` : `/api/service-requests/${id}/`;
+        const listingData = await req(endpoint);
+        
+        if(!listingData || !listingData.id) {
+          console.error('Listing not found');
+          return;
+        }
+        
+        const body = document.getElementById('detailSidebarBody');
+        const isOwn = listingData.user_info && listingData.user_info.username === USERNAME;
+        
+        // Badge HTML
+        const badgeClass = type === 'offer' ? 'offer' : 'request';
+        const badgeText = type === 'offer' ? 'OFFER' : 'REQUEST';
+        const onlineBadge = listingData.is_online ? '<span class="detail-online-badge" style="display:inline-flex;align-items:center;gap:6px;background:#3b82f6;color:#fff;padding:6px 12px;border-radius:99px;font-size:12px;font-weight:700;margin-left:8px"><i class="fas fa-globe"></i> Online / Remote</span>' : '';
+        
+        // Resim HTML
+        const imageHtml = listingData.image_url ? 
+          `<div class="detail-image"><img src="${listingData.image_url}" alt="${listingData.title || ''}"></div>` : '';
+        
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+          if (!text) return '';
+          const div = document.createElement('div');
+          div.textContent = text;
+          return div.innerHTML;
+        }
+        
+        body.innerHTML = `
+          <span class="detail-badge ${badgeClass}">${badgeText}</span>${onlineBadge}
+          ${imageHtml}
+          <h2 class="detail-title">${escapeHtml(listingData.title || 'Untitled')}</h2>
+          <div class="detail-meta">
+            <div class="detail-meta-item"><span>👤</span> <a href="/profile/${escapeHtml(listingData.user_info?.username || 'unknown')}/" style="color:#667eea;text-decoration:none;font-weight:700">${escapeHtml(listingData.user_info?.username || 'Unknown')}</a></div>
+            <div class="detail-meta-item"><span>⏱️</span> <span>${listingData.duration || 0}h</span></div>
+            <div class="detail-meta-item"><span>📂</span> <span>${escapeHtml(listingData.category || '')}</span></div>
+            <div class="detail-meta-item"><span>📅</span> <span>${listingData.created_at ? formatDate(listingData.created_at) : ''}</span></div>
+          </div>
+          <div class="detail-description">${escapeHtml(listingData.description || '')}</div>
+          ${listingData.address ? `<div class="detail-address">📍 ${escapeHtml(listingData.address)}</div>` : ''}
+          ${!isOwn && USER ? `
+            <div class="detail-actions">
+              <button class="detail-btn primary" onclick="startChatFromDetail(${id}, '${type}')">Contact</button>
+              <button class="detail-btn secondary" onclick="closeDetailSidebar()">Close</button>
+            </div>
+          ` : `
+            <div class="detail-actions">
+              <button class="detail-btn secondary" onclick="closeDetailSidebar()">Close</button>
+            </div>
+          `}
+        `;
+        document.getElementById('detailSidebar').classList.add('open');
+      } catch(err) {
+        console.error('Error loading listing:', err);
+      }
+    }
+    
+    window.openListingDetailFromReview = openListingDetailFromReview;
+    
+    // Review type tab switching
+    function showReviewTypeTab(tabName, element) {
+      // Hide all review type tabs
+      document.querySelectorAll('.review-type-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      // Remove active class from all review type tab buttons (only the ones in reviews section)
+      const reviewTypeTabButtons = document.querySelectorAll('#tab-reviews .tabs .tab-btn');
+      reviewTypeTabButtons.forEach(btn => {
+        btn.classList.remove('active');
+        btn.style.borderBottomColor = 'transparent';
+        btn.style.color = '#6b7280';
+      });
+      
+      // Show selected review type tab
+      const targetTab = document.getElementById('review-type-' + tabName);
+      if(targetTab) {
+        targetTab.classList.add('active');
+      }
+      
+      if(element) {
+        element.classList.add('active');
+        element.style.borderBottomColor = tabName === 'provider' ? '#667eea' : '#10b981';
+        element.style.color = '#1f2937';
+      }
+    }
+    
+    window.showReviewTypeTab = showReviewTypeTab;
   </script>
+  <style>
+    .review-type-content {
+      display: none;
+    }
+    .review-type-content.active {
+      display: block;
+    }
+  </style>
 </body>
 </html>
 
